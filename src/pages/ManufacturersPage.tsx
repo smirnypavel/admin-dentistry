@@ -157,7 +157,7 @@ export function ManufacturersPage() {
     const values = await form.validateFields();
     const payload: FormValues = {
       ...values,
-      slug: values.slug || slugify(values.nameUk),
+      slug: values.slug || slugify(values.nameUk || values.nameEn || ""),
     };
     try {
       if (editing) {
@@ -359,11 +359,14 @@ export function ManufacturersPage() {
           layout="vertical"
           form={form}
           onValuesChange={(changed) => {
-            if ("nameUk" in changed) {
-              const name = String(changed.nameUk ?? "");
+            if ("nameUk" in changed || "nameEn" in changed) {
               const currentSlug = form.getFieldValue("slug");
-              if (!currentSlug) {
-                form.setFieldsValue({ slug: slugify(name) });
+              if (currentSlug) return;
+              const uk = String(form.getFieldValue("nameUk") ?? "").trim();
+              const en = String(form.getFieldValue("nameEn") ?? "").trim();
+              const base = uk || en;
+              if (base) {
+                form.setFieldsValue({ slug: slugify(base) });
               }
             }
           }}>
@@ -388,7 +391,12 @@ export function ManufacturersPage() {
                     <Form.Item
                       label={t("manufacturers.form.description")}
                       name="descUk">
-                      <Input.TextArea rows={4} placeholder={t("manufacturers.form.description.placeholder")} />
+                      <Input.TextArea
+                        rows={4}
+                        placeholder={t(
+                          "manufacturers.form.description.placeholder"
+                        )}
+                      />
                     </Form.Item>
                   </>
                 ),
@@ -398,11 +406,18 @@ export function ManufacturersPage() {
                 label: t("manufacturers.form.name.en") || "English",
                 children: (
                   <>
-                    <Form.Item label={t("manufacturers.form.nameEn")} name="nameEn">
+                    <Form.Item
+                      label={t("manufacturers.form.nameEn")}
+                      name="nameEn">
                       <Input placeholder="3M" />
                     </Form.Item>
-                    <Form.Item label={t("manufacturers.form.descriptionEn")} name="descEn">
-                      <Input.TextArea rows={4} placeholder="Manufacturer description" />
+                    <Form.Item
+                      label={t("manufacturers.form.descriptionEn")}
+                      name="descEn">
+                      <Input.TextArea
+                        rows={4}
+                        placeholder="Manufacturer description"
+                      />
                     </Form.Item>
                   </>
                 ),

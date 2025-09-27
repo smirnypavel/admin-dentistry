@@ -345,11 +345,13 @@ export function CategoriesPage() {
           layout="vertical"
           form={form}
           onValuesChange={(changed) => {
-            if ("nameUk" in changed) {
-              const name = String(changed.nameUk ?? "");
-              const currentSlug = form.getFieldValue("slug");
-              if (!currentSlug) {
-                form.setFieldsValue({ slug: slugify(name) });
+            if ("nameUk" in changed || "nameEn" in changed) {
+              const uk = (form.getFieldValue("nameUk") || "").trim();
+              const en = (form.getFieldValue("nameEn") || "").trim();
+              const base = uk || en;
+              const currentSlug = (form.getFieldValue("slug") || "").trim();
+              if (!currentSlug && base) {
+                form.setFieldsValue({ slug: slugify(base) });
               }
             }
           }}>
@@ -369,14 +371,19 @@ export function CategoriesPage() {
                           message: t("categories.form.name.required"),
                         },
                       ]}>
-                      <Input placeholder={t("categories.form.name.placeholder")} />
+                      <Input
+                        placeholder={t("categories.form.name.placeholder")}
+                      />
                     </Form.Item>
                     <Form.Item
                       label={t("categories.form.description")}
                       name="descUk">
                       <Input.TextArea
                         rows={4}
-                        placeholder={t("categories.form.description.placeholder")} />
+                        placeholder={t(
+                          "categories.form.description.placeholder"
+                        )}
+                      />
                     </Form.Item>
                   </>
                 ),
@@ -386,11 +393,18 @@ export function CategoriesPage() {
                 label: t("categories.form.name.en") || "English",
                 children: (
                   <>
-                    <Form.Item label={t("categories.form.nameEn")} name="nameEn">
+                    <Form.Item
+                      label={t("categories.form.nameEn")}
+                      name="nameEn">
                       <Input placeholder="Composites" />
                     </Form.Item>
-                    <Form.Item label={t("categories.form.descriptionEn")} name="descEn">
-                      <Input.TextArea rows={4} placeholder="Category description" />
+                    <Form.Item
+                      label={t("categories.form.descriptionEn")}
+                      name="descEn">
+                      <Input.TextArea
+                        rows={4}
+                        placeholder="Category description"
+                      />
                     </Form.Item>
                   </>
                 ),
@@ -404,7 +418,6 @@ export function CategoriesPage() {
             tooltip={t("categories.form.slug.tooltip")}>
             <Input placeholder={t("categories.form.slug.placeholder")} />
           </Form.Item>
-
 
           <Form.Item
             label={t("categories.form.image")}

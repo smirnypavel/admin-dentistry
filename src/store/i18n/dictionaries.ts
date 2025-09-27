@@ -611,6 +611,12 @@ export const ruProducts: I18nDict = {
   "products.form.images": "Изображения товара",
   "products.form.isActive": "Активен",
 
+  // i18n tabs (reuse labels like in categories/manufacturers)
+  "products.form.lang.uk": "Українська",
+  "products.form.lang.en": "English",
+  "products.form.titleEn": "Название (EN)",
+  "products.form.descriptionEn": "Описание (EN)",
+
   "products.variants.add": "Добавить вариант",
   "products.variants.table.manufacturer": "Производитель",
   "products.variants.table.country": "Страна",
@@ -711,6 +717,12 @@ export const ukProducts: I18nDict = {
   "products.form.attr.add": "Додати атрибут",
   "products.form.images": "Зображення товару",
   "products.form.isActive": "Активний",
+
+  // i18n tabs (reuse labels like in categories/manufacturers)
+  "products.form.lang.uk": "Українська",
+  "products.form.lang.en": "English",
+  "products.form.titleEn": "Назва (EN)",
+  "products.form.descriptionEn": "Опис (EN)",
 
   "products.variants.add": "Додати варіант",
   "products.variants.table.manufacturer": "Виробник",

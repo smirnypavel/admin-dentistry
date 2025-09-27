@@ -7,6 +7,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Tabs,
   Select,
   Space,
   Steps,
@@ -81,9 +82,11 @@ export function ProductsPage() {
   });
 
   const [form] = Form.useForm<{
-    title: string;
+    titleUk: string;
+    titleEn?: string;
     slug: string;
-    description?: string;
+    descUk?: string;
+    descEn?: string;
     categoryIds: string[];
     tags?: string[];
     images?: string[];
@@ -203,9 +206,11 @@ export function ProductsPage() {
     (r: Product) => {
       setEditor({ open: true, mode: "edit", record: r, step: 0 });
       form.setFieldsValue({
-        title: r.title,
+        titleUk: r.titleI18n?.uk || r.title || "",
+        titleEn: r.titleI18n?.en || "",
         slug: r.slug,
-        description: r.description || "",
+        descUk: r.descriptionI18n?.uk || "",
+        descEn: r.descriptionI18n?.en || "",
         categoryIds: r.categoryIds || [],
         tags: r.tags || [],
         images: r.images || [],
@@ -327,9 +332,11 @@ export function ProductsPage() {
   const onCreate = () => {
     setEditor({ open: true, mode: "create", record: null, step: 0 });
     form.setFieldsValue({
-      title: "",
+      titleUk: "",
+      titleEn: "",
       slug: "",
-      description: "",
+      descUk: "",
+      descEn: "",
       categoryIds: [],
       tags: [],
       images: [],
@@ -343,9 +350,18 @@ export function ProductsPage() {
   const onSubmitBasics = async () => {
     try {
       const values = await form.validateFields();
+      // If UA title is empty but EN is present, auto-fill UA from EN
+      const titleUkTrim = (values.titleUk || "").trim();
+      const titleEnTrim = (values.titleEn || "").trim();
+      if (!titleUkTrim && titleEnTrim) {
+        form.setFieldValue("titleUk", titleEnTrim);
+      }
+      // Generate slug from whichever title is available
       if (!values.slug) {
-        values.slug = slugify(values.title || "");
-        form.setFieldValue("slug", values.slug);
+        const base = titleUkTrim || titleEnTrim || "";
+        const nextSlug = slugify(base);
+        values.slug = nextSlug;
+        form.setFieldValue("slug", nextSlug);
       }
       setEditor((s) => ({ ...s, step: 1 }));
     } catch {
@@ -355,6 +371,24 @@ export function ProductsPage() {
 
   const onSaveAll = async () => {
     const basics = form.getFieldsValue();
+    // Safety net: ensure we have UA title (fallback to EN) and slug
+    const titleUkTrim = (basics.titleUk || "").trim();
+    const titleEnTrim = (basics.titleEn || "").trim();
+    const ensuredTitleUk = titleUkTrim || titleEnTrim;
+    if (!ensuredTitleUk) {
+      message.error(t("products.form.title.required"));
+      setEditor((s) => ({ ...s, step: 0 }));
+      return;
+    }
+    if (!titleUkTrim && titleEnTrim) {
+      basics.titleUk = titleEnTrim;
+      form.setFieldValue("titleUk", titleEnTrim);
+    }
+    if (!basics.slug) {
+      const base = (basics.titleUk || "").trim() || titleEnTrim;
+      basics.slug = slugify(base);
+      form.setFieldValue("slug", basics.slug);
+    }
     const attributes = (basics.attributes || [])
       .filter((a) => (a.key || "").trim())
       .map(({ key, value }) => {
@@ -382,8 +416,10 @@ export function ProductsPage() {
       if (editor.mode === "create") {
         await createProduct({
           slug: basics.slug,
-          title: basics.title,
-          description: basics.description || undefined,
+          titleUk: basics.titleUk,
+          titleEn: basics.titleEn || undefined,
+          descUk: basics.descUk || undefined,
+          descEn: basics.descEn || undefined,
           categoryIds: basics.categoryIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
@@ -395,8 +431,10 @@ export function ProductsPage() {
       } else if (editor.mode === "edit" && editor.record) {
         await updateProduct(editor.record._id, {
           slug: basics.slug,
-          title: basics.title,
-          description: basics.description || undefined,
+          titleUk: basics.titleUk,
+          titleEn: basics.titleEn || undefined,
+          descUk: basics.descUk || undefined,
+          descEn: basics.descEn || undefined,
           categoryIds: basics.categoryIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
@@ -685,8 +723,14 @@ export function ProductsPage() {
                 value: "createdAt",
                 label: t("products.filters.sort.oldFirst"),
               },
-              { value: "title", label: t("products.filters.sort.titleAsc") },
-              { value: "-title", label: t("products.filters.sort.titleDesc") },
+              {
+                value: "titleI18n.uk",
+                label: t("products.filters.sort.titleAsc"),
+              },
+              {
+                value: "-titleI18n.uk",
+                label: t("products.filters.sort.titleDesc"),
+              },
               {
                 value: "priceMin",
                 label: t("products.filters.sort.priceMinAsc"),
@@ -801,33 +845,98 @@ export function ProductsPage() {
               layout="vertical"
               form={form}
               initialValues={{ isActive: true, images: [], attributes: [] }}>
-              <Form.Item
-                label={t("products.form.title")}
-                name="title"
-                rules={[
+              <Tabs
+                items={[
                   {
-                    required: true,
-                    message: t("products.form.title.required"),
+                    key: "uk",
+                    label: t("products.form.lang.uk") || "Українська",
+                    children: (
+                      <>
+                        <Form.Item
+                          label={t("products.form.title")}
+                          name="titleUk"
+                          // Custom validation: require at least one of UA or EN titles
+                          rules={[
+                            ({ getFieldValue }) => ({
+                              validator(_, value) {
+                                const uk = (value || "").trim();
+                                const en = (
+                                  getFieldValue("titleEn") || ""
+                                ).trim();
+                                if (uk || en) return Promise.resolve();
+                                return Promise.reject(
+                                  new Error(t("products.form.title.required"))
+                                );
+                              },
+                            }),
+                          ]}>
+                          <Input
+                            data-gramm="false"
+                            data-gramm_editor="false"
+                            onBlur={() => {
+                              const v = (
+                                form.getFieldValue("titleUk") || ""
+                              ).trim();
+                              const en = (
+                                form.getFieldValue("titleEn") || ""
+                              ).trim();
+                              if (!v && en) {
+                                form.setFieldValue("titleUk", en);
+                              }
+                              const s = form.getFieldValue("slug");
+                              const base = v || en;
+                              if (!s && base)
+                                form.setFieldValue("slug", slugify(base));
+                            }}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label={t("products.form.description")}
+                          name="descUk">
+                          <Input.TextArea
+                            rows={4}
+                            data-gramm="false"
+                            data-gramm_editor="false"
+                          />
+                        </Form.Item>
+                      </>
+                    ),
                   },
-                ]}>
-                <Input
-                  onBlur={() => {
-                    const t = form.getFieldValue("title");
-                    const s = form.getFieldValue("slug");
-                    if (!s && t) form.setFieldValue("slug", slugify(t));
-                  }}
-                />
-              </Form.Item>
+                  {
+                    key: "en",
+                    label: t("products.form.lang.en") || "English",
+                    children: (
+                      <>
+                        <Form.Item
+                          label={t("products.form.titleEn")}
+                          name="titleEn">
+                          <Input
+                            data-gramm="false"
+                            data-gramm_editor="false"
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label={t("products.form.descriptionEn")}
+                          name="descEn">
+                          <Input.TextArea
+                            rows={4}
+                            data-gramm="false"
+                            data-gramm_editor="false"
+                          />
+                        </Form.Item>
+                      </>
+                    ),
+                  },
+                ]}
+              />
               <Form.Item
                 label={t("products.form.slug")}
                 name="slug"
                 tooltip={t("products.form.slug.tooltip")}>
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label={t("products.form.description")}
-                name="description">
-                <Input.TextArea rows={4} />
+                <Input
+                  data-gramm="false"
+                  data-gramm_editor="false"
+                />
               </Form.Item>
               <Form.Item
                 label={t("products.form.categories")}

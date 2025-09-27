@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   App as AntApp,
   Button,
-  Drawer,
   Form,
   Input,
   Space,
   Switch,
   Table,
   Tabs,
+  Drawer,
   theme as antdTheme,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -140,7 +140,7 @@ export function CountriesPage() {
     const values = await form.validateFields();
     const payload: FormValues = {
       ...values,
-      slug: values.slug || slugify(values.nameUk),
+      slug: values.slug || slugify(values.nameUk || values.nameEn || ""),
     };
     try {
       if (editing) {
@@ -335,11 +335,13 @@ export function CountriesPage() {
           layout="vertical"
           form={form}
           onValuesChange={(changed) => {
-            if ("nameUk" in changed) {
-              const name = String(changed.nameUk ?? "");
-              const currentSlug = form.getFieldValue("slug");
-              if (!currentSlug) {
-                form.setFieldsValue({ slug: slugify(name) });
+            if ("nameUk" in changed || "nameEn" in changed) {
+              const uk = (form.getFieldValue("nameUk") || "").trim();
+              const en = (form.getFieldValue("nameEn") || "").trim();
+              const base = uk || en;
+              const currentSlug = (form.getFieldValue("slug") || "").trim();
+              if (!currentSlug && base) {
+                form.setFieldsValue({ slug: slugify(base) });
               }
             }
           }}>
@@ -365,10 +367,16 @@ export function CountriesPage() {
                     label={t("countries.form.name")}
                     name="nameUk"
                     rules={[
-                      {
-                        required: true,
-                        message: t("countries.form.name.required"),
-                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const uk = (value || "").trim();
+                          const en = (getFieldValue("nameEn") || "").trim();
+                          if (uk || en) return Promise.resolve();
+                          return Promise.reject(
+                            new Error(t("countries.form.name.required"))
+                          );
+                        },
+                      }),
                     ]}>
                     <Input placeholder="Україна" />
                   </Form.Item>
@@ -378,7 +386,9 @@ export function CountriesPage() {
                 key: "en",
                 label: t("countries.form.name.en") || "English",
                 children: (
-                  <Form.Item label={t("countries.form.nameEn")} name="nameEn">
+                  <Form.Item
+                    label={t("countries.form.nameEn")}
+                    name="nameEn">
                     <Input placeholder="Ukraine" />
                   </Form.Item>
                 ),

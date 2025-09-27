@@ -49,8 +49,7 @@ export async function listCategories(): Promise<Category[]> {
     slug: c.slug,
     name: c.nameI18n?.uk || c.nameI18n?.en || "",
     nameI18n: c.nameI18n,
-    description:
-      c.descriptionI18n?.uk || c.descriptionI18n?.en || null,
+    description: c.descriptionI18n?.uk || c.descriptionI18n?.en || null,
     descriptionI18n: c.descriptionI18n ?? null,
     imageUrl: c.imageUrl ?? null,
     sort: c.sort ?? null,
@@ -105,7 +104,7 @@ export async function updateCategory(
   const { nameUk, nameEn, descUk, descEn, ...rest } = payload;
   const wire: Record<string, unknown> = {
     ...rest,
-    ...((nameUk !== undefined || nameEn !== undefined)
+    ...(nameUk !== undefined || nameEn !== undefined
       ? {
           nameI18n: {
             ...(nameUk !== undefined ? { uk: nameUk } : {}),
@@ -113,7 +112,7 @@ export async function updateCategory(
           },
         }
       : {}),
-    ...((descUk !== undefined || descEn !== undefined)
+    ...(descUk !== undefined || descEn !== undefined
       ? {
           descriptionI18n: {
             ...(descUk !== undefined ? { uk: descUk } : {}),

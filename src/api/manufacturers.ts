@@ -72,7 +72,10 @@ export async function createManufacturer(
   payload: CreateManufacturerDto
 ): Promise<Manufacturer> {
   const wire = {
-    nameI18n: { uk: payload.nameUk, ...(payload.nameEn ? { en: payload.nameEn } : {}) },
+    nameI18n: {
+      uk: payload.nameUk,
+      ...(payload.nameEn ? { en: payload.nameEn } : {}),
+    },
     slug: payload.slug,
     countryIds: payload.countryIds || [],
     logoUrl: payload.logoUrl,
@@ -116,7 +119,7 @@ export async function updateManufacturer(
   const { nameUk, nameEn, descUk, descEn, ...rest } = payload;
   const wire: Record<string, unknown> = {
     ...rest,
-    ...((nameUk !== undefined || nameEn !== undefined)
+    ...(nameUk !== undefined || nameEn !== undefined
       ? {
           nameI18n: {
             ...(nameUk !== undefined ? { uk: nameUk } : {}),
@@ -124,7 +127,7 @@ export async function updateManufacturer(
           },
         }
       : {}),
-    ...((descUk !== undefined || descEn !== undefined)
+    ...(descUk !== undefined || descEn !== undefined
       ? {
           descriptionI18n: {
             ...(descUk !== undefined ? { uk: descUk } : {}),

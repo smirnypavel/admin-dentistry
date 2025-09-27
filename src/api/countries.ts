@@ -1,10 +1,11 @@
 import { api } from "./client";
 
-// Backend shape with i18n
+// Backend shape: can be i18n or plain name depending on backend version
 type CountryRaw = {
   _id: string;
   code: string;
-  nameI18n: { uk: string; en?: string };
+  nameI18n?: { uk: string; en?: string };
+  name?: string;
   slug: string;
   flagUrl?: string | null;
   isActive: boolean;
@@ -45,7 +46,7 @@ export async function listCountries(): Promise<Country[]> {
   return data.map((c) => ({
     _id: c._id,
     code: c.code,
-    name: c.nameI18n?.uk || c.nameI18n?.en || "",
+    name: c.nameI18n?.uk || c.nameI18n?.en || c.name || "",
     nameI18n: c.nameI18n,
     slug: c.slug,
     flagUrl: c.flagUrl ?? null,
@@ -58,18 +59,25 @@ export async function listCountries(): Promise<Country[]> {
 export async function createCountry(
   payload: CreateCountryDto
 ): Promise<Country> {
-  const wire = {
-    code: payload.code,
-    nameI18n: { uk: payload.nameUk, ...(payload.nameEn ? { en: payload.nameEn } : {}) },
-    slug: payload.slug,
-    flagUrl: payload.flagUrl,
-    isActive: payload.isActive,
-  } as const;
+  const code = (payload.code || "").trim();
+  const uk = (payload.nameUk || "").trim();
+  const en = (payload.nameEn || "").trim();
+  const slug = (payload.slug || "").trim();
+  const wire: Record<string, unknown> = {
+    code,
+    nameI18n: {
+      uk,
+      ...(en ? { en } : {}),
+    },
+    slug,
+    ...(payload.flagUrl ? { flagUrl: payload.flagUrl } : {}),
+    isActive: payload.isActive ?? true,
+  };
   const { data } = await api.post<CountryRaw>("/admin/countries", wire);
   return {
     _id: data._id,
     code: data.code,
-    name: data.nameI18n?.uk || data.nameI18n?.en || "",
+    name: data.nameI18n?.uk || data.nameI18n?.en || data.name || "",
     nameI18n: data.nameI18n,
     slug: data.slug,
     flagUrl: data.flagUrl ?? null,
@@ -88,17 +96,22 @@ export async function updateCountry(
     nameUk?: string;
     nameEn?: string;
   } & Omit<UpdateCountryDto, "nameUk" | "nameEn">;
-  const wire: Record<string, unknown> = {
-    ...rest,
-    ...((nameUk !== undefined || nameEn !== undefined)
-      ? {
-          nameI18n: {
-            ...(nameUk !== undefined ? { uk: nameUk } : {}),
-            ...(nameEn !== undefined ? { en: nameEn } : {}),
-          },
-        }
-      : {}),
-  };
+  const wire: Record<string, unknown> = {};
+  // Pass only defined fields
+  if (rest.code !== undefined) wire.code = (rest.code as string).trim();
+  if (rest.slug !== undefined) wire.slug = (rest.slug as string).trim();
+  if (rest.flagUrl !== undefined) wire.flagUrl = rest.flagUrl;
+  if (rest.isActive !== undefined) wire.isActive = rest.isActive;
+  // Map names to nameI18n if provided
+  if (nameUk !== undefined || nameEn !== undefined) {
+    const i18n: Record<string, string> = {};
+    if (nameUk !== undefined) i18n.uk = (nameUk || "").trim();
+    if (nameEn !== undefined) {
+      const enTrim = (nameEn || "").trim();
+      if (enTrim) i18n.en = enTrim;
+    }
+    wire.nameI18n = i18n;
+  }
   const { data } = await api.patch<CountryRaw | null>(
     `/admin/countries/${id}`,
     wire
@@ -107,7 +120,7 @@ export async function updateCountry(
   return {
     _id: data._id,
     code: data.code,
-    name: data.nameI18n?.uk || data.nameI18n?.en || "",
+    name: data.nameI18n?.uk || data.nameI18n?.en || data.name || "",
     nameI18n: data.nameI18n,
     slug: data.slug,
     flagUrl: data.flagUrl ?? null,
@@ -125,7 +138,7 @@ export async function deleteCountry(id: string): Promise<Country | null> {
   return {
     _id: data._id,
     code: data.code,
-    name: data.nameI18n?.uk || data.nameI18n?.en || "",
+    name: data.nameI18n?.uk || data.nameI18n?.en || data.name || "",
     nameI18n: data.nameI18n,
     slug: data.slug,
     flagUrl: data.flagUrl ?? null,
