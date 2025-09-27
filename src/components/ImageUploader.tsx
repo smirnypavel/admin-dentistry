@@ -10,6 +10,8 @@ type Props = {
   onChange?: (url: string | null) => void;
   folder?: string; // e.g., 'categories'
   disabled?: boolean;
+  accept?: string[]; // e.g., ['image/jpeg','image/png']
+  maxSizeMB?: number; // e.g., 2
 };
 
 export function ImageUploader({
@@ -17,12 +19,25 @@ export function ImageUploader({
   onChange,
   folder = "categories",
   disabled,
+  accept = ["image/jpeg", "image/png", "image/webp"],
+  maxSizeMB = 2,
 }: Props) {
   const { t } = useI18n();
   const { message } = AntApp.useApp();
   const [loading, setLoading] = useState(false);
 
   const beforeUpload: UploadProps["beforeUpload"] = async (file) => {
+    // Basic client validation
+    const mimeOk = accept.length === 0 || accept.includes(file.type);
+    const sizeOk = maxSizeMB ? file.size / (1024 * 1024) <= maxSizeMB : true;
+    if (!mimeOk) {
+      message.error(t("uploader.typeError"));
+      return false;
+    }
+    if (!sizeOk) {
+      message.error(t("uploader.sizeError").replace("{mb}", String(maxSizeMB)));
+      return false;
+    }
     setLoading(true);
     try {
       const res = await uploadImage(file as unknown as File, folder);

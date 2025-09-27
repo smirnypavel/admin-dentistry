@@ -11,6 +11,8 @@ import { ManufacturersPage } from "./pages/ManufacturersPage.tsx";
 import { CountriesPage } from "./pages/CountriesPage.tsx";
 import { AdminUsersPage } from "./pages/AdminUsersPage.tsx";
 import { DiscountsPage } from "./pages/DiscountsPage.tsx";
+import { ContactsPage } from "./pages/ContactsPage.tsx";
+import { HeroPage } from "./pages/HeroPage.tsx";
 import { ProtectedRoute } from "./routes/ProtectedRoute.tsx";
 import "./App.css";
 
@@ -92,6 +94,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <CountriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contacts"
+            element={
+              <ProtectedRoute>
+                <ContactsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hero"
+            element={
+              <ProtectedRoute>
+                <HeroPage />
               </ProtectedRoute>
             }
           />

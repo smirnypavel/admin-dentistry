@@ -22,7 +22,20 @@ import { listOrders } from "../api/orders";
 import { useThemeMode } from "../store/themeContext";
 import { theme as antdTheme, Segmented } from "antd";
 import { useI18n } from "../store/i18n";
-import { SunOutlined, MoonOutlined, DesktopOutlined } from "@ant-design/icons";
+import {
+  SunOutlined,
+  MoonOutlined,
+  DesktopOutlined,
+  DashboardOutlined,
+  AppstoreOutlined,
+  ShoppingCartOutlined,
+  PercentageOutlined,
+  TagsOutlined,
+  TeamOutlined,
+  GlobalOutlined,
+  ContactsOutlined,
+  CrownOutlined,
+} from "@ant-design/icons";
 import logoUrl from "../assets/orthilogotype.png";
 
 const { Header, Sider, Content } = Layout;
@@ -69,6 +82,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       categories: t("layout.menu.categories"),
       manufacturers: t("layout.menu.manufacturers"),
       countries: t("layout.menu.countries"),
+      contacts: t("layout.menu.contacts"),
+      hero: t("layout.menu.hero"),
       admins: t("layout.menu.admins"),
     };
     const items = [] as { title: React.ReactNode; href?: string }[];
@@ -192,28 +207,35 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           items={[
             {
               key: "/",
+              icon: <DashboardOutlined />,
               label: <Link to="/">{t("layout.menu.dashboard")}</Link>,
             },
+            { type: "group", label: "Каталог" },
             {
               key: "/products",
+              icon: <AppstoreOutlined />,
               label: <Link to="/products">{t("layout.menu.products")}</Link>,
             },
             {
               key: "/orders",
+              icon: <ShoppingCartOutlined />,
               label: <Link to="/orders">{t("layout.menu.orders")}</Link>,
             },
             {
               key: "/discounts",
+              icon: <PercentageOutlined />,
               label: <Link to="/discounts">{t("layout.menu.discounts")}</Link>,
             },
             {
               key: "/categories",
+              icon: <TagsOutlined />,
               label: (
                 <Link to="/categories">{t("layout.menu.categories")}</Link>
               ),
             },
             {
               key: "/manufacturers",
+              icon: <TeamOutlined />,
               label: (
                 <Link to="/manufacturers">
                   {t("layout.menu.manufacturers")}
@@ -222,10 +244,23 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             },
             {
               key: "/countries",
+              icon: <GlobalOutlined />,
               label: <Link to="/countries">{t("layout.menu.countries")}</Link>,
+            },
+            { type: "group", label: "Витрина" },
+            {
+              key: "/contacts",
+              icon: <ContactsOutlined />,
+              label: <Link to="/contacts">{t("layout.menu.contacts")}</Link>,
+            },
+            {
+              key: "/hero",
+              icon: <CrownOutlined />,
+              label: <Link to="/hero">{t("layout.menu.hero")}</Link>,
             },
             {
               key: "/admins",
+              icon: <TeamOutlined />,
               label: <Link to="/admins">{t("layout.menu.admins")}</Link>,
             },
           ]}

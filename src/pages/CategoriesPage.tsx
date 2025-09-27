@@ -147,7 +147,7 @@ export function CategoriesPage() {
     const values = await form.validateFields();
     const payload: FormValues = {
       ...values,
-      slug: values.slug || slugify(values.nameUk),
+      slug: values.slug || slugify(values.nameUk || values.nameEn || ""),
     };
     try {
       if (editing) {
@@ -346,11 +346,12 @@ export function CategoriesPage() {
           form={form}
           onValuesChange={(changed) => {
             if ("nameUk" in changed || "nameEn" in changed) {
+              const currentSlug = (form.getFieldValue("slug") || "").trim();
+              if (currentSlug) return;
               const uk = (form.getFieldValue("nameUk") || "").trim();
               const en = (form.getFieldValue("nameEn") || "").trim();
               const base = uk || en;
-              const currentSlug = (form.getFieldValue("slug") || "").trim();
-              if (!currentSlug && base) {
+              if (base) {
                 form.setFieldsValue({ slug: slugify(base) });
               }
             }
@@ -415,7 +416,13 @@ export function CategoriesPage() {
           <Form.Item
             label={t("categories.form.slug")}
             name="slug"
-            tooltip={t("categories.form.slug.tooltip")}>
+            tooltip={t("categories.form.slug.tooltip")}
+            extra={(() => {
+              const hint = t("categories.form.slug.hint");
+              return hint && hint !== "categories.form.slug.hint"
+                ? hint
+                : "Слаг формируется автоматически из названия. Можно оставить как есть.";
+            })()}>
             <Input placeholder={t("categories.form.slug.placeholder")} />
           </Form.Item>
 

@@ -428,7 +428,13 @@ export function ManufacturersPage() {
           <Form.Item
             label={t("manufacturers.form.slug")}
             name="slug"
-            tooltip={t("manufacturers.form.slug.tooltip")}>
+            tooltip={t("manufacturers.form.slug.tooltip")}
+            extra={(() => {
+              const hint = t("manufacturers.form.slug.hint");
+              return hint && hint !== "manufacturers.form.slug.hint"
+                ? hint
+                : "Слаг формируется автоматически из названия. Можно оставить как есть.";
+            })()}>
             <Input placeholder="3m" />
           </Form.Item>
 

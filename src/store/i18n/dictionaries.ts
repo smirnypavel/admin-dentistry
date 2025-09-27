@@ -9,6 +9,8 @@ export const ru: I18nDict = {
   "layout.menu.categories": "Категории",
   "layout.menu.manufacturers": "Производители",
   "layout.menu.countries": "Страны",
+  "layout.menu.contacts": "Контакты",
+  "layout.menu.hero": "Герой",
   "layout.menu.admins": "Админы",
 
   "layout.tooltip.newOrders": "Новые заказы",
@@ -103,6 +105,8 @@ export const uk: I18nDict = {
   "layout.menu.categories": "Категорії",
   "layout.menu.manufacturers": "Виробники",
   "layout.menu.countries": "Країни",
+  "layout.menu.contacts": "Контакти",
+  "layout.menu.hero": "Герой",
   "layout.menu.admins": "Адміни",
 
   "layout.tooltip.newOrders": "Нові замовлення",
@@ -187,6 +191,193 @@ export const uk: I18nDict = {
   "login.feature.secure": "Інтеграції, склад і контроль замовлень",
   "login.feature.bilingual": "Швидка робота та зручний інтерфейс",
 };
+
+// Contacts
+export const ruContacts: I18nDict = {
+  "contacts.loadError": "Не удалось загрузить контакты",
+  "contacts.refresh": "Обновить",
+  "contacts.add": "Добавить",
+  "contacts.search.placeholder": "Поиск по адресу/телефону/email...",
+  "contacts.columns.address": "Адрес",
+  "contacts.columns.phones": "Телефоны",
+  "contacts.columns.email": "Email",
+  "contacts.columns.viber": "Viber",
+  "contacts.columns.telegram": "Telegram",
+  "contacts.columns.sort": "Порядок",
+  "contacts.columns.isActive": "Активна",
+  "contacts.columns.actions": "Действия",
+  "contacts.msg.delete.title": "Удалить карточку «{label}»?",
+  "contacts.msg.delete.ok": "Удалить",
+  "contacts.msg.delete.cancel": "Отмена",
+  "contacts.msg.delete.success": "Карточка удалена",
+  "contacts.msg.delete.error": "Не удалось удалить",
+  "contacts.msg.toggleError": "Не удалось обновить активность",
+  "contacts.msg.save.created": "Карточка создана",
+  "contacts.msg.save.updated": "Карточка обновлена",
+  "contacts.msg.save.error": "Не удалось сохранить",
+  "contacts.drawer.createTitle": "Новая карточка контактов",
+  "contacts.drawer.editTitle": "Редактирование карточки",
+  "contacts.drawer.cancel": "Отмена",
+  "contacts.drawer.save": "Сохранить",
+  "contacts.form.address": "Адрес (укр)",
+  "contacts.form.address.placeholder": "м. Київ, вул. ...",
+  "contacts.form.address.uk": "Українська",
+  "contacts.form.address.en": "English",
+  "contacts.form.addressEn": "Адрес (en)",
+  // V2 items editor
+  "contacts.form.items.title": "Контактные элементы",
+  "contacts.form.items.bulkAdd": "Массово",
+  "contacts.form.items.value": "Значение",
+  "contacts.form.items.label": "Метка",
+  "contacts.form.items.isPrimary": "Основной",
+  "contacts.form.items.add": "Добавить элемент",
+  "contacts.form.sort": "Порядок",
+  "contacts.form.isActive": "Активна",
+  "contacts.pagination.showTotal": "{from}-{to} из {total}",
+  // Page explainer
+  "contacts.page.explainer": "Контакты компании для витрины",
+  "contacts.page.usage":
+    'Эти данные отображаются на странице "О компании", в футере и виджетах магазина. Создавайте одну или несколько карточек (офисов), редактируйте телефоны, мессенджеры и email.',
+  "contacts.card.updatedAt": "Обновлено",
+  "contacts.form.items.helper":
+    "Добавляйте телефоны, email и ссылки на мессенджеры. Эти элементы будут показаны на странице контактов и в футере.",
+  "contacts.form.items.backendLimits":
+    "Техническое ограничение: сохраняется только один email; соцсети и WhatsApp пока не сохраняются (отобразятся в предпросмотре, но не будут записаны в БД).",
+  "contacts.preview.lang": "Язык предпросмотра",
+  "contacts.preview.showHidden": "Показать неактивные",
+  "contacts.preview.hideHidden": "Скрыть неактивные",
+  "contacts.preview.showMore": "Показать больше",
+  "contacts.preview.showLess": "Показать меньше",
+  "contacts.loadEmpty": "Нет активных секций",
+  // Item types
+  "contacts.itemType.phone": "Телефон",
+  "contacts.itemType.email": "Email",
+  "contacts.itemType.telegram": "Telegram",
+  "contacts.itemType.viber": "Viber",
+  "contacts.itemType.whatsapp": "WhatsApp",
+  "contacts.itemType.instagram": "Instagram",
+  "contacts.itemType.facebook": "Facebook",
+  "contacts.itemType.site": "Сайт",
+  "contacts.itemType.custom": "Другое",
+  // Bulk modal
+  "contacts.bulk.title": "Массовое добавление",
+  "contacts.bulk.add": "Добавить",
+  "contacts.bulk.cancel": "Отмена",
+  "contacts.bulk.paste":
+    "Вставьте значения по одному на строку или через запятую",
+  // Filters / labels
+  "contacts.filter.all": "Все типы",
+  "contacts.filters.status.all": "Все",
+  "contacts.filters.status.active": "Активные",
+  "contacts.filters.status.hidden": "Скрытые",
+  "contacts.filters.type.all": "Все типы",
+  "contacts.filters.sort.orderAsc": "Порядок ↑",
+  "contacts.filters.sort.orderDesc": "Порядок ↓",
+  "contacts.filters.sort.updatedDesc": "Недавно обновлённые",
+  "contacts.filters.sort.updatedAsc": "Давно не обновлялись",
+  "contacts.filters.sort.addressAsc": "Адрес A→Z",
+  // Actions
+  "contacts.actions.duplicate": "Дублировать",
+  // Quick add and preview
+  "contacts.form.quickAdd": "Быстро добавить:",
+  "contacts.preview.title": "Предпросмотр",
+  "contacts.preview.hint":
+    "Так будет выглядеть блок на витрине (первые элементы по порядку).",
+};
+
+export const ukContacts: I18nDict = {
+  "contacts.loadError": "Не вдалося завантажити контакти",
+  "contacts.refresh": "Оновити",
+  "contacts.add": "Додати",
+  "contacts.search.placeholder": "Пошук за адресою/телефоном/email...",
+  "contacts.columns.address": "Адреса",
+  "contacts.columns.phones": "Телефони",
+  "contacts.columns.email": "Email",
+  "contacts.columns.viber": "Viber",
+  "contacts.columns.telegram": "Telegram",
+  "contacts.columns.sort": "Порядок",
+  "contacts.columns.isActive": "Активна",
+  "contacts.columns.actions": "Дії",
+  "contacts.msg.delete.title": "Видалити картку «{label}»?",
+  "contacts.msg.delete.ok": "Видалити",
+  "contacts.msg.delete.cancel": "Скасувати",
+  "contacts.msg.delete.success": "Картку видалено",
+  "contacts.msg.delete.error": "Не вдалося видалити",
+  "contacts.msg.toggleError": "Не вдалося оновити активність",
+  "contacts.msg.save.created": "Картку створено",
+  "contacts.msg.save.updated": "Картку оновлено",
+  "contacts.msg.save.error": "Не вдалося зберегти",
+  "contacts.drawer.createTitle": "Нова картка контактів",
+  "contacts.drawer.editTitle": "Редагування картки",
+  "contacts.drawer.cancel": "Скасувати",
+  "contacts.drawer.save": "Зберегти",
+  "contacts.form.address": "Адреса (укр)",
+  "contacts.form.address.placeholder": "м. Київ, вул. ...",
+  "contacts.form.address.uk": "Українська",
+  "contacts.form.address.en": "English",
+  "contacts.form.addressEn": "Адреса (en)",
+  // V2 items editor
+  "contacts.form.items.title": "Контактні елементи",
+  "contacts.form.items.bulkAdd": "Масово",
+  "contacts.form.items.value": "Значення",
+  "contacts.form.items.label": "Мітка",
+  "contacts.form.items.isPrimary": "Основний",
+  "contacts.form.items.add": "Додати елемент",
+  "contacts.form.sort": "Порядок",
+  "contacts.form.isActive": "Активна",
+  "contacts.pagination.showTotal": "{from}-{to} з {total}",
+  // Page explainer
+  "contacts.page.explainer": "Контакти компанії для вітрини",
+  "contacts.page.usage":
+    'Ці дані відображаються на сторінці "Про компанію", у футері та віджетах магазину. Створюйте одну або кілька карток (офісів), редагуйте телефони, месенджери та email.',
+  "contacts.card.updatedAt": "Оновлено",
+  "contacts.form.items.helper":
+    "Додавайте телефони, email і посилання на месенджери. Ці елементи буде показано на сторінці контактів і у футері.",
+  "contacts.form.items.backendLimits":
+    "Технічне обмеження: зберігається лише один email; соцмережі та WhatsApp поки не зберігаються (відобразяться у передперегляді, але не будуть записані до БД).",
+  "contacts.preview.lang": "Мова перегляду",
+  "contacts.preview.showHidden": "Показати неактивні",
+  "contacts.preview.hideHidden": "Сховати неактивні",
+  "contacts.preview.showMore": "Показати більше",
+  "contacts.preview.showLess": "Показати менше",
+  "contacts.loadEmpty": "Немає активних секцій",
+  // Item types
+  "contacts.itemType.phone": "Телефон",
+  "contacts.itemType.email": "Email",
+  "contacts.itemType.telegram": "Telegram",
+  "contacts.itemType.viber": "Viber",
+  "contacts.itemType.whatsapp": "WhatsApp",
+  "contacts.itemType.instagram": "Instagram",
+  "contacts.itemType.facebook": "Facebook",
+  "contacts.itemType.site": "Сайт",
+  "contacts.itemType.custom": "Інше",
+  // Bulk modal
+  "contacts.bulk.title": "Масове додавання",
+  "contacts.bulk.add": "Додати",
+  "contacts.bulk.cancel": "Скасувати",
+  "contacts.bulk.paste": "Вставте значення по одному в рядок або через кому",
+  // Filters / labels
+  "contacts.filter.all": "Усі типи",
+  "contacts.filters.status.all": "Усі",
+  "contacts.filters.status.active": "Активні",
+  "contacts.filters.status.hidden": "Приховані",
+  "contacts.filters.type.all": "Всі типи",
+  "contacts.filters.sort.orderAsc": "Порядок ↑",
+  "contacts.filters.sort.orderDesc": "Порядок ↓",
+  "contacts.filters.sort.updatedDesc": "Нещодавно оновлені",
+  "contacts.filters.sort.updatedAsc": "Давно не оновлювались",
+  "contacts.filters.sort.addressAsc": "Адреса A→Z",
+  // Actions
+  "contacts.actions.duplicate": "Дублювати",
+  // Quick add and preview
+  "contacts.form.quickAdd": "Швидко додати:",
+  "contacts.preview.title": "Попередній перегляд",
+  "contacts.preview.hint":
+    "Так виглядатиме блок на вітрині (перші елементи за порядком).",
+};
+
+Object.assign(ru, ruContacts);
+Object.assign(uk, ukContacts);
 
 // Extend dictionaries with Orders and Order Details
 export const ruOrders: I18nDict = {
@@ -305,6 +496,8 @@ export const commonRu: I18nDict = {
   "uploader.delete": "Удалить",
   "uploader.success": "Изображение загружено",
   "uploader.error": "Не удалось загрузить изображение",
+  "uploader.typeError": "Недопустимый тип файла",
+  "uploader.sizeError": "Файл слишком большой (макс. {mb} МБ)",
 };
 
 export const commonUk: I18nDict = {
@@ -329,6 +522,8 @@ export const commonUk: I18nDict = {
   "uploader.delete": "Видалити",
   "uploader.success": "Зображення завантажено",
   "uploader.error": "Не вдалося завантажити зображення",
+  "uploader.typeError": "Неприпустимий тип файлу",
+  "uploader.sizeError": "Файл занадто великий (макс. {mb} МБ)",
 };
 
 // Discounts
@@ -557,6 +752,96 @@ export const ukDiscounts: I18nDict = {
 Object.assign(ru, commonRu, ruOrders, ruOrderDetails, ruDiscounts);
 Object.assign(uk, commonUk, ukOrders, ukOrderDetails, ukDiscounts);
 
+// Hero
+export const ruHero: I18nDict = {
+  "hero.actions.save": "Сохранить",
+  "hero.actions.refresh": "Обновить",
+  "hero.actions.delete": "Удалить",
+  "hero.loadError": "Не удалось загрузить герой-блок",
+  "hero.save.success": "Сохранено",
+  "hero.save.error": "Не удалось сохранить",
+  "hero.delete.confirmTitle": "Удалить текущий герой-блок?",
+  "hero.delete.success": "Удалено",
+  "hero.delete.error": "Не удалось удалить",
+  "hero.tabs.uk": "Українська",
+  "hero.tabs.en": "English",
+  "hero.form.title.uk": "Заголовок",
+  "hero.form.title.uk.placeholder": "Заголовок героя (укр)",
+  "hero.form.subtitle.uk": "Подзаголовок",
+  "hero.form.subtitle.uk.placeholder": "Підзаголовок (укр)",
+  "hero.form.ctaLabel.uk": "CTA текст",
+  "hero.form.ctaLabel.uk.placeholder": "Например: Перейти в каталог",
+  "hero.form.title.en": "Title",
+  "hero.form.title.en.placeholder": "Hero title (en)",
+  "hero.form.subtitle.en": "Subtitle",
+  "hero.form.subtitle.en.placeholder": "Subtitle (en)",
+  "hero.form.ctaLabel.en": "CTA label",
+  "hero.form.ctaLabel.en.placeholder": "e.g. Go to catalog",
+  "hero.form.image.desktop": "Картинка (desktop)",
+  "hero.form.image.desktop.hint":
+    "Рекомендуется 1920×600, JPG/PNG/WebP до 2 МБ",
+  "hero.form.image.mobile": "Картинка (mobile)",
+  "hero.form.image.mobile.hint":
+    "Рекомендуется 1080×1080 или 1080×1350, JPG/PNG/WebP до 2 МБ",
+  "hero.form.video": "Видео (опционально)",
+  "hero.form.video.placeholder": "https://.../hero.mp4",
+  "hero.form.cta.url": "CTA URL",
+  "hero.form.cta.url.placeholder": "/catalog или https://...",
+  "hero.form.cta.external": "Открывать в новой вкладке",
+  "hero.form.theme": "Тема",
+  "hero.form.theme.light": "Светлая",
+  "hero.form.theme.dark": "Тёмная",
+  "hero.form.isActive": "Активен",
+  "hero.preview.title": "Предпросмотр",
+  "hero.preview.placeholder.title": "Заголовок героя",
+};
+
+export const ukHero: I18nDict = {
+  "hero.actions.save": "Зберегти",
+  "hero.actions.refresh": "Оновити",
+  "hero.actions.delete": "Видалити",
+  "hero.loadError": "Не вдалося завантажити герой-блок",
+  "hero.save.success": "Збережено",
+  "hero.save.error": "Не вдалося зберегти",
+  "hero.delete.confirmTitle": "Видалити поточний герой-блок?",
+  "hero.delete.success": "Видалено",
+  "hero.delete.error": "Не вдалося видалити",
+  "hero.tabs.uk": "Українська",
+  "hero.tabs.en": "English",
+  "hero.form.title.uk": "Заголовок",
+  "hero.form.title.uk.placeholder": "Заголовок героя (укр)",
+  "hero.form.subtitle.uk": "Підзаголовок",
+  "hero.form.subtitle.uk.placeholder": "Підзаголовок (укр)",
+  "hero.form.ctaLabel.uk": "Текст кнопки",
+  "hero.form.ctaLabel.uk.placeholder": "Наприклад: Перейти в каталог",
+  "hero.form.title.en": "Title",
+  "hero.form.title.en.placeholder": "Hero title (en)",
+  "hero.form.subtitle.en": "Subtitle",
+  "hero.form.subtitle.en.placeholder": "Subtitle (en)",
+  "hero.form.ctaLabel.en": "CTA label",
+  "hero.form.ctaLabel.en.placeholder": "e.g. Go to catalog",
+  "hero.form.image.desktop": "Картинка (desktop)",
+  "hero.form.image.desktop.hint":
+    "Рекомендовано 1920×600, JPG/PNG/WebP до 2 МБ",
+  "hero.form.image.mobile": "Картинка (mobile)",
+  "hero.form.image.mobile.hint":
+    "Рекомендовано 1080×1080 або 1080×1350, JPG/PNG/WebP до 2 МБ",
+  "hero.form.video": "Відео (опційно)",
+  "hero.form.video.placeholder": "https://.../hero.mp4",
+  "hero.form.cta.url": "CTA URL",
+  "hero.form.cta.url.placeholder": "/catalog або https://...",
+  "hero.form.cta.external": "Відкривати у новій вкладці",
+  "hero.form.theme": "Тема",
+  "hero.form.theme.light": "Світла",
+  "hero.form.theme.dark": "Темна",
+  "hero.form.isActive": "Активний",
+  "hero.preview.title": "Попередній перегляд",
+  "hero.preview.placeholder.title": "Заголовок героя",
+};
+
+Object.assign(ru, ruHero);
+Object.assign(uk, ukHero);
+
 // Products
 export const ruProducts: I18nDict = {
   "products.loadError": "Не удалось загрузить товары",
@@ -597,6 +882,8 @@ export const ruProducts: I18nDict = {
   "products.form.title.required": "Введите название",
   "products.form.slug": "Slug",
   "products.form.slug.tooltip": "Если пусто — сгенерируется из названия",
+  "products.form.slug.hint":
+    "Слаг формируется автоматически из названия. Можно оставить как есть.",
   "products.form.description": "Описание",
   "products.form.categories": "Категории",
   "products.form.categories.placeholder": "Выберите категории",
@@ -704,6 +991,8 @@ export const ukProducts: I18nDict = {
   "products.form.title.required": "Введіть назву",
   "products.form.slug": "Slug",
   "products.form.slug.tooltip": "Якщо порожньо — згенерується з назви",
+  "products.form.slug.hint":
+    "Слаг формується автоматично з назви. Можна залишити як є.",
   "products.form.description": "Опис",
   "products.form.categories": "Категорії",
   "products.form.categories.placeholder": "Оберіть категорії",
@@ -1028,7 +1317,6 @@ export const ruCountries: I18nDict = {
 
   "countries.search.placeholder": "Поиск по коду/названию/slug",
   "countries.refresh": "Обновить",
-  "countries.add": "Добавить страну",
   "countries.pagination.showTotal": "{from}–{to} из {total}",
 
   "countries.drawer.createTitle": "Новая страна",
@@ -1073,7 +1361,6 @@ export const ukCountries: I18nDict = {
 
   "countries.search.placeholder": "Пошук за кодом/назвою/slug",
   "countries.refresh": "Оновити",
-  "countries.add": "Додати країну",
   "countries.pagination.showTotal": "{from}–{to} з {total}",
 
   "countries.drawer.createTitle": "Нова країна",

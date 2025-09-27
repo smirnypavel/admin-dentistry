@@ -359,9 +359,11 @@ export function ProductsPage() {
       // Generate slug from whichever title is available
       if (!values.slug) {
         const base = titleUkTrim || titleEnTrim || "";
-        const nextSlug = slugify(base);
-        values.slug = nextSlug;
-        form.setFieldValue("slug", nextSlug);
+        if (base) {
+          const nextSlug = slugify(base);
+          values.slug = nextSlug;
+          form.setFieldValue("slug", nextSlug);
+        }
       }
       setEditor((s) => ({ ...s, step: 1 }));
     } catch {
@@ -370,12 +372,24 @@ export function ProductsPage() {
   };
 
   const onSaveAll = async () => {
-    const basics = form.getFieldsValue();
+    // Include values from unmounted basics form while on step 1
+    const basics = form.getFieldsValue(true) as {
+      titleUk?: string;
+      titleEn?: string;
+      slug?: string;
+      descUk?: string;
+      descEn?: string;
+      categoryIds?: string[];
+      tags?: string[];
+      images?: string[];
+      attributes?: Array<{ key: string; value: string }>;
+      isActive?: boolean;
+    };
     // Safety net: ensure we have UA title (fallback to EN) and slug
     const titleUkTrim = (basics.titleUk || "").trim();
     const titleEnTrim = (basics.titleEn || "").trim();
-    const ensuredTitleUk = titleUkTrim || titleEnTrim;
-    if (!ensuredTitleUk) {
+    const titleUkFinal = titleUkTrim || titleEnTrim;
+    if (!titleUkFinal) {
       message.error(t("products.form.title.required"));
       setEditor((s) => ({ ...s, step: 0 }));
       return;
@@ -389,6 +403,7 @@ export function ProductsPage() {
       basics.slug = slugify(base);
       form.setFieldValue("slug", basics.slug);
     }
+    const slugFinal = (basics.slug || slugify(titleUkFinal)) as string;
     const attributes = (basics.attributes || [])
       .filter((a) => (a.key || "").trim())
       .map(({ key, value }) => {
@@ -415,8 +430,8 @@ export function ProductsPage() {
     try {
       if (editor.mode === "create") {
         await createProduct({
-          slug: basics.slug,
-          titleUk: basics.titleUk,
+          slug: slugFinal,
+          titleUk: (basics.titleUk as string) || titleUkFinal,
           titleEn: basics.titleEn || undefined,
           descUk: basics.descUk || undefined,
           descEn: basics.descEn || undefined,
@@ -430,8 +445,8 @@ export function ProductsPage() {
         message.success(t("products.save.created"));
       } else if (editor.mode === "edit" && editor.record) {
         await updateProduct(editor.record._id, {
-          slug: basics.slug,
-          titleUk: basics.titleUk,
+          slug: slugFinal,
+          titleUk: (basics.titleUk as string) || titleUkFinal,
           titleEn: basics.titleEn || undefined,
           descUk: basics.descUk || undefined,
           descEn: basics.descEn || undefined,
@@ -844,7 +859,17 @@ export function ProductsPage() {
             <Form
               layout="vertical"
               form={form}
-              initialValues={{ isActive: true, images: [], attributes: [] }}>
+              initialValues={{ isActive: true, images: [], attributes: [] }}
+              onValuesChange={(changed) => {
+                if ("titleUk" in changed || "titleEn" in changed) {
+                  const currentSlug = (form.getFieldValue("slug") || "").trim();
+                  if (currentSlug) return;
+                  const uk = (form.getFieldValue("titleUk") || "").trim();
+                  const en = (form.getFieldValue("titleEn") || "").trim();
+                  const base = uk || en;
+                  if (base) form.setFieldsValue({ slug: slugify(base) });
+                }
+              }}>
               <Tabs
                 items={[
                   {
@@ -932,7 +957,13 @@ export function ProductsPage() {
               <Form.Item
                 label={t("products.form.slug")}
                 name="slug"
-                tooltip={t("products.form.slug.tooltip")}>
+                tooltip={t("products.form.slug.tooltip")}
+                extra={(() => {
+                  const hint = t("products.form.slug.hint");
+                  return hint && hint !== "products.form.slug.hint"
+                    ? hint
+                    : "Слаг формируется автоматически из названия. Можно оставить как есть.";
+                })()}>
                 <Input
                   data-gramm="false"
                   data-gramm_editor="false"

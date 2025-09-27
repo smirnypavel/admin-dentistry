@@ -399,7 +399,13 @@ export function CountriesPage() {
           <Form.Item
             label={t("countries.form.slug")}
             name="slug"
-            tooltip={t("countries.form.slug.tooltip")}>
+            tooltip={t("countries.form.slug.tooltip")}
+            extra={(() => {
+              const hint = t("countries.form.slug.hint");
+              return hint && hint !== "countries.form.slug.hint"
+                ? hint
+                : "Слаг формируется автоматически из названия. Можно оставить как есть.";
+            })()}>
             <Input placeholder="ukraine" />
           </Form.Item>
 
