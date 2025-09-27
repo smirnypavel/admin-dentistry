@@ -1,7 +1,7 @@
 export type I18nDict = Record<string, string>;
 
 export const ru: I18nDict = {
-  "layout.brand": "Админ",
+  "layout.brand": "ORTHOSTORE",
   "layout.menu.dashboard": "Дашборд",
   "layout.menu.products": "Товары",
   "layout.menu.orders": "Заказы",
@@ -35,7 +35,6 @@ export const ru: I18nDict = {
 
   // Common
   "common.updating": "Обновляется…",
-
   // Orders status labels
   "order.status.new": "Новый",
   "order.status.processing": "В работе",
@@ -43,9 +42,6 @@ export const ru: I18nDict = {
   "order.status.cancelled": "Отменен",
 
   // Dashboard
-  "dashboard.loadError": "Не удалось загрузить дашборд",
-  "dashboard.filters.today": "Сегодня",
-  "dashboard.filters.7d": "7 дней",
   "dashboard.filters.30d": "30 дней",
   "dashboard.filters.thisMonth": "Этот месяц",
   "dashboard.filters.granularity.day": "Дни",
@@ -80,10 +76,26 @@ export const ru: I18nDict = {
   "dashboard.discounts.active": "Активны",
   "dashboard.discounts.upcoming": "Скоро",
   "dashboard.discounts.expired": "Истекли",
+  // Login
+  "login.title": "Вход в админку",
+  "login.subtitle":
+    "Современные решения для стоматологии: каталог, заказы и аналитика для вашего роста.",
+  "login.username": "Логин",
+  "login.username.required": "Укажите логин",
+  "login.password": "Пароль",
+  "login.password.required": "Укажите пароль",
+  "login.signIn": "Войти",
+  "login.capsLockOn": "Включен Caps Lock",
+  "login.langSwitcher": "Язык",
+  "login.error.generic": "Не удалось войти. Попробуйте ещё раз.",
+  "login.error.credentials": "Ошибка входа. Проверьте логин и пароль.",
+  "login.feature.modern": "Каталог и прайсы — всегда под рукой",
+  "login.feature.secure": "Интеграции, склад и контроль заказов",
+  "login.feature.bilingual": "Быстрая работа и удобный интерфейс",
 };
 
 export const uk: I18nDict = {
-  "layout.brand": "Адмін",
+  "layout.brand": "ORTHOSTORE",
   "layout.menu.dashboard": "Дашборд",
   "layout.menu.products": "Товари",
   "layout.menu.orders": "Замовлення",
@@ -117,7 +129,6 @@ export const uk: I18nDict = {
 
   // Common
   "common.updating": "Оновлюється…",
-
   // Orders status labels
   "order.status.new": "Новий",
   "order.status.processing": "В роботі",
@@ -125,9 +136,6 @@ export const uk: I18nDict = {
   "order.status.cancelled": "Скасовано",
 
   // Dashboard
-  "dashboard.loadError": "Не вдалося завантажити дашборд",
-  "dashboard.filters.today": "Сьогодні",
-  "dashboard.filters.7d": "7 днів",
   "dashboard.filters.30d": "30 днів",
   "dashboard.filters.thisMonth": "Цей місяць",
   "dashboard.filters.granularity.day": "Дні",
@@ -162,6 +170,22 @@ export const uk: I18nDict = {
   "dashboard.discounts.active": "Активні",
   "dashboard.discounts.upcoming": "Незабаром",
   "dashboard.discounts.expired": "Минулі",
+  // Login
+  "login.title": "Вхід до адмінки",
+  "login.subtitle":
+    "Сучасні рішення для стоматології: каталог, замовлення та аналітика для зростання вашого бізнесу.",
+  "login.username": "Логін",
+  "login.username.required": "Вкажіть логін",
+  "login.password": "Пароль",
+  "login.password.required": "Вкажіть пароль",
+  "login.signIn": "Увійти",
+  "login.capsLockOn": "Увімкнено Caps Lock",
+  "login.langSwitcher": "Мова",
+  "login.error.generic": "Не вдалося увійти. Спробуйте ще раз.",
+  "login.error.credentials": "Помилка входу. Перевірте логін і пароль.",
+  "login.feature.modern": "Каталог і прайси — завжди під рукою",
+  "login.feature.secure": "Інтеграції, склад і контроль замовлень",
+  "login.feature.bilingual": "Швидка робота та зручний інтерфейс",
 };
 
 // Extend dictionaries with Orders and Order Details
@@ -801,12 +825,16 @@ export const ruCategories: I18nDict = {
   "categories.form.name": "Название",
   "categories.form.name.required": "Введите название",
   "categories.form.name.placeholder": "Например: Композиты",
+  "categories.form.name.uk": "Українська",
+  "categories.form.name.en": "English",
+  "categories.form.nameEn": "Название (EN)",
   "categories.form.slug": "Slug",
   "categories.form.slug.tooltip":
     "Автогенерируется из названия, можно изменить",
   "categories.form.slug.placeholder": "composites",
   "categories.form.description": "Описание",
   "categories.form.description.placeholder": "Краткое описание",
+  "categories.form.descriptionEn": "Описание (EN)",
   "categories.form.image": "Изображение",
   "categories.form.sort": "Сортировка",
   "categories.form.isActive": "Активна",
@@ -847,11 +875,15 @@ export const ukCategories: I18nDict = {
   "categories.form.name": "Назва",
   "categories.form.name.required": "Введіть назву",
   "categories.form.name.placeholder": "Наприклад: Композити",
+  "categories.form.name.uk": "Українська",
+  "categories.form.name.en": "English",
+  "categories.form.nameEn": "Назва (EN)",
   "categories.form.slug": "Slug",
   "categories.form.slug.tooltip": "Автогенерується з назви, можна змінити",
   "categories.form.slug.placeholder": "composites",
   "categories.form.description": "Опис",
   "categories.form.description.placeholder": "Короткий опис",
+  "categories.form.descriptionEn": "Опис (EN)",
   "categories.form.image": "Зображення",
   "categories.form.sort": "Сортування",
   "categories.form.isActive": "Активна",
@@ -892,6 +924,9 @@ export const ruManufacturers: I18nDict = {
 
   "manufacturers.form.name": "Название",
   "manufacturers.form.name.required": "Введите название",
+  "manufacturers.form.name.uk": "Українська",
+  "manufacturers.form.name.en": "English",
+  "manufacturers.form.nameEn": "Название (EN)",
   "manufacturers.form.slug": "Slug",
   "manufacturers.form.slug.tooltip":
     "Автогенерируется из названия, можно изменить",
@@ -902,6 +937,7 @@ export const ruManufacturers: I18nDict = {
   "manufacturers.form.website": "Сайт",
   "manufacturers.form.description": "Описание",
   "manufacturers.form.description.placeholder": "Краткое описание",
+  "manufacturers.form.descriptionEn": "Описание (EN)",
   "manufacturers.form.isActive": "Активен",
 
   "manufacturers.msg.delete.title": "Удалить производителя «{name}»?",
@@ -939,6 +975,9 @@ export const ukManufacturers: I18nDict = {
 
   "manufacturers.form.name": "Назва",
   "manufacturers.form.name.required": "Введіть назву",
+  "manufacturers.form.name.uk": "Українська",
+  "manufacturers.form.name.en": "English",
+  "manufacturers.form.nameEn": "Назва (EN)",
   "manufacturers.form.slug": "Slug",
   "manufacturers.form.slug.tooltip": "Автогенерується з назви, можна змінити",
   "manufacturers.form.countries": "Країни",
@@ -948,6 +987,7 @@ export const ukManufacturers: I18nDict = {
   "manufacturers.form.website": "Сайт",
   "manufacturers.form.description": "Опис",
   "manufacturers.form.description.placeholder": "Короткий опис",
+  "manufacturers.form.descriptionEn": "Опис (EN)",
   "manufacturers.form.isActive": "Активний",
 
   "manufacturers.msg.delete.title": "Видалити виробника «{name}»?",
@@ -988,6 +1028,9 @@ export const ruCountries: I18nDict = {
   "countries.form.code.required": "Введите код (например, UA)",
   "countries.form.name": "Название",
   "countries.form.name.required": "Введите название",
+  "countries.form.name.uk": "Українська",
+  "countries.form.name.en": "English",
+  "countries.form.nameEn": "Название (EN)",
   "countries.form.slug": "Slug",
   "countries.form.slug.tooltip": "Автогенерируется из названия, можно изменить",
   "countries.form.flag": "Флаг",
@@ -1030,6 +1073,9 @@ export const ukCountries: I18nDict = {
   "countries.form.code.required": "Введіть код (наприклад, UA)",
   "countries.form.name": "Назва",
   "countries.form.name.required": "Введіть назву",
+  "countries.form.name.uk": "Українська",
+  "countries.form.name.en": "English",
+  "countries.form.nameEn": "Назва (EN)",
   "countries.form.slug": "Slug",
   "countries.form.slug.tooltip": "Автогенерується з назви, можна змінити",
   "countries.form.flag": "Прапор",

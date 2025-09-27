@@ -1,5 +1,7 @@
 # Admin API Guide
 
+[i18n for Admin (uk/en) — how to create, update, search, and sort localized fields](./admin-i18n.md)
+
 Secure base: All admin endpoints are prefixed with `/admin` and require authorization.
 
 Auth options (either is accepted):
@@ -93,65 +95,27 @@ Base: `/admin/auth`
 Примеры:
 
 ```bash
-# Получить JWT
-curl -X POST "http://localhost:3000/admin/auth/login" \
-  -H "content-type: application/json" \
-  -d '{"username":"admin","password":"secret"}'
 
-# Запрос с Bearer токеном
-curl -H "Authorization: Bearer $ADMIN_JWT" \
-  "http://localhost:3000/admin/products?page=1&limit=20"
 ```
 
-- GET `/admin/auth/users` — список администраторов
-  - Security: Требуется Bearer или `x-api-key`
-  - Response: `[{ _id, username, createdAt, updatedAt }, ...]`
-
-- POST `/admin/auth/users` — создать нового администратора
-  - Body: `{ "username": "manager", "password": "verysecret" }`
-  - Response: `{ _id, username, createdAt, updatedAt }`
-
-- При старте сервера первый админ создаётся автоматически из ENV (`ADMIN_BOOTSTRAP_USERNAME`/`ADMIN_BOOTSTRAP_PASSWORD`), если такого пользователя ещё нет.
-
-Примечание: Ролей нет — у всех администраторов одинаковые права.
-
----
-
-## Products
-
-Base: `/admin/products`
-
-#### GET `/admin/products/autocomplete`
-
-- Summary: Lightweight product autocomplete for typeahead.
-- Auth: `x-api-key` or `Authorization: Bearer <JWT>`
-- Query params:
-  - `qLike` (string, optional): Case-insensitive substring over `title`, `slug`, `description`, `variants.sku`.
-  - `q` (string, optional): Full-text search (Mongo text index). Can be combined with `qLike` (AND).
-  - `limit` (number, optional, default 10, max 20): Number of suggestions to return.
-- Response: Array of minimal items.
-
-Example:
-
-```bash
-curl -H "x-api-key: $ADMIN_API_KEY" \
-  "http://localhost:3000/admin/products/autocomplete?qLike=comp&limit=10"
 ```
 
 Example response:
 
 ```
+
 [
-  {
-    "_id": "665f1a2b3c4d5e6f7a8b9c0d",
-    "title": "Композит универсальный",
-    "slug": "kompozit-universalnyj",
-    "priceMin": 350,
-    "priceMax": 480,
-    "matchedSkus": ["UC-1", "UC-2"]
-  }
+{
+"\_id": "665f1a2b3c4d5e6f7a8b9c0d",
+"title": "Композит универсальный",
+"slug": "kompozit-universalnyj",
+"priceMin": 350,
+"priceMax": 480,
+"matchedSkus": ["UC-1", "UC-2"]
+}
 ]
-```
+
+````
 
 Notes:
 
@@ -165,15 +129,15 @@ GET `/admin/products`
 
 Query params:
 
-- `q` string (optional): full-text search via MongoDB text index (typically matches title/description).
-- `qLike` string (optional): case-insensitive substring search across `title`, `slug`, `description`, and `variants.sku`. Safe-escaped as a literal regex. Great for live search/autocomplete.
+  - `q` string (optional): full-text search via MongoDB text index (matches i18n title/description fields).
+  - `qLike` string (optional): case-insensitive substring search across `titleI18n.uk/en`, `slug`, `descriptionI18n.uk/en`, and `variants.sku`. Safe-escaped as a literal regex. Great for live search/autocomplete.
 - `category` string (ObjectId): filter by category contained in `categoryIds`.
 - `manufacturerId` string | string[]: one or multiple manufacturer IDs contained in product `manufacturerIds`.
 - `countryId` string | string[]: one or multiple country IDs contained in product `countryIds`.
 - `tags` string | string[]: include products having any of specified tags.
 - `isActive` boolean: filter by active state.
 - `opt.<key>=<value>`: variant options filter. Repeat params to OR values, e.g. `opt.size=2g&opt.size=4g&opt.shade=A2`.
-- `sort` string: comma-separated fields, prefix with `-` for desc. Examples: `-createdAt`, `priceMin,-title`.
+- `sort` string: comma-separated fields, prefix with `-` for desc. Examples: `-createdAt`, `priceMin,-titleI18n.uk`.
 - `page` number (default 1)
 - `limit` number (default 20, max 50)
 
@@ -192,16 +156,16 @@ curl -H "x-api-key: $ADMIN_API_KEY" \
 # Combine full-text + substring + filters
 curl -H "x-api-key: $ADMIN_API_KEY" \
   "http://localhost:3000/admin/products?q=композит&qLike=UC-&manufacturerId=665f00000000000000001001&sort=-createdAt"
-```
+````
 
-Product shape (simplified)
+Product shape (simplified, i18n)
 
 ```
 {
   _id: string,
   slug: string,
-  title: string,
-  description?: string,
+  titleI18n: { uk: string; en?: string },
+  descriptionI18n?: { uk?: string; en?: string },
   categoryIds: string[],
   tags?: string[],
   images?: string[],
@@ -233,9 +197,9 @@ Variant shape
 ```
 
 {
-"slug": "universal-composite", // если пустой — будет сгенерирован из title
-"title": "Композит универсальный",
-"description": "Описание",
+"slug": "universal-composite", // если пустой — будет сгенерирован из titleI18n.uk
+"titleI18n": { "uk": "Композит універсальний", "en": "Universal composite" },
+"descriptionI18n": { "uk": "Опис", "en": "Description" },
 "categoryIds": ["<catId>"],
 "tags": ["popular"],
 "images": ["https://.../1.jpg"],
@@ -322,8 +286,8 @@ Responses:
 {
   "_id": "665f1a2b3c4d5e6f7a8b9c0d",
   "slug": "universal-composite",
-  "title": "Композит универсальный",
-  "description": "Описание...",
+  "titleI18n": { "uk": "Композит універсальний", "en": "Universal composite" },
+  "descriptionI18n": { "uk": "Опис...", "en": "Description..." },
   "categoryIds": [],
   "tags": ["popular"],
   "images": [],
@@ -443,6 +407,14 @@ Body (любые поля опциональны):
 ```bash
 curl -X PATCH -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
   -d '{"title":"Композит PRO","slug":""}' \
+  http://localhost:3000/admin/products/<productId>
+```
+
+### PATCH: добавить английский перевод товара
+
+```bash
+curl -X PATCH -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
+  -d '{"titleI18n":{"en":"Universal composite"},"descriptionI18n":{"en":"Description..."}}' \
   http://localhost:3000/admin/products/<productId>
 ```
 
@@ -905,7 +877,7 @@ Base: `/admin/countries`
     {
       "_id": "6666000000000000000000a1",
       "code": "UA",
-      "name": "Ukraine",
+      "nameI18n": { "uk": "Україна", "en": "Ukraine" },
       "slug": "ukraine",
       "flagUrl": null,
       "isActive": true,
@@ -916,8 +888,21 @@ Base: `/admin/countries`
   ```
 - GET `/admin/countries/:id` — получить по id
   - 200 OK — `Country | null`
+  - Пример ответа:
+  ```
+  {
+    "_id": "6666000000000000000000a1",
+    "code": "UA",
+    "nameI18n": { "uk": "Україна", "en": "Ukraine" },
+    "slug": "ukraine",
+    "flagUrl": null,
+    "isActive": true,
+    "createdAt": "2025-09-10T12:00:00.000Z",
+    "updatedAt": "2025-09-10T12:00:00.000Z"
+  }
+  ```
 - POST `/admin/countries` — создать
-  - Body: `{ code: string; name: string; slug: string; flagUrl?: string; isActive?: boolean }`
+  - Body: `{ code: string; nameI18n: { uk: string; en?: string }; slug: string; flagUrl?: string; isActive?: boolean }`
   - 201 Created — созданный `Country`
 - PATCH `/admin/countries/:id` — обновить
   - Body: частичное обновление тех же полей
@@ -931,8 +916,16 @@ Base: `/admin/countries`
 curl -H "x-api-key: $ADMIN_API_KEY" http://localhost:3000/admin/countries
 
 curl -X POST -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
-  -d '{"code":"DE","name":"Germany","slug":"germany"}' \
+  -d '{"code":"DE","nameI18n":{"uk":"Німеччина","en":"Germany"},"slug":"germany"}' \
   http://localhost:3000/admin/countries
+```
+
+### PATCH: добавить английский перевод страны
+
+```bash
+curl -X PATCH -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
+  -d '{"nameI18n":{"en":"Germany"}}' \
+  http://localhost:3000/admin/countries/<countryId>
 ```
 
 ---
@@ -943,10 +936,44 @@ Base: `/admin/manufacturers`
 
 - GET `/admin/manufacturers` — список
   - 200 OK — `Manufacturer[]`
+  - Пример ответа:
+  ```
+  [
+    {
+      "_id": "6666000000000000000000b1",
+      "slug": "3m",
+      "nameI18n": { "uk": "3M", "en": "3M" },
+      "descriptionI18n": { "uk": "Опис виробника", "en": "Manufacturer description" },
+      "countryIds": [],
+      "logoUrl": null,
+      "bannerUrl": null,
+      "website": null,
+      "isActive": true,
+      "createdAt": "2025-09-10T12:00:00.000Z",
+      "updatedAt": "2025-09-10T12:00:00.000Z"
+    }
+  ]
+  ```
 - GET `/admin/manufacturers/:id` — получить по id
   - 200 OK — `Manufacturer | null`
+  - Пример ответа:
+  ```
+  {
+    "_id": "6666000000000000000000b1",
+    "slug": "3m",
+    "nameI18n": { "uk": "3M", "en": "3M" },
+    "descriptionI18n": { "uk": "Опис виробника", "en": "Manufacturer description" },
+    "countryIds": [],
+    "logoUrl": null,
+    "bannerUrl": null,
+    "website": null,
+    "isActive": true,
+    "createdAt": "2025-09-10T12:00:00.000Z",
+    "updatedAt": "2025-09-10T12:00:00.000Z"
+  }
+  ```
 - POST `/admin/manufacturers` — создать
-  - Body: `{ name: string; slug: string; countryIds?: string[]; logoUrl?: string; bannerUrl?: string; website?: string; description?: string; isActive?: boolean }`
+  - Body: `{ nameI18n: { uk: string; en?: string }; slug: string; countryIds?: string[]; logoUrl?: string; bannerUrl?: string; website?: string; descriptionI18n?: { uk?: string; en?: string }; isActive?: boolean }`
   - 201 Created — созданный `Manufacturer`
 - PATCH `/admin/manufacturers/:id` — обновить (можно менять `countryIds`)
   - 200 OK — обновлённый `Manufacturer` или `null`
@@ -957,8 +984,16 @@ Base: `/admin/manufacturers`
 curl -H "x-api-key: $ADMIN_API_KEY" http://localhost:3000/admin/manufacturers
 
 curl -X POST -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
-  -d '{"name":"3M","slug":"3m","countryIds":[]}' \
+  -d '{"nameI18n":{"uk":"3M","en":"3M"},"slug":"3m","countryIds":[]}' \
   http://localhost:3000/admin/manufacturers
+```
+
+### PATCH: добавить английский перевод производителя
+
+```bash
+curl -X PATCH -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
+  -d '{"nameI18n":{"en":"3M"},"descriptionI18n":{"en":"Manufacturer description"}}' \
+  http://localhost:3000/admin/manufacturers/<manufacturerId>
 ```
 
 ---
@@ -967,12 +1002,42 @@ curl -X POST -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" 
 
 Base: `/admin/categories`
 
-- GET `/admin/categories` — список (сортировка по `sort`, затем `name`)
+- GET `/admin/categories` — список (сортировка по `sort`, затем `nameI18n.uk`)
   - 200 OK — `Category[]`
+  - Пример ответа:
+  ```
+  [
+    {
+      "_id": "6666000000000000000000c1",
+      "slug": "composites",
+      "nameI18n": { "uk": "Композити", "en": "Composites" },
+      "descriptionI18n": { "uk": "Опис категорії", "en": "Category description" },
+      "imageUrl": null,
+      "sort": 1,
+      "isActive": true,
+      "createdAt": "2025-09-10T12:00:00.000Z",
+      "updatedAt": "2025-09-10T12:00:00.000Z"
+    }
+  ]
+  ```
 - GET `/admin/categories/:id` — получить по id
   - 200 OK — `Category | null`
+  - Пример ответа:
+  ```
+  {
+    "_id": "6666000000000000000000c1",
+    "slug": "composites",
+    "nameI18n": { "uk": "Композити", "en": "Composites" },
+    "descriptionI18n": { "uk": "Опис категорії", "en": "Category description" },
+    "imageUrl": null,
+    "sort": 1,
+    "isActive": true,
+    "createdAt": "2025-09-10T12:00:00.000Z",
+    "updatedAt": "2025-09-10T12:00:00.000Z"
+  }
+  ```
 - POST `/admin/categories` — создать
-  - Body: `{ slug: string; name: string; description?: string; imageUrl?: string; sort?: number; isActive?: boolean }`
+  - Body: `{ slug: string; nameI18n: { uk: string; en?: string }; descriptionI18n?: { uk?: string; en?: string }; imageUrl?: string; sort?: number; isActive?: boolean }`
   - 201 Created — созданная `Category`
 - PATCH `/admin/categories/:id` — обновить
   - 200 OK — обновлённая `Category` или `null`
@@ -983,8 +1048,16 @@ Base: `/admin/categories`
 curl -H "x-api-key: $ADMIN_API_KEY" http://localhost:3000/admin/categories
 
 curl -X POST -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
-  -d '{"slug":"composites","name":"Композиты"}' \
+  -d '{"slug":"composites","nameI18n":{"uk":"Композити","en":"Composites"}}' \
   http://localhost:3000/admin/categories
+```
+
+### PATCH: добавить английский перевод категории
+
+```bash
+curl -X PATCH -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
+  -d '{"nameI18n":{"en":"Composites"},"descriptionI18n":{"en":"Category description"}}' \
+  http://localhost:3000/admin/categories/<categoryId>
 ```
 
 ---
@@ -1010,6 +1083,14 @@ Base: `/admin/uploads`
   ```
 
   - Примечания:
+    - Настройка окружения (одно из двух):
+      1. Явно задать переменные окружения:
+         - `CLOUDINARY_CLOUD_NAME=dsddgean7`
+         - `CLOUDINARY_API_KEY=377684217728157`
+         - `CLOUDINARY_API_SECRET=***` (не храните секрет в репозитории)
+      2. Или одной строкой:
+         - `CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>`
+           Сервис поддерживает оба способа и автоматически подхватит из доступных переменных.
     - Значение `public_id` можно хранить, если потребуется удаление файла через Cloudinary.
     - Для категорий/производителей/товаров/стран сохраняйте URL из ответа:
       - Category: `imageUrl`
@@ -1017,6 +1098,18 @@ Base: `/admin/uploads`
       - Product: `images[]` на уровне товара, либо `variants[*].images[]` для варианта
       - Country: `flagUrl`
     - Рекомендуемые папки: `products`, `categories`, `manufacturers`, `countries`.
+
+- POST `/admin/uploads/image/delete` — удалить изображение по `public_id`
+  - Body: `{ "publicId": "products/abc" }`
+  - Response 200 OK: `{ "result": "ok" }`
+
+Пример:
+
+```bash
+curl -X POST -H "x-api-key: $ADMIN_API_KEY" -H "Content-Type: application/json" \
+  -d '{"publicId":"products/abc"}' \
+  http://localhost:3000/admin/uploads/image/delete
+```
 
 ### Как загружать изображения и обновлять сущности
 

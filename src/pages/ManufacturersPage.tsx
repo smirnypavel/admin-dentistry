@@ -9,6 +9,7 @@ import {
   Space,
   Switch,
   Table,
+  Tabs,
   theme as antdTheme,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -34,13 +35,15 @@ import { useQueryParam } from "../hooks/useQueryParam";
 import { useI18n } from "../store/i18n";
 
 type FormValues = {
-  name: string;
+  nameUk: string;
+  nameEn?: string;
   slug: string;
   countryIds?: string[];
   logoUrl?: string | null;
   bannerUrl?: string | null;
   website?: string;
-  description?: string;
+  descUk?: string;
+  descEn?: string;
   isActive?: boolean;
 };
 
@@ -107,13 +110,15 @@ export function ManufacturersPage() {
   const onEdit = (record: Manufacturer) => {
     setEditing(record);
     form.setFieldsValue({
-      name: record.name,
+      nameUk: record.nameI18n?.uk || record.name,
+      nameEn: record.nameI18n?.en,
       slug: record.slug,
       countryIds: record.countryIds || [],
       logoUrl: record.logoUrl || undefined,
       bannerUrl: record.bannerUrl || undefined,
       website: record.website || undefined,
-      description: record.description || undefined,
+      descUk: record.descriptionI18n?.uk,
+      descEn: record.descriptionI18n?.en,
       isActive: record.isActive,
     });
     setOpen(true);
@@ -152,7 +157,7 @@ export function ManufacturersPage() {
     const values = await form.validateFields();
     const payload: FormValues = {
       ...values,
-      slug: values.slug || slugify(values.name),
+      slug: values.slug || slugify(values.nameUk),
     };
     try {
       if (editing) {
@@ -164,13 +169,15 @@ export function ManufacturersPage() {
         message.success(t("manufacturers.msg.save.updated"));
       } else {
         await createManufacturer({
-          name: payload.name,
+          nameUk: payload.nameUk,
+          nameEn: payload.nameEn || undefined,
           slug: payload.slug,
           countryIds: payload.countryIds || [],
           logoUrl: payload.logoUrl || undefined,
           bannerUrl: payload.bannerUrl || undefined,
           website: payload.website || undefined,
-          description: payload.description || undefined,
+          descUk: payload.descUk || undefined,
+          descEn: payload.descEn || undefined,
           isActive: payload.isActive,
         });
         message.success(t("manufacturers.msg.save.created"));
@@ -352,25 +359,56 @@ export function ManufacturersPage() {
           layout="vertical"
           form={form}
           onValuesChange={(changed) => {
-            if ("name" in changed) {
-              const name = String(changed.name ?? "");
+            if ("nameUk" in changed) {
+              const name = String(changed.nameUk ?? "");
               const currentSlug = form.getFieldValue("slug");
               if (!currentSlug) {
                 form.setFieldsValue({ slug: slugify(name) });
               }
             }
           }}>
-          <Form.Item
-            label={t("manufacturers.form.name")}
-            name="name"
-            rules={[
+          <Tabs
+            items={[
               {
-                required: true,
-                message: t("manufacturers.form.name.required"),
+                key: "uk",
+                label: t("manufacturers.form.name.uk") || "Українська",
+                children: (
+                  <>
+                    <Form.Item
+                      label={t("manufacturers.form.name")}
+                      name="nameUk"
+                      rules={[
+                        {
+                          required: true,
+                          message: t("manufacturers.form.name.required"),
+                        },
+                      ]}>
+                      <Input placeholder="3M" />
+                    </Form.Item>
+                    <Form.Item
+                      label={t("manufacturers.form.description")}
+                      name="descUk">
+                      <Input.TextArea rows={4} placeholder={t("manufacturers.form.description.placeholder")} />
+                    </Form.Item>
+                  </>
+                ),
               },
-            ]}>
-            <Input placeholder="3M" />
-          </Form.Item>
+              {
+                key: "en",
+                label: t("manufacturers.form.name.en") || "English",
+                children: (
+                  <>
+                    <Form.Item label={t("manufacturers.form.nameEn")} name="nameEn">
+                      <Input placeholder="3M" />
+                    </Form.Item>
+                    <Form.Item label={t("manufacturers.form.descriptionEn")} name="descEn">
+                      <Input.TextArea rows={4} placeholder="Manufacturer description" />
+                    </Form.Item>
+                  </>
+                ),
+              },
+            ]}
+          />
 
           <Form.Item
             label={t("manufacturers.form.slug")}

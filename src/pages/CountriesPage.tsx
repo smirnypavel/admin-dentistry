@@ -8,6 +8,7 @@ import {
   Space,
   Switch,
   Table,
+  Tabs,
   theme as antdTheme,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -32,7 +33,8 @@ import { useI18n } from "../store/i18n";
 
 type FormValues = {
   code: string;
-  name: string;
+  nameUk: string;
+  nameEn?: string;
   slug: string;
   flagUrl?: string | null;
   isActive?: boolean;
@@ -96,7 +98,8 @@ export function CountriesPage() {
     setEditing(record);
     form.setFieldsValue({
       code: record.code,
-      name: record.name,
+      nameUk: record.nameI18n?.uk || record.name,
+      nameEn: record.nameI18n?.en,
       slug: record.slug,
       flagUrl: record.flagUrl || undefined,
       isActive: record.isActive,
@@ -137,7 +140,7 @@ export function CountriesPage() {
     const values = await form.validateFields();
     const payload: FormValues = {
       ...values,
-      slug: values.slug || slugify(values.name),
+      slug: values.slug || slugify(values.nameUk),
     };
     try {
       if (editing) {
@@ -149,7 +152,8 @@ export function CountriesPage() {
       } else {
         await createCountry({
           code: payload.code,
-          name: payload.name,
+          nameUk: payload.nameUk,
+          nameEn: payload.nameEn || undefined,
           slug: payload.slug,
           flagUrl: payload.flagUrl || undefined,
           isActive: payload.isActive,
@@ -331,8 +335,8 @@ export function CountriesPage() {
           layout="vertical"
           form={form}
           onValuesChange={(changed) => {
-            if ("name" in changed) {
-              const name = String(changed.name ?? "");
+            if ("nameUk" in changed) {
+              const name = String(changed.nameUk ?? "");
               const currentSlug = form.getFieldValue("slug");
               if (!currentSlug) {
                 form.setFieldsValue({ slug: slugify(name) });
@@ -351,14 +355,36 @@ export function CountriesPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            label={t("countries.form.name")}
-            name="name"
-            rules={[
-              { required: true, message: t("countries.form.name.required") },
-            ]}>
-            <Input placeholder="Ukraine" />
-          </Form.Item>
+          <Tabs
+            items={[
+              {
+                key: "uk",
+                label: t("countries.form.name.uk") || "Українська",
+                children: (
+                  <Form.Item
+                    label={t("countries.form.name")}
+                    name="nameUk"
+                    rules={[
+                      {
+                        required: true,
+                        message: t("countries.form.name.required"),
+                      },
+                    ]}>
+                    <Input placeholder="Україна" />
+                  </Form.Item>
+                ),
+              },
+              {
+                key: "en",
+                label: t("countries.form.name.en") || "English",
+                children: (
+                  <Form.Item label={t("countries.form.nameEn")} name="nameEn">
+                    <Input placeholder="Ukraine" />
+                  </Form.Item>
+                ),
+              },
+            ]}
+          />
 
           <Form.Item
             label={t("countries.form.slug")}

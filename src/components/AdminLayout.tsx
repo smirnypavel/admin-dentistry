@@ -23,6 +23,7 @@ import { useThemeMode } from "../store/themeContext";
 import { theme as antdTheme, Segmented } from "antd";
 import { useI18n } from "../store/i18n";
 import { SunOutlined, MoonOutlined, DesktopOutlined } from "@ant-design/icons";
+import logoUrl from "../assets/orthilogotype.png";
 
 const { Header, Sider, Content } = Layout;
 
@@ -142,8 +143,46 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           overflow: "auto",
           background: token.colorBgContainer,
         }}>
-        <div style={{ color: token.colorText, padding: 16, fontWeight: 600 }}>
-          {t("layout.brand")}
+        <div
+          style={{
+            color: token.colorText,
+            padding: 16,
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 6,
+              background: token.colorBgLayout,
+              display: "grid",
+              placeItems: "center",
+              boxShadow: "inset 0 0 0 1px " + token.colorBorder,
+              overflow: "hidden",
+              flexShrink: 0,
+            }}>
+            <img
+              src={logoUrl}
+              alt="logo"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+          </div>
+          <span
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}>
+            {t("layout.brand")}
+          </span>
         </div>
         <Menu
           theme={isDarkEffective ? "dark" : "light"}
@@ -217,7 +256,40 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               flex: "1 1 auto",
               overflow: "hidden",
             }}>
-            <Breadcrumb items={breadcrumbItems} />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                minWidth: 0,
+              }}>
+              {isMobile ? (
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    background: token.colorBgLayout,
+                    display: "grid",
+                    placeItems: "center",
+                    boxShadow: "inset 0 0 0 1px " + token.colorBorder,
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}>
+                  <img
+                    src={logoUrl}
+                    alt="logo"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      objectFit: "contain",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ) : null}
+              <Breadcrumb items={breadcrumbItems} />
+            </div>
           </div>
           <div
             style={{

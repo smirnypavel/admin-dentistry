@@ -8,6 +8,7 @@ import {
   Space,
   Switch,
   Table,
+  Tabs,
   App as AntApp,
   theme as antdTheme,
 } from "antd";
@@ -32,9 +33,11 @@ import { useQueryParam } from "../hooks/useQueryParam";
 import { useI18n } from "../store/i18n";
 
 type FormValues = {
-  name: string;
+  nameUk: string;
+  nameEn?: string;
   slug: string;
-  description?: string;
+  descUk?: string;
+  descEn?: string;
   imageUrl?: string | null;
   sort?: number;
   isActive?: boolean;
@@ -99,9 +102,11 @@ export function CategoriesPage() {
   const onEdit = (record: Category) => {
     setEditing(record);
     form.setFieldsValue({
-      name: record.name,
+      nameUk: record.nameI18n?.uk || record.name,
+      nameEn: record.nameI18n?.en,
       slug: record.slug,
-      description: record.description || undefined,
+      descUk: record.descriptionI18n?.uk,
+      descEn: record.descriptionI18n?.en,
       imageUrl: record.imageUrl || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
@@ -142,7 +147,7 @@ export function CategoriesPage() {
     const values = await form.validateFields();
     const payload: FormValues = {
       ...values,
-      slug: values.slug || slugify(values.name),
+      slug: values.slug || slugify(values.nameUk),
     };
     try {
       if (editing) {
@@ -153,9 +158,11 @@ export function CategoriesPage() {
         message.success(t("categories.msg.save.updated"));
       } else {
         await createCategory({
-          name: payload.name,
+          nameUk: payload.nameUk,
+          nameEn: payload.nameEn || undefined,
           slug: payload.slug,
-          description: payload.description,
+          descUk: payload.descUk || undefined,
+          descEn: payload.descEn || undefined,
           imageUrl: payload.imageUrl || undefined,
           sort: payload.sort,
           isActive: payload.isActive,
@@ -338,22 +345,58 @@ export function CategoriesPage() {
           layout="vertical"
           form={form}
           onValuesChange={(changed) => {
-            if ("name" in changed) {
-              const name = String(changed.name ?? "");
+            if ("nameUk" in changed) {
+              const name = String(changed.nameUk ?? "");
               const currentSlug = form.getFieldValue("slug");
               if (!currentSlug) {
                 form.setFieldsValue({ slug: slugify(name) });
               }
             }
           }}>
-          <Form.Item
-            label={t("categories.form.name")}
-            name="name"
-            rules={[
-              { required: true, message: t("categories.form.name.required") },
-            ]}>
-            <Input placeholder={t("categories.form.name.placeholder")} />
-          </Form.Item>
+          <Tabs
+            items={[
+              {
+                key: "uk",
+                label: t("categories.form.name.uk") || "Українська",
+                children: (
+                  <>
+                    <Form.Item
+                      label={t("categories.form.name")}
+                      name="nameUk"
+                      rules={[
+                        {
+                          required: true,
+                          message: t("categories.form.name.required"),
+                        },
+                      ]}>
+                      <Input placeholder={t("categories.form.name.placeholder")} />
+                    </Form.Item>
+                    <Form.Item
+                      label={t("categories.form.description")}
+                      name="descUk">
+                      <Input.TextArea
+                        rows={4}
+                        placeholder={t("categories.form.description.placeholder")} />
+                    </Form.Item>
+                  </>
+                ),
+              },
+              {
+                key: "en",
+                label: t("categories.form.name.en") || "English",
+                children: (
+                  <>
+                    <Form.Item label={t("categories.form.nameEn")} name="nameEn">
+                      <Input placeholder="Composites" />
+                    </Form.Item>
+                    <Form.Item label={t("categories.form.descriptionEn")} name="descEn">
+                      <Input.TextArea rows={4} placeholder="Category description" />
+                    </Form.Item>
+                  </>
+                ),
+              },
+            ]}
+          />
 
           <Form.Item
             label={t("categories.form.slug")}
@@ -362,14 +405,6 @@ export function CategoriesPage() {
             <Input placeholder={t("categories.form.slug.placeholder")} />
           </Form.Item>
 
-          <Form.Item
-            label={t("categories.form.description")}
-            name="description">
-            <Input.TextArea
-              rows={4}
-              placeholder={t("categories.form.description.placeholder")}
-            />
-          </Form.Item>
 
           <Form.Item
             label={t("categories.form.image")}
