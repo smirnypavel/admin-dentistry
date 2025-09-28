@@ -45,10 +45,13 @@ export const ru: I18nDict = {
 
   // Dashboard
   "dashboard.filters.30d": "30 дней",
+  "dashboard.filters.today": "Сегодня",
+  "dashboard.filters.7d": "7 дней",
   "dashboard.filters.thisMonth": "Этот месяц",
   "dashboard.filters.granularity.day": "Дни",
   "dashboard.filters.granularity.week": "Недели",
   "dashboard.filters.granularity.month": "Месяцы",
+  "dashboard.loadError": "Не удалось загрузить дашборд",
   "dashboard.metric.revenue": "Выручка",
   "dashboard.metric.orders": "Заказы",
   "dashboard.metric.items": "Товары",
@@ -141,10 +144,13 @@ export const uk: I18nDict = {
 
   // Dashboard
   "dashboard.filters.30d": "30 днів",
+  "dashboard.filters.today": "Сьогодні",
+  "dashboard.filters.7d": "7 днів",
   "dashboard.filters.thisMonth": "Цей місяць",
   "dashboard.filters.granularity.day": "Дні",
   "dashboard.filters.granularity.week": "Тижні",
   "dashboard.filters.granularity.month": "Місяці",
+  "dashboard.loadError": "Не вдалося завантажити дашборд",
   "dashboard.metric.revenue": "Виручка",
   "dashboard.metric.orders": "Замовлення",
   "dashboard.metric.items": "Товари",
