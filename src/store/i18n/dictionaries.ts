@@ -1312,6 +1312,7 @@ export const ukManufacturers: I18nDict = {
 // Countries
 export const ruCountries: I18nDict = {
   "countries.loadError": "Не удалось загрузить страны",
+  "countries.add": "Добавить страну",
 
   "countries.columns.flag": "Флаг",
   "countries.columns.code": "Код",
@@ -1319,7 +1320,7 @@ export const ruCountries: I18nDict = {
   "countries.columns.slug": "Slug",
   "countries.columns.isActive": "Активна",
   "countries.columns.updatedAt": "Обновлено",
-  "countries.columns.actions": "",
+  "countries.columns.actions": "Действия",
 
   "countries.search.placeholder": "Поиск по коду/названию/slug",
   "countries.refresh": "Обновить",
@@ -1339,6 +1340,8 @@ export const ruCountries: I18nDict = {
   "countries.form.nameEn": "Название (EN)",
   "countries.form.slug": "Slug",
   "countries.form.slug.tooltip": "Автогенерируется из названия, можно изменить",
+  "countries.form.slug.hint":
+    "Слаг формируется автоматически из названия. Можно оставить как есть.",
   "countries.form.flag": "Флаг",
   "countries.form.isActive": "Активна",
 
@@ -1356,6 +1359,7 @@ export const ruCountries: I18nDict = {
 
 export const ukCountries: I18nDict = {
   "countries.loadError": "Не вдалося завантажити країни",
+  "countries.add": "Додати країну",
 
   "countries.columns.flag": "Прапор",
   "countries.columns.code": "Код",
@@ -1363,7 +1367,7 @@ export const ukCountries: I18nDict = {
   "countries.columns.slug": "Slug",
   "countries.columns.isActive": "Активна",
   "countries.columns.updatedAt": "Оновлено",
-  "countries.columns.actions": "",
+  "countries.columns.actions": "Дії",
 
   "countries.search.placeholder": "Пошук за кодом/назвою/slug",
   "countries.refresh": "Оновити",
@@ -1383,6 +1387,8 @@ export const ukCountries: I18nDict = {
   "countries.form.nameEn": "Назва (EN)",
   "countries.form.slug": "Slug",
   "countries.form.slug.tooltip": "Автогенерується з назви, можна змінити",
+  "countries.form.slug.hint":
+    "Slug формується автоматично з назви. Можна залишити як є.",
   "countries.form.flag": "Прапор",
   "countries.form.isActive": "Активна",
 

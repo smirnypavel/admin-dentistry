@@ -247,7 +247,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               icon: <GlobalOutlined />,
               label: <Link to="/countries">{t("layout.menu.countries")}</Link>,
             },
-            { type: "group", label: "Витрина" },
+            { type: "group", label: "Сайт" },
             {
               key: "/contacts",
               icon: <ContactsOutlined />,
