@@ -854,6 +854,7 @@ export const ruProducts: I18nDict = {
 
   "products.columns.title": "Название",
   "products.columns.priceRange": "Диапазон цен",
+  "products.columns.discount": "Скидка",
   "products.columns.variants": "Вариантов",
   "products.columns.isActive": "Активен",
   "products.columns.createdAt": "Создан",
@@ -963,6 +964,7 @@ export const ukProducts: I18nDict = {
 
   "products.columns.title": "Назва",
   "products.columns.priceRange": "Діапазон цін",
+  "products.columns.discount": "Знижка",
   "products.columns.variants": "Варіантів",
   "products.columns.isActive": "Активний",
   "products.columns.createdAt": "Створено",

@@ -29,6 +29,9 @@ type ProductRaw = {
   countryIds?: string[];
   priceMin?: number;
   priceMax?: number;
+  priceMinFinal?: number;
+  priceMaxFinal?: number;
+  hasDiscount?: boolean;
   optionsSummary?: Record<string, Array<string | number>>;
   isActive: boolean;
   createdAt?: string | null;
@@ -52,6 +55,9 @@ export type Product = {
   countryIds?: string[];
   priceMin?: number;
   priceMax?: number;
+  priceMinFinal?: number;
+  priceMaxFinal?: number;
+  hasDiscount?: boolean;
   optionsSummary?: Record<string, Array<string | number>>;
   isActive: boolean;
   createdAt?: string | null;
@@ -85,7 +91,7 @@ export type ListProductsResponse = {
 };
 
 export async function listProducts(
-  params: ListProductsParams
+  params: ListProductsParams,
 ): Promise<ListProductsResponse> {
   const { data } = await api.get<{
     items: ProductRaw[];
@@ -113,6 +119,9 @@ export async function listProducts(
       countryIds: p.countryIds || [],
       priceMin: p.priceMin ?? undefined,
       priceMax: p.priceMax ?? undefined,
+      priceMinFinal: p.priceMinFinal ?? undefined,
+      priceMaxFinal: p.priceMaxFinal ?? undefined,
+      hasDiscount: p.hasDiscount ?? false,
       optionsSummary: p.optionsSummary || undefined,
       isActive: p.isActive,
       createdAt: p.createdAt ?? null,
@@ -220,7 +229,7 @@ export type UpdateProductDto = Partial<Omit<CreateProductDto, "variants">> & {
 
 export async function updateProduct(
   id: string,
-  dto: UpdateProductDto
+  dto: UpdateProductDto,
 ): Promise<Product | null> {
   const { titleUk, titleEn, descUk, descEn, variants, ...rest } = dto;
   const { slug, ...restWithoutSlug } = rest as { slug?: string } & Record<
@@ -250,7 +259,7 @@ export async function updateProduct(
   };
   const { data } = await api.patch<ProductRaw | null>(
     `/admin/products/${id}`,
-    wire
+    wire,
   );
   if (!data) return null;
   return {
@@ -304,11 +313,11 @@ export async function deleteProduct(id: string): Promise<Product | null> {
 
 export async function addVariant(
   productId: string,
-  variant: ProductVariant
+  variant: ProductVariant,
 ): Promise<Product> {
   const { data } = await api.post<ProductRaw>(
     `/admin/products/${productId}/variants`,
-    variant
+    variant,
   );
   return {
     _id: data._id,
@@ -336,11 +345,11 @@ export async function addVariant(
 export async function updateVariant(
   productId: string,
   variantId: string,
-  dto: Partial<ProductVariant>
+  dto: Partial<ProductVariant>,
 ): Promise<Product> {
   const { data } = await api.patch<ProductRaw>(
     `/admin/products/${productId}/variants/${variantId}`,
-    dto
+    dto,
   );
   return {
     _id: data._id,
@@ -367,10 +376,10 @@ export async function updateVariant(
 
 export async function deleteVariant(
   productId: string,
-  variantId: string
+  variantId: string,
 ): Promise<Product> {
   const { data } = await api.delete<ProductRaw>(
-    `/admin/products/${productId}/variants/${variantId}`
+    `/admin/products/${productId}/variants/${variantId}`,
   );
   return {
     _id: data._id,

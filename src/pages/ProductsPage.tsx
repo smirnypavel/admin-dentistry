@@ -57,7 +57,7 @@ export function ProductsPage() {
   const [categoryId, setCategoryId] = useQueryParam("category", "");
   const [manufacturerIds, setManufacturerIds] = useQueryParam(
     "manufacturerId",
-    ""
+    "",
   );
   const [countryIds, setCountryIds] = useQueryParam("countryId", "");
   const [tagsFilter, setTagsFilter] = useQueryParam("tags", "");
@@ -116,7 +116,7 @@ export function ProductsPage() {
         listManufacturers(),
         listCountries(),
         listDiscounts({ page: 1, limit: 50, sort: "-createdAt" }).then(
-          (r) => r.items
+          (r) => r.items,
         ),
       ]);
       setCategories(cats);
@@ -224,10 +224,10 @@ export function ProductsPage() {
         (r.variants || []).map((v) => ({
           ...v,
           _tmpId: v._id || crypto.randomUUID(),
-        }))
+        })),
       );
     },
-    [form]
+    [form],
   );
 
   const onDelete = useCallback(
@@ -248,7 +248,7 @@ export function ProductsPage() {
         },
       });
     },
-    [load, message, modal, t]
+    [load, message, modal, t],
   );
 
   const columns: ColumnsType<Product> = useMemo(
@@ -278,6 +278,38 @@ export function ProductsPage() {
           (r.priceMin ?? 0) === (r.priceMax ?? 0)
             ? (r.priceMin ?? 0)
             : `${r.priceMin ?? 0} – ${r.priceMax ?? 0}`,
+      },
+      {
+        title: t("products.columns.discount"),
+        key: "discount",
+        width: 180,
+        render: (_: unknown, r) => {
+          if (!r.hasDiscount) return "—";
+          const finalRange =
+            (r.priceMinFinal ?? 0) === (r.priceMaxFinal ?? 0)
+              ? String(r.priceMinFinal ?? 0)
+              : `${r.priceMinFinal ?? 0} – ${r.priceMaxFinal ?? 0}`;
+          const origMin = r.priceMin ?? 0;
+          const finalMin = r.priceMinFinal ?? 0;
+          const pct =
+            origMin > 0 ? Math.round((1 - finalMin / origMin) * 100) : 0;
+          return (
+            <Space
+              direction="vertical"
+              size={0}>
+              <Typography.Text
+                type="success"
+                strong>
+                {finalRange}
+              </Typography.Text>
+              <Tag
+                color="red"
+                style={{ marginTop: 2 }}>
+                −{pct}%
+              </Tag>
+            </Space>
+          );
+        },
       },
       {
         title: t("products.columns.variants"),
@@ -326,7 +358,7 @@ export function ProductsPage() {
         ),
       },
     ],
-    [onEdit, onDelete, t]
+    [onEdit, onDelete, t],
   );
 
   const onCreate = () => {
@@ -467,7 +499,7 @@ export function ProductsPage() {
       };
       if (e?.response?.status === 400) {
         message.error(
-          e?.response?.data?.message || t("products.save.validation")
+          e?.response?.data?.message || t("products.save.validation"),
         );
       } else {
         message.error(t("products.save.error"));
@@ -479,16 +511,16 @@ export function ProductsPage() {
     (v: ProductVariant & { _tmpId?: string }) => {
       variantForm.setFieldsValue({ ...v });
     },
-    [variantForm]
+    [variantForm],
   );
 
   const onRemoveVariant = useCallback(
     (v: ProductVariant & { _tmpId?: string }) => {
       setVariants((prev) =>
-        prev.filter((x) => (x._id ? x._id !== v._id : x._tmpId !== v._tmpId))
+        prev.filter((x) => (x._id ? x._id !== v._id : x._tmpId !== v._tmpId)),
       );
     },
-    []
+    [],
   );
 
   const variantColumns: ColumnsType<ProductVariant & { _tmpId?: string }> =
@@ -575,7 +607,7 @@ export function ProductsPage() {
           ),
         },
       ],
-      [manufacturers, countries, onEditVariant, onRemoveVariant, t]
+      [manufacturers, countries, onEditVariant, onRemoveVariant, t],
     );
 
   const onAddVariant = () => {
@@ -604,7 +636,7 @@ export function ProductsPage() {
       const v = await variantForm.validateFields();
       setVariants((prev) => {
         const idx = prev.findIndex((x) =>
-          x._id ? x._id === v._id : x._tmpId === v._tmpId
+          x._id ? x._id === v._id : x._tmpId === v._tmpId,
         );
         if (idx >= 0) {
           const copy = [...prev];
@@ -890,7 +922,7 @@ export function ProductsPage() {
                                 ).trim();
                                 if (uk || en) return Promise.resolve();
                                 return Promise.reject(
-                                  new Error(t("products.form.title.required"))
+                                  new Error(t("products.form.title.required")),
                                 );
                               },
                             }),
@@ -1012,7 +1044,7 @@ export function ProductsPage() {
                             style={{ width: 220 }}>
                             <Input
                               placeholder={t(
-                                "products.form.attr.key.placeholder"
+                                "products.form.attr.key.placeholder",
                               )}
                             />
                           </Form.Item>
@@ -1028,7 +1060,7 @@ export function ProductsPage() {
                             style={{ width: 260 }}>
                             <Input
                               placeholder={t(
-                                "products.form.attr.value.placeholder"
+                                "products.form.attr.value.placeholder",
                               )}
                             />
                           </Form.Item>
@@ -1123,7 +1155,7 @@ export function ProductsPage() {
                       {
                         required: true,
                         message: t(
-                          "products.variants.form.manufacturer.required"
+                          "products.variants.form.manufacturer.required",
                         ),
                       },
                     ]}>
@@ -1188,7 +1220,7 @@ export function ProductsPage() {
                   <Input.TextArea
                     rows={2}
                     placeholder={t(
-                      "products.variants.form.options.placeholder"
+                      "products.variants.form.options.placeholder",
                     )}
                     onBlur={(e) => {
                       const text = e.target.value || "";
@@ -1256,7 +1288,7 @@ export function ProductsPage() {
                     message.success(
                       bulkMode === "add"
                         ? t("products.bulk.success.add")
-                        : t("products.bulk.success.remove")
+                        : t("products.bulk.success.remove"),
                     );
                     setBulkVisible(false);
                     setSelectedRowKeys([]);
