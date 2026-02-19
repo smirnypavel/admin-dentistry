@@ -1404,5 +1404,77 @@ export const ukCountries: I18nDict = {
     "Помилка під час збереження. Перевірте унікальність коду/slug і заповнення полів.",
 };
 
+/* ---------- Customers ---------- */
+
+export const ruCustomers: I18nDict = {
+  "layout.menu.customers": "Клиенты",
+  "customers.loadError": "Не удалось загрузить клиентов",
+  "customers.search.placeholder": "Поиск по телефону, имени, email…",
+  "customers.columns.name": "Имя",
+  "customers.columns.phone": "Телефон",
+  "customers.columns.email": "Email",
+  "customers.columns.ordersCount": "Заказы",
+  "customers.columns.ordersTotal": "Сумма",
+  "customers.columns.lastLogin": "Последний вход",
+  "customers.columns.createdAt": "Зарегистрирован",
+
+  "customerDetails.loadError": "Не удалось загрузить клиента",
+  "customerDetails.ordersLoadError": "Не удалось загрузить заказы клиента",
+  "customerDetails.notFound": "Клиент не найден",
+  "customerDetails.ordersTitle": "Заказы клиента",
+  "customerDetails.yes": "Да",
+  "customerDetails.no": "Нет",
+  "customerDetails.desc.phone": "Телефон",
+  "customerDetails.desc.email": "Email",
+  "customerDetails.desc.name": "Имя",
+  "customerDetails.desc.phoneVerified": "Телефон подтверждён",
+  "customerDetails.desc.marketing": "Маркетинг",
+  "customerDetails.desc.lastLogin": "Последний вход",
+  "customerDetails.desc.createdAt": "Дата регистрации",
+  "customerDetails.desc.ordersCount": "Кол-во заказов",
+  "customerDetails.desc.ordersTotal": "Сумма заказов",
+  "customerDetails.orders.status": "Статус",
+  "customerDetails.orders.items": "Позиции",
+  "customerDetails.orders.total": "Сумма",
+  "customerDetails.orders.createdAt": "Дата",
+};
+
+export const ukCustomers: I18nDict = {
+  "layout.menu.customers": "Клієнти",
+  "customers.loadError": "Не вдалося завантажити клієнтів",
+  "customers.search.placeholder": "Пошук за телефоном, ім'ям, email…",
+  "customers.columns.name": "Ім'я",
+  "customers.columns.phone": "Телефон",
+  "customers.columns.email": "Email",
+  "customers.columns.ordersCount": "Замовлення",
+  "customers.columns.ordersTotal": "Сума",
+  "customers.columns.lastLogin": "Останній вхід",
+  "customers.columns.createdAt": "Зареєстровано",
+
+  "customerDetails.loadError": "Не вдалося завантажити клієнта",
+  "customerDetails.ordersLoadError":
+    "Не вдалося завантажити замовлення клієнта",
+  "customerDetails.notFound": "Клієнта не знайдено",
+  "customerDetails.ordersTitle": "Замовлення клієнта",
+  "customerDetails.yes": "Так",
+  "customerDetails.no": "Ні",
+  "customerDetails.desc.phone": "Телефон",
+  "customerDetails.desc.email": "Email",
+  "customerDetails.desc.name": "Ім'я",
+  "customerDetails.desc.phoneVerified": "Телефон підтверджено",
+  "customerDetails.desc.marketing": "Маркетинг",
+  "customerDetails.desc.lastLogin": "Останній вхід",
+  "customerDetails.desc.createdAt": "Дата реєстрації",
+  "customerDetails.desc.ordersCount": "Кіл-ть замовлень",
+  "customerDetails.desc.ordersTotal": "Сума замовлень",
+  "customerDetails.orders.status": "Статус",
+  "customerDetails.orders.items": "Позицій",
+  "customerDetails.orders.total": "Сума",
+  "customerDetails.orders.createdAt": "Дата",
+};
+
+Object.assign(ru, ruCustomers);
+Object.assign(uk, ukCustomers);
+
 Object.assign(ru, ruCategories, ruManufacturers, ruCountries);
 Object.assign(uk, ukCategories, ukManufacturers, ukCountries);

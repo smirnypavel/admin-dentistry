@@ -35,6 +35,7 @@ import {
   GlobalOutlined,
   ContactsOutlined,
   CrownOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import logoUrl from "../assets/orthilogotype.png";
 
@@ -50,7 +51,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [systemDark, setSystemDark] = useState<boolean>(() =>
     typeof window !== "undefined" && window.matchMedia
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
-      : false
+      : false,
   );
   useEffect(() => {
     if (!window.matchMedia) return;
@@ -246,6 +247,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               key: "/countries",
               icon: <GlobalOutlined />,
               label: <Link to="/countries">{t("layout.menu.countries")}</Link>,
+            },
+            {
+              key: "/customers",
+              icon: <UserOutlined />,
+              label: <Link to="/customers">{t("layout.menu.customers")}</Link>,
             },
             { type: "group", label: "Сайт" },
             {
