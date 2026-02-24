@@ -48,6 +48,7 @@ export type Product = {
   description?: string | null; // prefer uk -> en
   descriptionI18n?: { uk?: string; en?: string } | null;
   categoryIds: string[];
+  subcategoryIds?: string[];
   tags?: string[];
   images?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
@@ -113,7 +114,6 @@ export async function listProducts(
       description: p.descriptionI18n?.uk || p.descriptionI18n?.en || null,
       descriptionI18n: p.descriptionI18n ?? null,
       categoryIds: p.categoryIds || [],
-      subcategoryIds: p.subcategoryIds || [],
       subcategoryIds: p.subcategoryIds || [],
       tags: p.tags || [],
       images: p.images || [],
