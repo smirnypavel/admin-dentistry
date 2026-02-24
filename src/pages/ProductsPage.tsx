@@ -32,6 +32,7 @@ import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { slugify } from "../utils/slugify";
 import { listCategories, type Category } from "../api/categories";
+import { listSubcategories, type Subcategory } from "../api/subcategories";
 import { listManufacturers, type Manufacturer } from "../api/manufacturers";
 import { listCountries, type Country } from "../api/countries";
 import {
@@ -88,6 +89,7 @@ export function ProductsPage() {
     descUk?: string;
     descEn?: string;
     categoryIds: string[];
+    subcategoryIds?: string[];
     tags?: string[];
     images?: string[];
     attributes?: Array<{ key: string; value: string }>;
@@ -100,6 +102,7 @@ export function ProductsPage() {
   >([]);
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -119,7 +122,9 @@ export function ProductsPage() {
           (r) => r.items,
         ),
       ]);
+      const subs = await listSubcategories();
       setCategories(cats);
+      setSubcategories(subs);
       setManufacturers(mans);
       setCountries(cnts);
       setDiscounts(discs);
@@ -212,6 +217,7 @@ export function ProductsPage() {
         descUk: r.descriptionI18n?.uk || "",
         descEn: r.descriptionI18n?.en || "",
         categoryIds: r.categoryIds || [],
+        subcategoryIds: r.subcategoryIds || [],
         tags: r.tags || [],
         images: r.images || [],
         attributes: (r.attributes || []).map((a) => ({
@@ -370,6 +376,7 @@ export function ProductsPage() {
       descUk: "",
       descEn: "",
       categoryIds: [],
+      subcategoryIds: [],
       tags: [],
       images: [],
       isActive: true,
@@ -412,6 +419,7 @@ export function ProductsPage() {
       descUk?: string;
       descEn?: string;
       categoryIds?: string[];
+      subcategoryIds?: string[];
       tags?: string[];
       images?: string[];
       attributes?: Array<{ key: string; value: string }>;
@@ -468,6 +476,7 @@ export function ProductsPage() {
           descUk: basics.descUk || undefined,
           descEn: basics.descEn || undefined,
           categoryIds: basics.categoryIds || [],
+          subcategoryIds: basics.subcategoryIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
           attributes,
@@ -483,6 +492,7 @@ export function ProductsPage() {
           descUk: basics.descUk || undefined,
           descEn: basics.descEn || undefined,
           categoryIds: basics.categoryIds || [],
+          subcategoryIds: basics.subcategoryIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
           attributes,
@@ -1010,6 +1020,18 @@ export function ProductsPage() {
                   options={categories.map((c) => ({
                     value: c._id,
                     label: c.name,
+                  }))}
+                />
+              </Form.Item>
+              <Form.Item
+                label={t("products.form.subcategories") || "Подкатегории"}
+                name="subcategoryIds">
+                <Select
+                  mode="multiple"
+                  placeholder={t("products.form.subcategories.placeholder")}
+                  options={subcategories.map((s) => ({
+                    value: s._id,
+                    label: `${s.name} (${categories.find((c) => c._id === s.categoryId)?.name || "?"})`,
                   }))}
                 />
               </Form.Item>

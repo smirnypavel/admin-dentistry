@@ -7,6 +7,7 @@ export const ru: I18nDict = {
   "layout.menu.orders": "Заказы",
   "layout.menu.discounts": "Скидки",
   "layout.menu.categories": "Категории",
+  "layout.menu.subcategories": "Подкатегории",
   "layout.menu.manufacturers": "Производители",
   "layout.menu.countries": "Страны",
   "layout.menu.contacts": "Контакты",
@@ -106,6 +107,7 @@ export const uk: I18nDict = {
   "layout.menu.orders": "Замовлення",
   "layout.menu.discounts": "Знижки",
   "layout.menu.categories": "Категорії",
+  "layout.menu.subcategories": "Підкатегорії",
   "layout.menu.manufacturers": "Виробники",
   "layout.menu.countries": "Країни",
   "layout.menu.contacts": "Контакти",
@@ -894,6 +896,7 @@ export const ruProducts: I18nDict = {
   "products.form.description": "Описание",
   "products.form.categories": "Категории",
   "products.form.categories.placeholder": "Выберите категории",
+  "products.form.subcategories": "Подкатегории",
   "products.form.tags": "Теги",
   "products.form.tags.placeholder": "Введите теги",
   "products.form.attributes": "Атрибуты",
@@ -1004,6 +1007,7 @@ export const ukProducts: I18nDict = {
   "products.form.description": "Опис",
   "products.form.categories": "Категорії",
   "products.form.categories.placeholder": "Оберіть категорії",
+  "products.form.subcategories": "Підкатегорії",
   "products.form.tags": "Теги",
   "products.form.tags.placeholder": "Введіть теги",
   "products.form.attributes": "Атрибути",
@@ -1480,3 +1484,122 @@ Object.assign(uk, ukCustomers);
 
 Object.assign(ru, ruCategories, ruManufacturers, ruCountries);
 Object.assign(uk, ukCategories, ukManufacturers, ukCountries);
+
+export const ruSubcategories: I18nDict = {
+  "subcategories.loadError": "Не удалось загрузить подкатегории",
+
+  "subcategories.columns.preview": "Превью",
+  "subcategories.columns.name": "Название",
+  "subcategories.columns.category": "Категория",
+  "subcategories.columns.slug": "Slug",
+  "subcategories.columns.sort": "Сортировка",
+  "subcategories.columns.isActive": "Активна",
+  "subcategories.columns.updatedAt": "Обновлено",
+  "subcategories.columns.actions": "",
+
+  "subcategories.search.placeholder": "Поиск по названию/slug/описанию",
+  "subcategories.filter.category": "Фильтр по категории",
+  "subcategories.refresh": "Обновить",
+  "subcategories.add": "Добавить подкатегорию",
+  "subcategories.pagination.showTotal": "{from}–{to} из {total}",
+
+  "subcategories.drawer.createTitle": "Новая подкатегория",
+  "subcategories.drawer.editTitle": "Редактирование: {name}",
+  "subcategories.drawer.cancel": "Отмена",
+  "subcategories.drawer.save": "Сохранить",
+
+  "subcategories.form.category": "Категория",
+  "subcategories.form.category.required": "Выберите категорию",
+  "subcategories.form.category.placeholder": "Выберите категорию",
+  "subcategories.form.name": "Название",
+  "subcategories.form.name.required": "Введите название",
+  "subcategories.form.name.placeholder": "Например: Композиты",
+  "subcategories.form.name.uk": "Українська",
+  "subcategories.form.name.en": "English",
+  "subcategories.form.nameEn": "Название (EN)",
+  "subcategories.form.slug": "Slug",
+  "subcategories.form.slug.tooltip":
+    "Автогенерируется из названия, можно изменить",
+  "subcategories.form.slug.placeholder": "composites",
+  "subcategories.form.slug.hint":
+    "Слаг формируется автоматически из названия. Можно оставить как есть.",
+  "subcategories.form.description": "Описание",
+  "subcategories.form.description.placeholder": "Краткое описание",
+  "subcategories.form.descriptionEn": "Описание (EN)",
+  "subcategories.form.image": "Изображение",
+  "subcategories.form.sort": "Сортировка",
+  "subcategories.form.isActive": "Активна",
+
+  "subcategories.msg.delete.title": "Удалить подкатегорию «{name}»?",
+  "subcategories.msg.delete.ok": "Удалить",
+  "subcategories.msg.delete.cancel": "Отмена",
+  "subcategories.msg.delete.success": "Подкатегория удалена",
+  "subcategories.msg.delete.error": "Не удалось удалить",
+  "subcategories.msg.toggleError": "Не удалось изменить статус",
+  "subcategories.msg.save.created": "Подкатегория создана",
+  "subcategories.msg.save.updated": "Подкатегория обновлена",
+  "subcategories.msg.save.error":
+    "Ошибка при сохранении. Проверьте уникальность slug и заполнение полей.",
+
+  "products.form.subcategories.placeholder": "Выберите подкатегории",
+};
+
+export const ukSubcategories: I18nDict = {
+  "subcategories.loadError": "Не вдалося завантажити підкатегорії",
+
+  "subcategories.columns.preview": "Прев'ю",
+  "subcategories.columns.name": "Назва",
+  "subcategories.columns.category": "Категорія",
+  "subcategories.columns.slug": "Slug",
+  "subcategories.columns.sort": "Сортування",
+  "subcategories.columns.isActive": "Активна",
+  "subcategories.columns.updatedAt": "Оновлено",
+  "subcategories.columns.actions": "",
+
+  "subcategories.search.placeholder": "Пошук за назвою/slug/описом",
+  "subcategories.filter.category": "Фільтр за категорією",
+  "subcategories.refresh": "Оновити",
+  "subcategories.add": "Додати підкатегорію",
+  "subcategories.pagination.showTotal": "{from}–{to} з {total}",
+
+  "subcategories.drawer.createTitle": "Нова підкатегорія",
+  "subcategories.drawer.editTitle": "Редагування: {name}",
+  "subcategories.drawer.cancel": "Скасувати",
+  "subcategories.drawer.save": "Зберегти",
+
+  "subcategories.form.category": "Категорія",
+  "subcategories.form.category.required": "Оберіть категорію",
+  "subcategories.form.category.placeholder": "Оберіть категорію",
+  "subcategories.form.name": "Назва",
+  "subcategories.form.name.required": "Введіть назву",
+  "subcategories.form.name.placeholder": "Наприклад: Композити",
+  "subcategories.form.name.uk": "Українська",
+  "subcategories.form.name.en": "English",
+  "subcategories.form.nameEn": "Назва (EN)",
+  "subcategories.form.slug": "Slug",
+  "subcategories.form.slug.tooltip": "Автогенерується з назви, можна змінити",
+  "subcategories.form.slug.placeholder": "composites",
+  "subcategories.form.slug.hint": "Слаг формується автоматично з назви.",
+  "subcategories.form.description": "Опис",
+  "subcategories.form.description.placeholder": "Короткий опис",
+  "subcategories.form.descriptionEn": "Опис (EN)",
+  "subcategories.form.image": "Зображення",
+  "subcategories.form.sort": "Сортування",
+  "subcategories.form.isActive": "Активна",
+
+  "subcategories.msg.delete.title": "Видалити підкатегорію «{name}»?",
+  "subcategories.msg.delete.ok": "Видалити",
+  "subcategories.msg.delete.cancel": "Скасувати",
+  "subcategories.msg.delete.success": "Підкатегорію видалено",
+  "subcategories.msg.delete.error": "Не вдалося видалити",
+  "subcategories.msg.toggleError": "Не вдалося змінити статус",
+  "subcategories.msg.save.created": "Підкатегорію створено",
+  "subcategories.msg.save.updated": "Підкатегорію оновлено",
+  "subcategories.msg.save.error":
+    "Помилка під час збереження. Перевірте унікальність slug і заповнення полів.",
+
+  "products.form.subcategories.placeholder": "Оберіть підкатегорії",
+};
+
+Object.assign(ru, ruSubcategories);
+Object.assign(uk, ukSubcategories);

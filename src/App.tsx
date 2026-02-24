@@ -7,6 +7,7 @@ import { OrdersPage } from "./pages/OrdersPage.tsx";
 import { OrderDetailsPage } from "./pages/OrderDetailsPage.tsx";
 import OrderPrintPage from "./pages/OrderPrintPage.tsx";
 import { CategoriesPage } from "./pages/CategoriesPage.tsx";
+import { SubcategoriesPage } from "./pages/SubcategoriesPage.tsx";
 import { ManufacturersPage } from "./pages/ManufacturersPage.tsx";
 import { CountriesPage } from "./pages/CountriesPage.tsx";
 import { AdminUsersPage } from "./pages/AdminUsersPage.tsx";
@@ -72,6 +73,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subcategories"
+            element={
+              <ProtectedRoute>
+                <SubcategoriesPage />
               </ProtectedRoute>
             }
           />

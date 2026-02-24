@@ -31,6 +31,7 @@ import {
   ShoppingCartOutlined,
   PercentageOutlined,
   TagsOutlined,
+  FolderOutlined,
   TeamOutlined,
   GlobalOutlined,
   ContactsOutlined,
@@ -81,6 +82,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       orders: t("layout.menu.orders"),
       discounts: t("layout.menu.discounts"),
       categories: t("layout.menu.categories"),
+      subcategories: t("layout.menu.subcategories"),
       manufacturers: t("layout.menu.manufacturers"),
       countries: t("layout.menu.countries"),
       contacts: t("layout.menu.contacts"),
@@ -232,6 +234,15 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               icon: <TagsOutlined />,
               label: (
                 <Link to="/categories">{t("layout.menu.categories")}</Link>
+              ),
+            },
+            {
+              key: "/subcategories",
+              icon: <FolderOutlined />,
+              label: (
+                <Link to="/subcategories">
+                  {t("layout.menu.subcategories")}
+                </Link>
               ),
             },
             {

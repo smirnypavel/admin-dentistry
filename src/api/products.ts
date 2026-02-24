@@ -21,6 +21,7 @@ type ProductRaw = {
   titleI18n: { uk: string; en?: string };
   descriptionI18n?: { uk?: string; en?: string } | null;
   categoryIds: string[];
+  subcategoryIds?: string[];
   tags?: string[];
   images?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
@@ -67,6 +68,7 @@ export type Product = {
 export type ListProductsParams = {
   q?: string;
   category?: string;
+  subcategory?: string;
   manufacturerId?: string | string[];
   countryId?: string | string[];
   tags?: string | string[];
@@ -111,6 +113,8 @@ export async function listProducts(
       description: p.descriptionI18n?.uk || p.descriptionI18n?.en || null,
       descriptionI18n: p.descriptionI18n ?? null,
       categoryIds: p.categoryIds || [],
+      subcategoryIds: p.subcategoryIds || [],
+      subcategoryIds: p.subcategoryIds || [],
       tags: p.tags || [],
       images: p.images || [],
       attributes: p.attributes || [],
@@ -141,6 +145,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
@@ -163,6 +168,7 @@ export type CreateProductDto = {
   descUk?: string;
   descEn?: string;
   categoryIds?: string[];
+  subcategoryIds?: string[];
   tags?: string[];
   images?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
@@ -193,6 +199,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
         }
       : {}),
     categoryIds: dto.categoryIds,
+    subcategoryIds: dto.subcategoryIds,
     tags: dto.tags,
     images: dto.images,
     attributes: dto.attributes,
@@ -208,6 +215,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
@@ -270,6 +278,7 @@ export async function updateProduct(
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
@@ -296,6 +305,7 @@ export async function deleteProduct(id: string): Promise<Product | null> {
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
@@ -327,6 +337,7 @@ export async function addVariant(
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
@@ -359,6 +370,7 @@ export async function updateVariant(
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
@@ -389,6 +401,7 @@ export async function deleteVariant(
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
     attributes: data.attributes || [],
