@@ -11,6 +11,7 @@ export type OrderItemSnapshot = {
   manufacturerId?: string | null;
   countryId?: string | null;
   unit?: string | null;
+  promoDiscount?: number;
   discountsApplied?: Array<{
     discountId: string;
     name: string;
@@ -32,6 +33,9 @@ export type Order = {
   status: "new" | "processing" | "done" | "cancelled";
   name?: string | null;
   comment?: string | null;
+  promoCode?: string | null;
+  promoCodeName?: string | null;
+  promoCodeDiscount?: number;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -55,7 +59,7 @@ export type ListOrdersResponse = {
 };
 
 export async function listOrders(
-  params: ListOrdersParams
+  params: ListOrdersParams,
 ): Promise<ListOrdersResponse> {
   const { data } = await api.get<ListOrdersResponse>("/admin/orders", {
     params,
@@ -70,7 +74,7 @@ export async function getOrder(id: string): Promise<Order | null> {
 
 export async function updateOrderStatus(
   id: string,
-  status: Order["status"]
+  status: Order["status"],
 ): Promise<Order | null> {
   const { data } = await api.patch<Order | null>(`/admin/orders/${id}/status`, {
     status,

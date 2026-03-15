@@ -5,7 +5,7 @@ export const ru: I18nDict = {
   "layout.menu.dashboard": "Дашборд",
   "layout.menu.products": "Товары",
   "layout.menu.orders": "Заказы",
-  "layout.menu.discounts": "Скидки",
+  "layout.menu.discounts": "Скидки и промокоды",
   "layout.menu.categories": "Категории",
   "layout.menu.subcategories": "Подкатегории",
   "layout.menu.manufacturers": "Производители",
@@ -105,7 +105,7 @@ export const uk: I18nDict = {
   "layout.menu.dashboard": "Дашборд",
   "layout.menu.products": "Товари",
   "layout.menu.orders": "Замовлення",
-  "layout.menu.discounts": "Знижки",
+  "layout.menu.discounts": "Знижки та промокоди",
   "layout.menu.categories": "Категорії",
   "layout.menu.subcategories": "Підкатегорії",
   "layout.menu.manufacturers": "Виробники",
@@ -434,6 +434,7 @@ export const ruOrderDetails: I18nDict = {
   "orderDetails.desc.itemsDiscount": "Скидка на позиции",
   "orderDetails.desc.itemsSumAfter": "Сумма позиций (после скидок)",
   "orderDetails.desc.deliveryFee": "Доставка",
+  "orderDetails.desc.promoCode": "Промокод",
   "orderDetails.desc.totalToPay": "Итого к оплате",
   "orderDetails.btn.accept": "Принять в работу",
   "orderDetails.btn.finish": "Завершить",
@@ -466,6 +467,7 @@ export const ukOrderDetails: I18nDict = {
   "orderDetails.desc.itemsDiscount": "Знижка на позиції",
   "orderDetails.desc.itemsSumAfter": "Сума позицій (після знижок)",
   "orderDetails.desc.deliveryFee": "Доставка",
+  "orderDetails.desc.promoCode": "Промокод",
   "orderDetails.desc.totalToPay": "Разом до оплати",
   "orderDetails.btn.accept": "Прийняти в роботу",
   "orderDetails.btn.finish": "Завершити",
@@ -536,6 +538,8 @@ export const commonUk: I18nDict = {
 
 // Discounts
 export const ruDiscounts: I18nDict = {
+  "discounts.tab.discounts": "Скидки",
+  "discounts.tab.promoCodes": "Промокоды",
   "discounts.loadError": "Не удалось загрузить скидки",
   "discounts.delete.title": "Удаление скидки",
   "discounts.delete.confirm": "Удалить скидку",
@@ -647,6 +651,8 @@ export const ruDiscounts: I18nDict = {
 };
 
 export const ukDiscounts: I18nDict = {
+  "discounts.tab.discounts": "Знижки",
+  "discounts.tab.promoCodes": "Промокоди",
   "discounts.loadError": "Не вдалося завантажити знижки",
   "discounts.delete.title": "Видалення знижки",
   "discounts.delete.confirm": "Видалити знижку",
@@ -1603,3 +1609,137 @@ export const ukSubcategories: I18nDict = {
 
 Object.assign(ru, ruSubcategories);
 Object.assign(uk, ukSubcategories);
+
+// Promo codes
+const ruPromoCodes: I18nDict = {
+  "promoCodes.loadError": "Не удалось загрузить промокоды",
+  "promoCodes.search": "Поиск по коду или имени",
+  "promoCodes.filter.active": "Активность",
+  "promoCodes.add": "Добавить промокод",
+
+  "promoCodes.columns.code": "Код",
+  "promoCodes.columns.name": "Название",
+  "promoCodes.columns.type": "Скидка",
+  "promoCodes.columns.usage": "Использований",
+  "promoCodes.columns.period": "Период",
+  "promoCodes.columns.active": "Активен",
+  "promoCodes.columns.actions": "Действия",
+
+  "promoCodes.actions.stats": "Статистика",
+
+  "promoCodes.delete.title": "Удаление промокода",
+  "promoCodes.delete.confirm": "Удалить промокод",
+  "promoCodes.delete.success": "Промокод удалён",
+  "promoCodes.delete.error": "Не удалось удалить промокод",
+
+  "promoCodes.editor.createTitle": "Новый промокод",
+  "promoCodes.editor.editTitle": "Редактирование промокода",
+
+  "promoCodes.form.code": "Код промокода",
+  "promoCodes.form.code.required": "Введите код",
+  "promoCodes.form.name": "Название (описательное)",
+  "promoCodes.form.name.required": "Введите название",
+  "promoCodes.form.name.placeholder": "Промо Олега, Скидка для стоматологов...",
+  "promoCodes.form.description": "Описание",
+  "promoCodes.form.type": "Тип скидки",
+  "promoCodes.form.value": "Значение",
+  "promoCodes.form.usageLimit": "Лимит использований",
+  "promoCodes.form.usageLimit.placeholder": "Пусто = безлимит",
+  "promoCodes.form.startsAt": "Начало",
+  "promoCodes.form.endsAt": "Окончание",
+  "promoCodes.form.isActive": "Активен",
+  "promoCodes.form.targeting": "Таргетинг товаров",
+  "promoCodes.form.allowedCategories": "Только для категорий",
+  "promoCodes.form.allowedCategories.placeholder": "Пусто = все категории",
+  "promoCodes.form.allowedProducts": "Только для товаров",
+  "promoCodes.form.allowedProducts.placeholder": "Пусто = все товары",
+  "promoCodes.form.excludedCategories": "Исключить категории",
+  "promoCodes.form.excludedCategories.placeholder": "Категории, к которым промокод не применяется",
+  "promoCodes.form.excludedProducts": "Исключить товары",
+  "promoCodes.form.excludedProducts.placeholder": "Товары, к которым промокод не применяется",
+
+  "promoCodes.save.created": "Промокод создан",
+  "promoCodes.save.updated": "Промокод обновлён",
+  "promoCodes.save.error": "Не удалось сохранить промокод",
+
+  "promoCodes.stats.title": "Статистика промокода",
+  "promoCodes.stats.loadError": "Не удалось загрузить статистику",
+  "promoCodes.stats.code": "Код",
+  "promoCodes.stats.name": "Название",
+  "promoCodes.stats.usageCount": "Использований",
+  "promoCodes.stats.totalDiscount": "Общая сумма скидок",
+  "promoCodes.stats.orders": "Заказы с промокодом",
+  "promoCodes.stats.orderPhone": "Телефон",
+  "promoCodes.stats.orderTotal": "Сумма заказа",
+  "promoCodes.stats.orderDiscount": "Скидка по промокоду",
+  "promoCodes.stats.orderStatus": "Статус",
+  "promoCodes.stats.orderDate": "Дата",
+};
+
+const ukPromoCodes: I18nDict = {
+  "promoCodes.loadError": "Не вдалося завантажити промокоди",
+  "promoCodes.search": "Пошук за кодом або назвою",
+  "promoCodes.filter.active": "Активність",
+  "promoCodes.add": "Додати промокод",
+
+  "promoCodes.columns.code": "Код",
+  "promoCodes.columns.name": "Назва",
+  "promoCodes.columns.type": "Знижка",
+  "promoCodes.columns.usage": "Використань",
+  "promoCodes.columns.period": "Період",
+  "promoCodes.columns.active": "Активний",
+  "promoCodes.columns.actions": "Дії",
+
+  "promoCodes.actions.stats": "Статистика",
+
+  "promoCodes.delete.title": "Видалення промокоду",
+  "promoCodes.delete.confirm": "Видалити промокод",
+  "promoCodes.delete.success": "Промокод видалено",
+  "promoCodes.delete.error": "Не вдалося видалити промокод",
+
+  "promoCodes.editor.createTitle": "Новий промокод",
+  "promoCodes.editor.editTitle": "Редагування промокоду",
+
+  "promoCodes.form.code": "Код промокоду",
+  "promoCodes.form.code.required": "Введіть код",
+  "promoCodes.form.name": "Назва (описова)",
+  "promoCodes.form.name.required": "Введіть назву",
+  "promoCodes.form.name.placeholder": "Промо Олега, Знижка для стоматологів...",
+  "promoCodes.form.description": "Опис",
+  "promoCodes.form.type": "Тип знижки",
+  "promoCodes.form.value": "Значення",
+  "promoCodes.form.usageLimit": "Ліміт використань",
+  "promoCodes.form.usageLimit.placeholder": "Порожньо = безліміт",
+  "promoCodes.form.startsAt": "Початок",
+  "promoCodes.form.endsAt": "Закінчення",
+  "promoCodes.form.isActive": "Активний",
+  "promoCodes.form.targeting": "Таргетинг товарів",
+  "promoCodes.form.allowedCategories": "Тільки для категорій",
+  "promoCodes.form.allowedCategories.placeholder": "Порожньо = всі категорії",
+  "promoCodes.form.allowedProducts": "Тільки для товарів",
+  "promoCodes.form.allowedProducts.placeholder": "Порожньо = всі товари",
+  "promoCodes.form.excludedCategories": "Виключити категорії",
+  "promoCodes.form.excludedCategories.placeholder": "Категорії, до яких промокод не застосовується",
+  "promoCodes.form.excludedProducts": "Виключити товари",
+  "promoCodes.form.excludedProducts.placeholder": "Товари, до яких промокод не застосовується",
+
+  "promoCodes.save.created": "Промокод створено",
+  "promoCodes.save.updated": "Промокод оновлено",
+  "promoCodes.save.error": "Не вдалося зберегти промокод",
+
+  "promoCodes.stats.title": "Статистика промокоду",
+  "promoCodes.stats.loadError": "Не вдалося завантажити статистику",
+  "promoCodes.stats.code": "Код",
+  "promoCodes.stats.name": "Назва",
+  "promoCodes.stats.usageCount": "Використань",
+  "promoCodes.stats.totalDiscount": "Загальна сума знижок",
+  "promoCodes.stats.orders": "Замовлення з промокодом",
+  "promoCodes.stats.orderPhone": "Телефон",
+  "promoCodes.stats.orderTotal": "Сума замовлення",
+  "promoCodes.stats.orderDiscount": "Знижка за промокодом",
+  "promoCodes.stats.orderStatus": "Статус",
+  "promoCodes.stats.orderDate": "Дата",
+};
+
+Object.assign(ru, ruPromoCodes);
+Object.assign(uk, ukPromoCodes);

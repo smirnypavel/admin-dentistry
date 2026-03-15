@@ -36,7 +36,7 @@ export function OrderDetailsPage() {
         currency: "UAH",
         maximumFractionDigits: 2,
       }),
-    []
+    [],
   );
 
   const load = async () => {
@@ -207,11 +207,11 @@ export function OrderDetailsPage() {
       } | null;
     const itemsFinal = order.items.reduce(
       (sum, it) => sum + it.price * it.quantity,
-      0
+      0,
     );
     const itemsOriginal = order.items.reduce(
       (sum, it) => sum + (it.priceOriginal ?? it.price) * it.quantity,
-      0
+      0,
     );
     const discountTotal = Math.max(0, itemsOriginal - itemsFinal);
     return { itemsFinal, itemsOriginal, discountTotal };
@@ -299,6 +299,25 @@ export function OrderDetailsPage() {
               <Descriptions.Item label={t("orderDetails.desc.deliveryFee")}>
                 {fmt.format(order.deliveryFee ?? 0)}
               </Descriptions.Item>
+              {order.promoCode ? (
+                <Descriptions.Item
+                  label={t("orderDetails.desc.promoCode")}
+                  span={2}>
+                  <Space>
+                    <Tag color="purple">{order.promoCode}</Tag>
+                    {order.promoCodeName ? (
+                      <Typography.Text type="secondary">
+                        {order.promoCodeName}
+                      </Typography.Text>
+                    ) : null}
+                    {order.promoCodeDiscount ? (
+                      <Typography.Text type="success">
+                        -{fmt.format(order.promoCodeDiscount)}
+                      </Typography.Text>
+                    ) : null}
+                  </Space>
+                </Descriptions.Item>
+              ) : null}
               <Descriptions.Item
                 label={t("orderDetails.desc.totalToPay")}
                 span={2}>

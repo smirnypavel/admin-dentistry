@@ -12,6 +12,7 @@ import {
   Space,
   Switch,
   Table,
+  Tabs,
   Tag,
   theme as antdTheme,
 } from "antd";
@@ -34,6 +35,7 @@ import { listCategories, type Category } from "../api/categories";
 import { listManufacturers, type Manufacturer } from "../api/manufacturers";
 import { listCountries, type Country } from "../api/countries";
 import { useI18n } from "../store/i18n";
+import { PromoCodesTab } from "./PromoCodesTab";
 
 type EditorState = {
   open: boolean;
@@ -54,6 +56,7 @@ export function DiscountsPage() {
   const { t } = useI18n();
   const { message, modal } = AntApp.useApp();
   const { token } = antdTheme.useToken();
+  const [activeTab, setActiveTab] = useState("discounts");
   const [q, setQ] = useQueryParam("q", "");
   const [isActiveStr, setIsActiveStr] = useQueryParam("isActive", "");
   const [sort, setSort] = useQueryParam("sort", "-createdAt");
@@ -181,7 +184,7 @@ export function DiscountsPage() {
       setQ(t);
       setPageStr("1");
     },
-    [setQ, setPageStr]
+    [setQ, setPageStr],
   );
 
   const onEdit = useCallback(
@@ -215,7 +218,7 @@ export function DiscountsPage() {
           : [],
       });
     },
-    [form]
+    [form],
   );
 
   const onDelete = useCallback(
@@ -236,7 +239,7 @@ export function DiscountsPage() {
         },
       });
     },
-    [modal, t, message, load]
+    [modal, t, message, load],
   );
 
   const columns: ColumnsType<Discount> = useMemo(
@@ -263,19 +266,19 @@ export function DiscountsPage() {
           const bits: string[] = [];
           if (r.productIds && r.productIds.length)
             bits.push(
-              `${t("discounts.scope.products")}:${r.productIds.length}`
+              `${t("discounts.scope.products")}:${r.productIds.length}`,
             );
           if (r.categoryIds && r.categoryIds.length)
             bits.push(
-              `${t("discounts.scope.categories")}:${r.categoryIds.length}`
+              `${t("discounts.scope.categories")}:${r.categoryIds.length}`,
             );
           if (r.manufacturerIds && r.manufacturerIds.length)
             bits.push(
-              `${t("discounts.scope.manufacturers")}:${r.manufacturerIds.length}`
+              `${t("discounts.scope.manufacturers")}:${r.manufacturerIds.length}`,
             );
           if (r.countryIds && r.countryIds.length)
             bits.push(
-              `${t("discounts.scope.countries")}:${r.countryIds.length}`
+              `${t("discounts.scope.countries")}:${r.countryIds.length}`,
             );
           return bits.length ? (
             <Space
@@ -433,7 +436,7 @@ export function DiscountsPage() {
         ),
       },
     ],
-    [onTagFilter, token, t, onEdit, onDelete]
+    [onTagFilter, token, t, onEdit, onDelete],
   );
 
   const onCreate = () => {
@@ -477,7 +480,7 @@ export function DiscountsPage() {
           tags: g.tags && g.tags.length ? g.tags : undefined,
         };
         const hasAny = Object.values(group).some((v) =>
-          Array.isArray(v) ? v.length > 0 : false
+          Array.isArray(v) ? v.length > 0 : false,
         );
         return hasAny ? group : null;
       })
@@ -545,600 +548,672 @@ export function DiscountsPage() {
 
   return (
     <AdminLayout>
-      <Space
-        direction="vertical"
-        style={{ width: "100%" }}
-        size="large">
-        {/* Page title removed (shown in header) */}
-        <Space wrap>
-          <Input
-            placeholder={t("common.search")}
-            style={{ width: 220 }}
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPageStr("1");
-            }}
-            allowClear
-            onPressEnter={() => void load()}
-          />
-          <Select
-            allowClear
-            placeholder={t("discounts.filters.active.placeholder")}
-            style={{ width: 160 }}
-            value={isActiveStr || undefined}
-            onChange={(v) => {
-              setIsActiveStr(v ?? "");
-              setPageStr("1");
-            }}
-            options={[
-              { value: "true", label: t("discounts.filters.active.true") },
-              { value: "false", label: t("discounts.filters.active.false") },
-            ]}
-          />
-          <Select
-            placeholder={t("discounts.filters.sort.placeholder")}
-            style={{ width: 220 }}
-            value={sort || undefined}
-            onChange={(v) => {
-              setSort(v ?? "");
-              setPageStr("1");
-            }}
-            options={[
-              {
-                value: "-createdAt",
-                label: t("discounts.filters.sort.newFirst"),
-              },
-              {
-                value: "createdAt",
-                label: t("discounts.filters.sort.oldFirst"),
-              },
-              {
-                value: "-priority,createdAt",
-                label: t("discounts.filters.sort.priorityDescNew"),
-              },
-              {
-                value: "priority,createdAt",
-                label: t("discounts.filters.sort.priorityAscNew"),
-              },
-            ]}
-            allowClear
-          />
-          <Button
-            type="primary"
-            onClick={() => onCreate()}>
-            {t("common.create")}
-          </Button>
-        </Space>
-
-        <Table
-          rowKey="_id"
-          loading={loading}
-          columns={columns}
-          dataSource={items}
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total: data?.total || 0,
-            showSizeChanger: true,
-            pageSizeOptions: ["10", "20", "50"],
-            onChange: (p, ps) => {
-              setPageStr(String(p));
-              setLimitStr(String(ps));
-            },
-            showTotal: (total, range) =>
-              `${range[0]}–${range[1]} ${t("common.of")} ${total}`,
-          }}
-        />
-
-        <Drawer
-          open={editor.open}
-          width={900}
-          onClose={() =>
-            setEditor({ open: false, mode: "create", record: null })
-          }
-          title={
-            editor.mode === "create"
-              ? t("discounts.editor.createTitle")
-              : t("discounts.editor.editTitle")
-          }
-          extra={
-            <Space>
-              <Button
-                type="primary"
-                onClick={onSave}>
-                {t("common.save")}
-              </Button>
-            </Space>
-          }>
-          <Form
-            layout="vertical"
-            form={form}
-            initialValues={{ isActive: true, priority: 0, stackable: false }}>
-            <Form.Item
-              label={t("discounts.form.name")}
-              name="name"
-              rules={[
-                { required: true, message: t("discounts.form.name.required") },
-              ]}>
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label={t("discounts.form.description")}
-              name="description">
-              <Input.TextArea rows={3} />
-            </Form.Item>
-            <Space wrap>
-              <Form.Item
-                label={t("discounts.form.type")}
-                name="type"
-                rules={[{ required: true }]}>
-                <Select
-                  style={{ width: 180 }}
-                  options={[
-                    { value: "percent", label: "%" },
-                    { value: "fixed", label: t("discounts.type.fixed.short") },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item
-                label={t("discounts.form.value")}
-                name="value"
-                rules={[{ required: true }]}>
-                <InputNumber
-                  min={0}
-                  style={{ width: 160 }}
-                />
-              </Form.Item>
-              <Form.Item
-                label={t("discounts.form.isActive")}
-                name="isActive"
-                valuePropName="checked">
-                <Switch />
-              </Form.Item>
-              <Form.Item
-                label={t("discounts.form.priority")}
-                name="priority">
-                <InputNumber style={{ width: 160 }} />
-              </Form.Item>
-              <Form.Item
-                label={t("discounts.form.stackable")}
-                name="stackable"
-                valuePropName="checked">
-                <Switch />
-              </Form.Item>
-            </Space>
-            <Space wrap>
-              <Form.Item
-                label={t("discounts.form.startsAt")}
-                name="startsAt">
-                <DatePicker
-                  style={{ width: 200 }}
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={t("discounts.form.endsAt")}
-                name="endsAt">
-                <DatePicker
-                  style={{ width: 200 }}
-                  allowClear
-                />
-              </Form.Item>
-            </Space>
-            <Form.Item
-              label={t("discounts.form.categories")}
-              name="categoryIds">
-              <Select
-                mode="multiple"
-                placeholder={t("discounts.form.categories.placeholder")}
-                options={categories.map((c) => ({
-                  value: c._id,
-                  label: c.name,
-                }))}
-              />
-            </Form.Item>
-            <Form.Item
-              label={t("discounts.form.manufacturers")}
-              name="manufacturerIds">
-              <Select
-                mode="multiple"
-                placeholder={t("discounts.form.manufacturers.placeholder")}
-                options={manufacturers.map((m) => ({
-                  value: m._id,
-                  label: m.name,
-                }))}
-              />
-            </Form.Item>
-            <Form.Item
-              label={t("discounts.form.countries")}
-              name="countryIds">
-              <Select
-                mode="multiple"
-                placeholder={t("discounts.form.countries.placeholder")}
-                options={countries.map((c) => ({
-                  value: c._id,
-                  label: c.name,
-                }))}
-              />
-            </Form.Item>
-            <Form.Item
-              label={t("discounts.form.tags")}
-              name="tags">
-              <Select
-                mode="tags"
-                placeholder={t("discounts.form.tags.placeholder")}
-              />
-            </Form.Item>
-            {/* Target Groups Builder */}
-            <div style={{ fontWeight: 600 }}>
-              {t("discounts.form.targetGroups")}
-            </div>
-            <div style={{ color: token.colorTextSecondary, marginBottom: 8 }}>
-              {t("discounts.form.targetGroups.help")}
-            </div>
-            <Form.List name="targetGroups">
-              {(fields, { add, remove }) => (
-                <Space
-                  direction="vertical"
-                  style={{ width: "100%" }}>
-                  {fields.map(({ key, name }) => (
-                    <div
-                      key={key}
-                      style={{
-                        border: `1px solid ${token.colorBorder}`,
-                        borderRadius: 8,
-                        padding: 12,
-                      }}>
-                      <Space
-                        align="start"
-                        style={{ width: "100%" }}
-                        wrap>
-                        <Form.Item
-                          label={t("discounts.form.group.products")}
-                          name={[name, "productIdsText"]}
-                          style={{ minWidth: 260 }}>
-                          <Input.TextArea
-                            rows={2}
-                            placeholder={t(
-                              "discounts.form.group.products.placeholder"
-                            )}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          label={t("discounts.form.group.categories")}
-                          name={[name, "categoryIds"]}>
-                          <Select
-                            mode="multiple"
-                            placeholder={t(
-                              "discounts.form.categories.placeholder"
-                            )}
-                            options={categories.map((c) => ({
-                              value: c._id,
-                              label: c.name,
-                            }))}
-                            style={{ minWidth: 240 }}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          label={t("discounts.form.group.manufacturers")}
-                          name={[name, "manufacturerIds"]}>
-                          <Select
-                            mode="multiple"
-                            placeholder={t(
-                              "discounts.form.manufacturers.placeholder"
-                            )}
-                            options={manufacturers.map((m) => ({
-                              value: m._id,
-                              label: m.name,
-                            }))}
-                            style={{ minWidth: 240 }}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          label={t("discounts.form.group.countries")}
-                          name={[name, "countryIds"]}>
-                          <Select
-                            mode="multiple"
-                            placeholder={t(
-                              "discounts.form.countries.placeholder"
-                            )}
-                            options={countries.map((c) => ({
-                              value: c._id,
-                              label: c.name,
-                            }))}
-                            style={{ minWidth: 220 }}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          label={t("discounts.form.group.tags")}
-                          name={[name, "tags"]}>
-                          <Select
-                            mode="tags"
-                            placeholder={t(
-                              "discounts.form.group.tags.placeholder"
-                            )}
-                            style={{ minWidth: 220 }}
-                          />
-                        </Form.Item>
-                        <div style={{ flex: 1 }} />
-                        <Button
-                          danger
-                          onClick={() => remove(name)}>
-                          {t("discounts.form.targetGroups.remove")}
-                        </Button>
-                      </Space>
-                    </div>
-                  ))}
-                  <Button onClick={() => add()}>
-                    {t("discounts.form.targetGroups.add")}
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={[
+          {
+            key: "discounts",
+            label: t("discounts.tab.discounts"),
+            children: (
+              <Space
+                direction="vertical"
+                style={{ width: "100%" }}
+                size="large">
+                {/* Page title removed (shown in header) */}
+                <Space wrap>
+                  <Input
+                    placeholder={t("common.search")}
+                    style={{ width: 220 }}
+                    value={q}
+                    onChange={(e) => {
+                      setQ(e.target.value);
+                      setPageStr("1");
+                    }}
+                    allowClear
+                    onPressEnter={() => void load()}
+                  />
+                  <Select
+                    allowClear
+                    placeholder={t("discounts.filters.active.placeholder")}
+                    style={{ width: 160 }}
+                    value={isActiveStr || undefined}
+                    onChange={(v) => {
+                      setIsActiveStr(v ?? "");
+                      setPageStr("1");
+                    }}
+                    options={[
+                      {
+                        value: "true",
+                        label: t("discounts.filters.active.true"),
+                      },
+                      {
+                        value: "false",
+                        label: t("discounts.filters.active.false"),
+                      },
+                    ]}
+                  />
+                  <Select
+                    placeholder={t("discounts.filters.sort.placeholder")}
+                    style={{ width: 220 }}
+                    value={sort || undefined}
+                    onChange={(v) => {
+                      setSort(v ?? "");
+                      setPageStr("1");
+                    }}
+                    options={[
+                      {
+                        value: "-createdAt",
+                        label: t("discounts.filters.sort.newFirst"),
+                      },
+                      {
+                        value: "createdAt",
+                        label: t("discounts.filters.sort.oldFirst"),
+                      },
+                      {
+                        value: "-priority,createdAt",
+                        label: t("discounts.filters.sort.priorityDescNew"),
+                      },
+                      {
+                        value: "priority,createdAt",
+                        label: t("discounts.filters.sort.priorityAscNew"),
+                      },
+                    ]}
+                    allowClear
+                  />
+                  <Button
+                    type="primary"
+                    onClick={() => onCreate()}>
+                    {t("common.create")}
                   </Button>
                 </Space>
-              )}
-            </Form.List>
-            <div style={{ color: token.colorTextSecondary }}>
-              {t("discounts.form.groups.note")}
-            </div>
-          </Form>
-        </Drawer>
 
-        {/* Manage Targets Drawer */}
-        <Drawer
-          open={targets.open}
-          width={720}
-          onClose={() =>
-            setTargets({
-              open: false,
-              record: null,
-              productIdsText: "",
-              categoryIds: [],
-              manufacturerIds: [],
-              countryIds: [],
-            })
-          }
-          title={
-            targets.record
-              ? `${t("discounts.targets.title")}: ${targets.record.name}`
-              : t("discounts.targets.title")
-          }
-          extra={
-            <Space>
-              <Button
-                onClick={async () => {
-                  if (!targets.record) return;
-                  const productIds = targets.productIdsText
-                    .split(/\s|,|\n|\r/g)
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-                  try {
-                    await addDiscountTargets(targets.record._id, {
-                      productIds: productIds.length ? productIds : undefined,
-                      categoryIds: targets.categoryIds.length
-                        ? targets.categoryIds
-                        : undefined,
-                      manufacturerIds: targets.manufacturerIds.length
-                        ? targets.manufacturerIds
-                        : undefined,
-                      countryIds: targets.countryIds.length
-                        ? targets.countryIds
-                        : undefined,
-                    });
-                    message.success(t("discounts.targets.added"));
-                    await load();
-                    // keep drawer open; refresh preview
-                    const fresh = await getDiscount(targets.record._id);
-                    setCurrent(fresh);
-                  } catch {
-                    message.error(t("discounts.targets.addError"));
-                  }
-                }}
-                type="primary">
-                {t("common.add")}
-              </Button>
-              <Button
-                danger
-                onClick={async () => {
-                  if (!targets.record) return;
-                  const productIds = targets.productIdsText
-                    .split(/\s|,|\n|\r/g)
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-                  try {
-                    await removeDiscountTargets(targets.record._id, {
-                      productIds: productIds.length ? productIds : undefined,
-                      categoryIds: targets.categoryIds.length
-                        ? targets.categoryIds
-                        : undefined,
-                      manufacturerIds: targets.manufacturerIds.length
-                        ? targets.manufacturerIds
-                        : undefined,
-                      countryIds: targets.countryIds.length
-                        ? targets.countryIds
-                        : undefined,
-                    });
-                    message.success(t("discounts.targets.removed"));
-                    await load();
-                    // keep drawer open; refresh preview
-                    const fresh = await getDiscount(targets.record._id);
-                    setCurrent(fresh);
-                  } catch {
-                    message.error(t("discounts.targets.removeError"));
-                  }
-                }}>
-                {t("common.delete")}
-              </Button>
-            </Space>
-          }>
-          <Space
-            direction="vertical"
-            style={{ width: "100%" }}>
-            <div style={{ fontWeight: 600 }}>
-              {t("discounts.targets.current")}
-            </div>
-            <Space wrap>
-              <Tag>
-                {t("discounts.scope.products")}:{" "}
-                {current?.productIds?.length ?? 0}
-              </Tag>
-              <Tag>
-                {t("discounts.scope.categories")}:{" "}
-                {current?.categoryIds?.length ?? 0}
-              </Tag>
-              <Tag>
-                {t("discounts.scope.manufacturers")}:{" "}
-                {current?.manufacturerIds?.length ?? 0}
-              </Tag>
-              <Tag>
-                {t("discounts.scope.countries")}:{" "}
-                {current?.countryIds?.length ?? 0}
-              </Tag>
-            </Space>
-            <Space wrap>
-              <Button
-                size="small"
-                disabled={!current?.productIds?.length}
-                loading={targetsLoading}
-                onClick={async () => {
-                  if (!targets.record || !current?.productIds?.length) return;
-                  try {
-                    await removeDiscountTargets(targets.record._id, {
-                      productIds: current.productIds,
-                    });
-                    message.success(t("discounts.targets.cleared.products"));
-                    await load();
-                    const fresh = await getDiscount(targets.record._id);
-                    setCurrent(fresh);
-                  } catch {
-                    message.error(t("discounts.targets.clearError.products"));
-                  }
-                }}>
-                {t("discounts.targets.clear.products")}
-              </Button>
-              <Button
-                size="small"
-                disabled={!current?.categoryIds?.length}
-                loading={targetsLoading}
-                onClick={async () => {
-                  if (!targets.record || !current?.categoryIds?.length) return;
-                  try {
-                    await removeDiscountTargets(targets.record._id, {
-                      categoryIds: current.categoryIds,
-                    });
-                    message.success(t("discounts.targets.cleared.categories"));
-                    await load();
-                    const fresh = await getDiscount(targets.record._id);
-                    setCurrent(fresh);
-                  } catch {
-                    message.error(t("discounts.targets.clearError.categories"));
-                  }
-                }}>
-                {t("discounts.targets.clear.categories")}
-              </Button>
-              <Button
-                size="small"
-                disabled={!current?.manufacturerIds?.length}
-                loading={targetsLoading}
-                onClick={async () => {
-                  if (!targets.record || !current?.manufacturerIds?.length)
-                    return;
-                  try {
-                    await removeDiscountTargets(targets.record._id, {
-                      manufacturerIds: current.manufacturerIds,
-                    });
-                    message.success(
-                      t("discounts.targets.cleared.manufacturers")
-                    );
-                    await load();
-                    const fresh = await getDiscount(targets.record._id);
-                    setCurrent(fresh);
-                  } catch {
-                    message.error(
-                      t("discounts.targets.clearError.manufacturers")
-                    );
-                  }
-                }}>
-                {t("discounts.targets.clear.manufacturers")}
-              </Button>
-              <Button
-                size="small"
-                disabled={!current?.countryIds?.length}
-                loading={targetsLoading}
-                onClick={async () => {
-                  if (!targets.record || !current?.countryIds?.length) return;
-                  try {
-                    await removeDiscountTargets(targets.record._id, {
-                      countryIds: current.countryIds,
-                    });
-                    message.success(t("discounts.targets.cleared.countries"));
-                    await load();
-                    const fresh = await getDiscount(targets.record._id);
-                    setCurrent(fresh);
-                  } catch {
-                    message.error(t("discounts.targets.clearError.countries"));
-                  }
-                }}>
-                {t("discounts.targets.clear.countries")}
-              </Button>
-            </Space>
-            <div style={{ height: 8 }} />
-            <Input.TextArea
-              rows={4}
-              placeholder={t("discounts.targets.input.placeholder")}
-              value={targets.productIdsText}
-              onChange={(e) =>
-                setTargets((t) => ({ ...t, productIdsText: e.target.value }))
-              }
-            />
-            <Form layout="vertical">
-              <Form.Item label={t("discounts.form.categories")}>
-                <Select
-                  mode="multiple"
-                  placeholder={t("discounts.form.categories.placeholder")}
-                  options={categories.map((c) => ({
-                    value: c._id,
-                    label: c.name,
-                  }))}
-                  value={targets.categoryIds}
-                  onChange={(vals) =>
-                    setTargets((t) => ({ ...t, categoryIds: vals }))
-                  }
+                <Table
+                  rowKey="_id"
+                  loading={loading}
+                  columns={columns}
+                  dataSource={items}
+                  pagination={{
+                    current: page,
+                    pageSize: limit,
+                    total: data?.total || 0,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["10", "20", "50"],
+                    onChange: (p, ps) => {
+                      setPageStr(String(p));
+                      setLimitStr(String(ps));
+                    },
+                    showTotal: (total, range) =>
+                      `${range[0]}–${range[1]} ${t("common.of")} ${total}`,
+                  }}
                 />
-              </Form.Item>
-              <Form.Item label={t("discounts.form.manufacturers")}>
-                <Select
-                  mode="multiple"
-                  placeholder={t("discounts.form.manufacturers.placeholder")}
-                  options={manufacturers.map((m) => ({
-                    value: m._id,
-                    label: m.name,
-                  }))}
-                  value={targets.manufacturerIds}
-                  onChange={(vals) =>
-                    setTargets((t) => ({ ...t, manufacturerIds: vals }))
+
+                <Drawer
+                  open={editor.open}
+                  width={900}
+                  onClose={() =>
+                    setEditor({ open: false, mode: "create", record: null })
                   }
-                />
-              </Form.Item>
-              <Form.Item label={t("discounts.form.countries")}>
-                <Select
-                  mode="multiple"
-                  placeholder={t("discounts.form.countries.placeholder")}
-                  options={countries.map((c) => ({
-                    value: c._id,
-                    label: c.name,
-                  }))}
-                  value={targets.countryIds}
-                  onChange={(vals) =>
-                    setTargets((t) => ({ ...t, countryIds: vals }))
+                  title={
+                    editor.mode === "create"
+                      ? t("discounts.editor.createTitle")
+                      : t("discounts.editor.editTitle")
                   }
-                />
-              </Form.Item>
-            </Form>
-            <div style={{ color: token.colorTextSecondary }}>
-              {t("discounts.targets.hint")}
-            </div>
-          </Space>
-        </Drawer>
-      </Space>
+                  extra={
+                    <Space>
+                      <Button
+                        type="primary"
+                        onClick={onSave}>
+                        {t("common.save")}
+                      </Button>
+                    </Space>
+                  }>
+                  <Form
+                    layout="vertical"
+                    form={form}
+                    initialValues={{
+                      isActive: true,
+                      priority: 0,
+                      stackable: false,
+                    }}>
+                    <Form.Item
+                      label={t("discounts.form.name")}
+                      name="name"
+                      rules={[
+                        {
+                          required: true,
+                          message: t("discounts.form.name.required"),
+                        },
+                      ]}>
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      label={t("discounts.form.description")}
+                      name="description">
+                      <Input.TextArea rows={3} />
+                    </Form.Item>
+                    <Space wrap>
+                      <Form.Item
+                        label={t("discounts.form.type")}
+                        name="type"
+                        rules={[{ required: true }]}>
+                        <Select
+                          style={{ width: 180 }}
+                          options={[
+                            { value: "percent", label: "%" },
+                            {
+                              value: "fixed",
+                              label: t("discounts.type.fixed.short"),
+                            },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label={t("discounts.form.value")}
+                        name="value"
+                        rules={[{ required: true }]}>
+                        <InputNumber
+                          min={0}
+                          style={{ width: 160 }}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label={t("discounts.form.isActive")}
+                        name="isActive"
+                        valuePropName="checked">
+                        <Switch />
+                      </Form.Item>
+                      <Form.Item
+                        label={t("discounts.form.priority")}
+                        name="priority">
+                        <InputNumber style={{ width: 160 }} />
+                      </Form.Item>
+                      <Form.Item
+                        label={t("discounts.form.stackable")}
+                        name="stackable"
+                        valuePropName="checked">
+                        <Switch />
+                      </Form.Item>
+                    </Space>
+                    <Space wrap>
+                      <Form.Item
+                        label={t("discounts.form.startsAt")}
+                        name="startsAt">
+                        <DatePicker
+                          style={{ width: 200 }}
+                          allowClear
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label={t("discounts.form.endsAt")}
+                        name="endsAt">
+                        <DatePicker
+                          style={{ width: 200 }}
+                          allowClear
+                        />
+                      </Form.Item>
+                    </Space>
+                    <Form.Item
+                      label={t("discounts.form.categories")}
+                      name="categoryIds">
+                      <Select
+                        mode="multiple"
+                        placeholder={t("discounts.form.categories.placeholder")}
+                        options={categories.map((c) => ({
+                          value: c._id,
+                          label: c.name,
+                        }))}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label={t("discounts.form.manufacturers")}
+                      name="manufacturerIds">
+                      <Select
+                        mode="multiple"
+                        placeholder={t(
+                          "discounts.form.manufacturers.placeholder",
+                        )}
+                        options={manufacturers.map((m) => ({
+                          value: m._id,
+                          label: m.name,
+                        }))}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label={t("discounts.form.countries")}
+                      name="countryIds">
+                      <Select
+                        mode="multiple"
+                        placeholder={t("discounts.form.countries.placeholder")}
+                        options={countries.map((c) => ({
+                          value: c._id,
+                          label: c.name,
+                        }))}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label={t("discounts.form.tags")}
+                      name="tags">
+                      <Select
+                        mode="tags"
+                        placeholder={t("discounts.form.tags.placeholder")}
+                      />
+                    </Form.Item>
+                    {/* Target Groups Builder */}
+                    <div style={{ fontWeight: 600 }}>
+                      {t("discounts.form.targetGroups")}
+                    </div>
+                    <div
+                      style={{
+                        color: token.colorTextSecondary,
+                        marginBottom: 8,
+                      }}>
+                      {t("discounts.form.targetGroups.help")}
+                    </div>
+                    <Form.List name="targetGroups">
+                      {(fields, { add, remove }) => (
+                        <Space
+                          direction="vertical"
+                          style={{ width: "100%" }}>
+                          {fields.map(({ key, name }) => (
+                            <div
+                              key={key}
+                              style={{
+                                border: `1px solid ${token.colorBorder}`,
+                                borderRadius: 8,
+                                padding: 12,
+                              }}>
+                              <Space
+                                align="start"
+                                style={{ width: "100%" }}
+                                wrap>
+                                <Form.Item
+                                  label={t("discounts.form.group.products")}
+                                  name={[name, "productIdsText"]}
+                                  style={{ minWidth: 260 }}>
+                                  <Input.TextArea
+                                    rows={2}
+                                    placeholder={t(
+                                      "discounts.form.group.products.placeholder",
+                                    )}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label={t("discounts.form.group.categories")}
+                                  name={[name, "categoryIds"]}>
+                                  <Select
+                                    mode="multiple"
+                                    placeholder={t(
+                                      "discounts.form.categories.placeholder",
+                                    )}
+                                    options={categories.map((c) => ({
+                                      value: c._id,
+                                      label: c.name,
+                                    }))}
+                                    style={{ minWidth: 240 }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label={t(
+                                    "discounts.form.group.manufacturers",
+                                  )}
+                                  name={[name, "manufacturerIds"]}>
+                                  <Select
+                                    mode="multiple"
+                                    placeholder={t(
+                                      "discounts.form.manufacturers.placeholder",
+                                    )}
+                                    options={manufacturers.map((m) => ({
+                                      value: m._id,
+                                      label: m.name,
+                                    }))}
+                                    style={{ minWidth: 240 }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label={t("discounts.form.group.countries")}
+                                  name={[name, "countryIds"]}>
+                                  <Select
+                                    mode="multiple"
+                                    placeholder={t(
+                                      "discounts.form.countries.placeholder",
+                                    )}
+                                    options={countries.map((c) => ({
+                                      value: c._id,
+                                      label: c.name,
+                                    }))}
+                                    style={{ minWidth: 220 }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label={t("discounts.form.group.tags")}
+                                  name={[name, "tags"]}>
+                                  <Select
+                                    mode="tags"
+                                    placeholder={t(
+                                      "discounts.form.group.tags.placeholder",
+                                    )}
+                                    style={{ minWidth: 220 }}
+                                  />
+                                </Form.Item>
+                                <div style={{ flex: 1 }} />
+                                <Button
+                                  danger
+                                  onClick={() => remove(name)}>
+                                  {t("discounts.form.targetGroups.remove")}
+                                </Button>
+                              </Space>
+                            </div>
+                          ))}
+                          <Button onClick={() => add()}>
+                            {t("discounts.form.targetGroups.add")}
+                          </Button>
+                        </Space>
+                      )}
+                    </Form.List>
+                    <div style={{ color: token.colorTextSecondary }}>
+                      {t("discounts.form.groups.note")}
+                    </div>
+                  </Form>
+                </Drawer>
+
+                {/* Manage Targets Drawer */}
+                <Drawer
+                  open={targets.open}
+                  width={720}
+                  onClose={() =>
+                    setTargets({
+                      open: false,
+                      record: null,
+                      productIdsText: "",
+                      categoryIds: [],
+                      manufacturerIds: [],
+                      countryIds: [],
+                    })
+                  }
+                  title={
+                    targets.record
+                      ? `${t("discounts.targets.title")}: ${targets.record.name}`
+                      : t("discounts.targets.title")
+                  }
+                  extra={
+                    <Space>
+                      <Button
+                        onClick={async () => {
+                          if (!targets.record) return;
+                          const productIds = targets.productIdsText
+                            .split(/\s|,|\n|\r/g)
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                          try {
+                            await addDiscountTargets(targets.record._id, {
+                              productIds: productIds.length
+                                ? productIds
+                                : undefined,
+                              categoryIds: targets.categoryIds.length
+                                ? targets.categoryIds
+                                : undefined,
+                              manufacturerIds: targets.manufacturerIds.length
+                                ? targets.manufacturerIds
+                                : undefined,
+                              countryIds: targets.countryIds.length
+                                ? targets.countryIds
+                                : undefined,
+                            });
+                            message.success(t("discounts.targets.added"));
+                            await load();
+                            // keep drawer open; refresh preview
+                            const fresh = await getDiscount(targets.record._id);
+                            setCurrent(fresh);
+                          } catch {
+                            message.error(t("discounts.targets.addError"));
+                          }
+                        }}
+                        type="primary">
+                        {t("common.add")}
+                      </Button>
+                      <Button
+                        danger
+                        onClick={async () => {
+                          if (!targets.record) return;
+                          const productIds = targets.productIdsText
+                            .split(/\s|,|\n|\r/g)
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                          try {
+                            await removeDiscountTargets(targets.record._id, {
+                              productIds: productIds.length
+                                ? productIds
+                                : undefined,
+                              categoryIds: targets.categoryIds.length
+                                ? targets.categoryIds
+                                : undefined,
+                              manufacturerIds: targets.manufacturerIds.length
+                                ? targets.manufacturerIds
+                                : undefined,
+                              countryIds: targets.countryIds.length
+                                ? targets.countryIds
+                                : undefined,
+                            });
+                            message.success(t("discounts.targets.removed"));
+                            await load();
+                            // keep drawer open; refresh preview
+                            const fresh = await getDiscount(targets.record._id);
+                            setCurrent(fresh);
+                          } catch {
+                            message.error(t("discounts.targets.removeError"));
+                          }
+                        }}>
+                        {t("common.delete")}
+                      </Button>
+                    </Space>
+                  }>
+                  <Space
+                    direction="vertical"
+                    style={{ width: "100%" }}>
+                    <div style={{ fontWeight: 600 }}>
+                      {t("discounts.targets.current")}
+                    </div>
+                    <Space wrap>
+                      <Tag>
+                        {t("discounts.scope.products")}:{" "}
+                        {current?.productIds?.length ?? 0}
+                      </Tag>
+                      <Tag>
+                        {t("discounts.scope.categories")}:{" "}
+                        {current?.categoryIds?.length ?? 0}
+                      </Tag>
+                      <Tag>
+                        {t("discounts.scope.manufacturers")}:{" "}
+                        {current?.manufacturerIds?.length ?? 0}
+                      </Tag>
+                      <Tag>
+                        {t("discounts.scope.countries")}:{" "}
+                        {current?.countryIds?.length ?? 0}
+                      </Tag>
+                    </Space>
+                    <Space wrap>
+                      <Button
+                        size="small"
+                        disabled={!current?.productIds?.length}
+                        loading={targetsLoading}
+                        onClick={async () => {
+                          if (!targets.record || !current?.productIds?.length)
+                            return;
+                          try {
+                            await removeDiscountTargets(targets.record._id, {
+                              productIds: current.productIds,
+                            });
+                            message.success(
+                              t("discounts.targets.cleared.products"),
+                            );
+                            await load();
+                            const fresh = await getDiscount(targets.record._id);
+                            setCurrent(fresh);
+                          } catch {
+                            message.error(
+                              t("discounts.targets.clearError.products"),
+                            );
+                          }
+                        }}>
+                        {t("discounts.targets.clear.products")}
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={!current?.categoryIds?.length}
+                        loading={targetsLoading}
+                        onClick={async () => {
+                          if (!targets.record || !current?.categoryIds?.length)
+                            return;
+                          try {
+                            await removeDiscountTargets(targets.record._id, {
+                              categoryIds: current.categoryIds,
+                            });
+                            message.success(
+                              t("discounts.targets.cleared.categories"),
+                            );
+                            await load();
+                            const fresh = await getDiscount(targets.record._id);
+                            setCurrent(fresh);
+                          } catch {
+                            message.error(
+                              t("discounts.targets.clearError.categories"),
+                            );
+                          }
+                        }}>
+                        {t("discounts.targets.clear.categories")}
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={!current?.manufacturerIds?.length}
+                        loading={targetsLoading}
+                        onClick={async () => {
+                          if (
+                            !targets.record ||
+                            !current?.manufacturerIds?.length
+                          )
+                            return;
+                          try {
+                            await removeDiscountTargets(targets.record._id, {
+                              manufacturerIds: current.manufacturerIds,
+                            });
+                            message.success(
+                              t("discounts.targets.cleared.manufacturers"),
+                            );
+                            await load();
+                            const fresh = await getDiscount(targets.record._id);
+                            setCurrent(fresh);
+                          } catch {
+                            message.error(
+                              t("discounts.targets.clearError.manufacturers"),
+                            );
+                          }
+                        }}>
+                        {t("discounts.targets.clear.manufacturers")}
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={!current?.countryIds?.length}
+                        loading={targetsLoading}
+                        onClick={async () => {
+                          if (!targets.record || !current?.countryIds?.length)
+                            return;
+                          try {
+                            await removeDiscountTargets(targets.record._id, {
+                              countryIds: current.countryIds,
+                            });
+                            message.success(
+                              t("discounts.targets.cleared.countries"),
+                            );
+                            await load();
+                            const fresh = await getDiscount(targets.record._id);
+                            setCurrent(fresh);
+                          } catch {
+                            message.error(
+                              t("discounts.targets.clearError.countries"),
+                            );
+                          }
+                        }}>
+                        {t("discounts.targets.clear.countries")}
+                      </Button>
+                    </Space>
+                    <div style={{ height: 8 }} />
+                    <Input.TextArea
+                      rows={4}
+                      placeholder={t("discounts.targets.input.placeholder")}
+                      value={targets.productIdsText}
+                      onChange={(e) =>
+                        setTargets((t) => ({
+                          ...t,
+                          productIdsText: e.target.value,
+                        }))
+                      }
+                    />
+                    <Form layout="vertical">
+                      <Form.Item label={t("discounts.form.categories")}>
+                        <Select
+                          mode="multiple"
+                          placeholder={t(
+                            "discounts.form.categories.placeholder",
+                          )}
+                          options={categories.map((c) => ({
+                            value: c._id,
+                            label: c.name,
+                          }))}
+                          value={targets.categoryIds}
+                          onChange={(vals) =>
+                            setTargets((t) => ({ ...t, categoryIds: vals }))
+                          }
+                        />
+                      </Form.Item>
+                      <Form.Item label={t("discounts.form.manufacturers")}>
+                        <Select
+                          mode="multiple"
+                          placeholder={t(
+                            "discounts.form.manufacturers.placeholder",
+                          )}
+                          options={manufacturers.map((m) => ({
+                            value: m._id,
+                            label: m.name,
+                          }))}
+                          value={targets.manufacturerIds}
+                          onChange={(vals) =>
+                            setTargets((t) => ({ ...t, manufacturerIds: vals }))
+                          }
+                        />
+                      </Form.Item>
+                      <Form.Item label={t("discounts.form.countries")}>
+                        <Select
+                          mode="multiple"
+                          placeholder={t(
+                            "discounts.form.countries.placeholder",
+                          )}
+                          options={countries.map((c) => ({
+                            value: c._id,
+                            label: c.name,
+                          }))}
+                          value={targets.countryIds}
+                          onChange={(vals) =>
+                            setTargets((t) => ({ ...t, countryIds: vals }))
+                          }
+                        />
+                      </Form.Item>
+                    </Form>
+                    <div style={{ color: token.colorTextSecondary }}>
+                      {t("discounts.targets.hint")}
+                    </div>
+                  </Space>
+                </Drawer>
+              </Space>
+            ),
+          },
+          {
+            key: "promoCodes",
+            label: t("discounts.tab.promoCodes"),
+            children: <PromoCodesTab />,
+          },
+        ]}
+      />
     </AdminLayout>
   );
 }
