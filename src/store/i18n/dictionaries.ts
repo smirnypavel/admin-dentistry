@@ -1743,3 +1743,32 @@ const ukPromoCodes: I18nDict = {
 
 Object.assign(ru, ruPromoCodes);
 Object.assign(uk, ukPromoCodes);
+
+/* ---------- Gallery ---------- */
+
+export const ruGallery: I18nDict = {
+  "layout.menu.gallery": "Галерея",
+  "gallery.title": "Галерея «О нас»",
+  "gallery.refresh": "Обновить",
+  "gallery.addNew": "Добавить фото",
+  "gallery.save": "Сохранить",
+  "gallery.deleteConfirm": "Удалить фото?",
+  "gallery.yes": "Да",
+  "gallery.no": "Нет",
+  "gallery.empty": "Нет фотографий. Добавьте первое фото.",
+};
+
+export const ukGallery: I18nDict = {
+  "layout.menu.gallery": "Галерея",
+  "gallery.title": "Галерея «Про нас»",
+  "gallery.refresh": "Оновити",
+  "gallery.addNew": "Додати фото",
+  "gallery.save": "Зберегти",
+  "gallery.deleteConfirm": "Видалити фото?",
+  "gallery.yes": "Так",
+  "gallery.no": "Ні",
+  "gallery.empty": "Немає фотографій. Додайте перше фото.",
+};
+
+Object.assign(ru, ruGallery);
+Object.assign(uk, ukGallery);
