@@ -94,6 +94,7 @@ export function ProductsPage() {
     images?: string[];
     attributes?: Array<{ key: string; value: string }>;
     isActive: boolean;
+    isNew?: boolean;
   }>();
 
   const [variantForm] = Form.useForm<ProductVariant & { _tmpId?: string }>();
@@ -426,6 +427,7 @@ export function ProductsPage() {
       images?: string[];
       attributes?: Array<{ key: string; value: string }>;
       isActive?: boolean;
+      isNew?: boolean;
     };
     // Safety net: ensure we have UA title (fallback to EN) and slug
     const titleUkTrim = (basics.titleUk || "").trim();
