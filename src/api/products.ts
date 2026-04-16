@@ -35,6 +35,7 @@ type ProductRaw = {
   hasDiscount?: boolean;
   optionsSummary?: Record<string, Array<string | number>>;
   isActive: boolean;
+  isNew?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -62,6 +63,7 @@ export type Product = {
   hasDiscount?: boolean;
   optionsSummary?: Record<string, Array<string | number>>;
   isActive: boolean;
+  isNew?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -128,6 +130,7 @@ export async function listProducts(
       hasDiscount: p.hasDiscount ?? false,
       optionsSummary: p.optionsSummary || undefined,
       isActive: p.isActive,
+      isNew: p.isNew ?? false,
       createdAt: p.createdAt ?? null,
       updatedAt: p.updatedAt ?? null,
     })),
@@ -156,6 +159,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -174,6 +178,7 @@ export type CreateProductDto = {
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   variants: ProductVariant[];
   isActive?: boolean;
+  isNew?: boolean;
 };
 
 export async function createProduct(dto: CreateProductDto): Promise<Product> {
@@ -205,6 +210,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     attributes: dto.attributes,
     variants: dto.variants,
     isActive: dto.isActive,
+    isNew: dto.isNew,
   } as const;
   const { data } = await api.post<ProductRaw>("/admin/products", wire);
   return {
@@ -226,6 +232,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -289,6 +296,7 @@ export async function updateProduct(
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -316,6 +324,7 @@ export async function deleteProduct(id: string): Promise<Product | null> {
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -348,6 +357,7 @@ export async function addVariant(
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -381,6 +391,7 @@ export async function updateVariant(
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -412,6 +423,7 @@ export async function deleteVariant(
     priceMax: data.priceMax ?? undefined,
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
+    isNew: data.isNew ?? false,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };

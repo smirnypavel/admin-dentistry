@@ -225,6 +225,7 @@ export function ProductsPage() {
           value: String(a.value ?? ""),
         })),
         isActive: r.isActive,
+        isNew: r.isNew ?? false,
       });
       setVariants(
         (r.variants || []).map((v) => ({
@@ -380,6 +381,7 @@ export function ProductsPage() {
       tags: [],
       images: [],
       isActive: true,
+      isNew: false,
     });
     setVariants([]);
   };
@@ -482,6 +484,7 @@ export function ProductsPage() {
           attributes,
           variants: preparedVariants,
           isActive: basics.isActive,
+          isNew: basics.isNew ?? false,
         });
         message.success(t("products.save.created"));
       } else if (editor.mode === "edit" && editor.record) {
@@ -498,6 +501,7 @@ export function ProductsPage() {
           attributes,
           variants: preparedVariants,
           isActive: basics.isActive,
+          isNew: basics.isNew ?? false,
         });
         message.success(t("products.save.updated"));
       }
@@ -1136,6 +1140,12 @@ export function ProductsPage() {
               <Form.Item
                 label={t("products.form.isActive")}
                 name="isActive"
+                valuePropName="checked">
+                <Switch />
+              </Form.Item>
+              <Form.Item
+                label={t("products.form.isNew")}
+                name="isNew"
                 valuePropName="checked">
                 <Switch />
               </Form.Item>

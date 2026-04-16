@@ -913,6 +913,7 @@ export const ruProducts: I18nDict = {
   "products.form.attr.add": "Добавить атрибут",
   "products.form.images": "Изображения товара",
   "products.form.isActive": "Активен",
+  "products.form.isNew": "Бейдж NEW",
 
   // i18n tabs (reuse labels like in categories/manufacturers)
   "products.form.lang.uk": "Українська",
@@ -1024,6 +1025,7 @@ export const ukProducts: I18nDict = {
   "products.form.attr.add": "Додати атрибут",
   "products.form.images": "Зображення товару",
   "products.form.isActive": "Активний",
+  "products.form.isNew": "Бейдж NEW",
 
   // i18n tabs (reuse labels like in categories/manufacturers)
   "products.form.lang.uk": "Українська",
