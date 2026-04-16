@@ -15,6 +15,7 @@ import { DiscountsPage } from "./pages/DiscountsPage.tsx";
 import { ContactsPage } from "./pages/ContactsPage.tsx";
 import { HeroPage } from "./pages/HeroPage.tsx";
 import { GalleryPage } from "./pages/GalleryPage.tsx";
+import { PromoSlidesPage } from "./pages/PromoSlidesPage.tsx";
 import { CustomersPage } from "./pages/CustomersPage.tsx";
 import { CustomerDetailsPage } from "./pages/CustomerDetailsPage.tsx";
 import { ProtectedRoute } from "./routes/ProtectedRoute.tsx";
@@ -130,6 +131,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <GalleryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/promo-slides"
+            element={
+              <ProtectedRoute>
+                <PromoSlidesPage />
               </ProtectedRoute>
             }
           />
