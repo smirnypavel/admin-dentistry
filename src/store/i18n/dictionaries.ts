@@ -392,6 +392,7 @@ export const ruOrders: I18nDict = {
   "orders.loadError": "Не удалось загрузить заказы",
   "orders.columns.phone": "Телефон",
   "orders.columns.clientId": "Client",
+  "orders.columns.name": "Клиент",
   "orders.columns.itemsCount": "Позиции",
   "orders.columns.itemsTotal": "Сумма позиций",
   "orders.columns.total": "Всего",
@@ -407,6 +408,7 @@ export const ukOrders: I18nDict = {
   "orders.loadError": "Не вдалося завантажити замовлення",
   "orders.columns.phone": "Телефон",
   "orders.columns.clientId": "Client",
+  "orders.columns.name": "Клієнт",
   "orders.columns.itemsCount": "Позицій",
   "orders.columns.itemsTotal": "Сума позицій",
   "orders.columns.total": "Разом",
@@ -598,6 +600,8 @@ export const ruDiscounts: I18nDict = {
   "discounts.form.endsAt": "Конец",
   "discounts.form.categories": "Категории",
   "discounts.form.categories.placeholder": "Выберите категории",
+  "discounts.form.subcategories": "Подкатегории",
+  "discounts.form.subcategories.placeholder": "Выберите подкатегории",
   "discounts.form.manufacturers": "Производители",
   "discounts.form.manufacturers.placeholder": "Выберите производителей",
   "discounts.form.countries": "Страны",
@@ -614,6 +618,7 @@ export const ruDiscounts: I18nDict = {
   "discounts.form.group.products.placeholder":
     "ID через запятую/пробел/перенос",
   "discounts.form.group.categories": "Категории",
+  "discounts.form.group.subcategories": "Подкатегории",
   "discounts.form.group.manufacturers": "Производители",
   "discounts.form.group.countries": "Страны",
   "discounts.form.group.tags": "Теги",
@@ -711,6 +716,8 @@ export const ukDiscounts: I18nDict = {
   "discounts.form.endsAt": "Кінець",
   "discounts.form.categories": "Категорії",
   "discounts.form.categories.placeholder": "Оберіть категорії",
+  "discounts.form.subcategories": "Підкатегорії",
+  "discounts.form.subcategories.placeholder": "Оберіть підкатегорії",
   "discounts.form.manufacturers": "Виробники",
   "discounts.form.manufacturers.placeholder": "Оберіть виробників",
   "discounts.form.countries": "Країни",
@@ -727,6 +734,7 @@ export const ukDiscounts: I18nDict = {
   "discounts.form.group.products.placeholder":
     "ID через кому/пробіл/перенесення",
   "discounts.form.group.categories": "Категорії",
+  "discounts.form.group.subcategories": "Підкатегорії",
   "discounts.form.group.manufacturers": "Виробники",
   "discounts.form.group.countries": "Країни",
   "discounts.form.group.tags": "Теги",
@@ -1451,6 +1459,13 @@ export const ruCustomers: I18nDict = {
   "customerDetails.orders.items": "Позиции",
   "customerDetails.orders.total": "Сумма",
   "customerDetails.orders.createdAt": "Дата",
+  "customerDetails.delete.button": "Удалить аккаунт",
+  "customerDetails.delete.confirmTitle": "Удалить аккаунт клиента?",
+  "customerDetails.delete.confirmText":
+    "Профиль клиента будет удалён. История заказов сохранится, но аккаунт больше не будет привязан к ним.",
+  "customerDetails.delete.confirmOk": "Удалить",
+  "customerDetails.delete.success": "Аккаунт клиента удалён",
+  "customerDetails.delete.error": "Не удалось удалить аккаунт клиента",
 };
 
 export const ukCustomers: I18nDict = {
@@ -1485,6 +1500,13 @@ export const ukCustomers: I18nDict = {
   "customerDetails.orders.items": "Позицій",
   "customerDetails.orders.total": "Сума",
   "customerDetails.orders.createdAt": "Дата",
+  "customerDetails.delete.button": "Видалити акаунт",
+  "customerDetails.delete.confirmTitle": "Видалити акаунт клієнта?",
+  "customerDetails.delete.confirmText":
+    "Профіль клієнта буде видалено. Історія замовлень збережеться, але акаунт більше не буде прив'язаний до них.",
+  "customerDetails.delete.confirmOk": "Видалити",
+  "customerDetails.delete.success": "Акаунт клієнта видалено",
+  "customerDetails.delete.error": "Не вдалося видалити акаунт клієнта",
 };
 
 Object.assign(ru, ruCustomers);
@@ -1653,10 +1675,14 @@ const ruPromoCodes: I18nDict = {
   "promoCodes.form.targeting": "Таргетинг товаров",
   "promoCodes.form.allowedCategories": "Только для категорий",
   "promoCodes.form.allowedCategories.placeholder": "Пусто = все категории",
+  "promoCodes.form.allowedSubcategories": "Только для подкатегорий",
+  "promoCodes.form.allowedSubcategories.placeholder": "Пусто = все подкатегории",
   "promoCodes.form.allowedProducts": "Только для товаров",
   "promoCodes.form.allowedProducts.placeholder": "Пусто = все товары",
   "promoCodes.form.excludedCategories": "Исключить категории",
   "promoCodes.form.excludedCategories.placeholder": "Категории, к которым промокод не применяется",
+  "promoCodes.form.excludedSubcategories": "Исключить подкатегории",
+  "promoCodes.form.excludedSubcategories.placeholder": "Подкатегории, к которым промокод не применяется",
   "promoCodes.form.excludedProducts": "Исключить товары",
   "promoCodes.form.excludedProducts.placeholder": "Товары, к которым промокод не применяется",
 
@@ -1718,10 +1744,14 @@ const ukPromoCodes: I18nDict = {
   "promoCodes.form.targeting": "Таргетинг товарів",
   "promoCodes.form.allowedCategories": "Тільки для категорій",
   "promoCodes.form.allowedCategories.placeholder": "Порожньо = всі категорії",
+  "promoCodes.form.allowedSubcategories": "Тільки для підкатегорій",
+  "promoCodes.form.allowedSubcategories.placeholder": "Порожньо = всі підкатегорії",
   "promoCodes.form.allowedProducts": "Тільки для товарів",
   "promoCodes.form.allowedProducts.placeholder": "Порожньо = всі товари",
   "promoCodes.form.excludedCategories": "Виключити категорії",
   "promoCodes.form.excludedCategories.placeholder": "Категорії, до яких промокод не застосовується",
+  "promoCodes.form.excludedSubcategories": "Виключити підкатегорії",
+  "promoCodes.form.excludedSubcategories.placeholder": "Підкатегорії, до яких промокод не застосовується",
   "promoCodes.form.excludedProducts": "Виключити товари",
   "promoCodes.form.excludedProducts.placeholder": "Товари, до яких промокод не застосовується",
 

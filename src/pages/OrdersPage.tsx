@@ -89,15 +89,14 @@ export function OrdersPage() {
         ),
       },
       {
-        title: t("orders.columns.clientId"),
-        dataIndex: "clientId",
-        key: "clientId",
+        title: t("orders.columns.name"),
+        key: "name",
         width: 160,
-        render: (cid?: string) =>
-          cid ? (
-            <Typography.Text copyable={{ text: cid }}>{cid}</Typography.Text>
+        render: (_: unknown, r: Order) =>
+          r.name ? (
+            <Typography.Text>{r.name}</Typography.Text>
           ) : (
-            "—"
+            <Typography.Text type="secondary">—</Typography.Text>
           ),
       },
       {

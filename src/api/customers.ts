@@ -78,3 +78,7 @@ export async function getCustomerOrders(
   );
   return data;
 }
+
+export async function deleteCustomer(id: string): Promise<void> {
+  await api.delete(`/admin/customers/${id}`);
+}

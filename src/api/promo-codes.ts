@@ -14,8 +14,10 @@ export type PromoCode = {
   endsAt?: string | null;
   allowedProductIds?: string[];
   allowedCategoryIds?: string[];
+  allowedSubcategoryIds?: string[];
   excludedProductIds?: string[];
   excludedCategoryIds?: string[];
+  excludedSubcategoryIds?: string[];
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -47,8 +49,10 @@ export type CreatePromoCodeDto = {
   endsAt?: string;
   allowedProductIds?: string[];
   allowedCategoryIds?: string[];
+  allowedSubcategoryIds?: string[];
   excludedProductIds?: string[];
   excludedCategoryIds?: string[];
+  excludedSubcategoryIds?: string[];
 };
 
 export type UpdatePromoCodeDto = Partial<CreatePromoCodeDto>;

@@ -34,6 +34,7 @@ import {
 import { listCategories, type Category } from "../api/categories";
 import { listManufacturers, type Manufacturer } from "../api/manufacturers";
 import { listCountries, type Country } from "../api/countries";
+import { listSubcategories, type Subcategory } from "../api/subcategories";
 import { useI18n } from "../store/i18n";
 import { PromoCodesTab } from "./PromoCodesTab";
 
@@ -70,6 +71,7 @@ export function DiscountsPage() {
   const items = data?.items || [];
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
 
@@ -85,6 +87,7 @@ export function DiscountsPage() {
     stackable?: boolean;
     productIds?: string[];
     categoryIds?: string[];
+    subcategoryIds?: string[];
     manufacturerIds?: string[];
     countryIds?: string[];
     tags?: string[];
@@ -92,6 +95,7 @@ export function DiscountsPage() {
       productIdsText?: string; // for UI input only
       productIds?: string[]; // normalized
       categoryIds?: string[];
+      subcategoryIds?: string[];
       manufacturerIds?: string[];
       countryIds?: string[];
       tags?: string[];
@@ -118,12 +122,14 @@ export function DiscountsPage() {
 
   const loadRefs = useCallback(async () => {
     try {
-      const [cats, mans, cnts] = await Promise.all([
+      const [cats, subcats, mans, cnts] = await Promise.all([
         listCategories(),
+        listSubcategories(),
         listManufacturers(),
         listCountries(),
       ]);
       setCategories(cats);
+      setSubcategories(subcats);
       setManufacturers(mans);
       setCountries(cnts);
     } catch {
@@ -202,6 +208,7 @@ export function DiscountsPage() {
         stackable: r.stackable ?? false,
         productIds: r.productIds || [],
         categoryIds: r.categoryIds || [],
+        subcategoryIds: r.subcategoryIds || [],
         manufacturerIds: r.manufacturerIds || [],
         countryIds: r.countryIds || [],
         tags: r.tags || [],
@@ -211,6 +218,7 @@ export function DiscountsPage() {
                 ? g.productIds.join(", ")
                 : "",
               categoryIds: g.categoryIds || [],
+              subcategoryIds: g.subcategoryIds || [],
               manufacturerIds: g.manufacturerIds || [],
               countryIds: g.countryIds || [],
               tags: g.tags || [],
@@ -451,6 +459,7 @@ export function DiscountsPage() {
       stackable: false,
       productIds: [],
       categoryIds: [],
+      subcategoryIds: [],
       manufacturerIds: [],
       countryIds: [],
       tags: [],
@@ -471,6 +480,8 @@ export function DiscountsPage() {
           productIds: productIds.length ? productIds : undefined,
           categoryIds:
             g.categoryIds && g.categoryIds.length ? g.categoryIds : undefined,
+          subcategoryIds:
+            g.subcategoryIds && g.subcategoryIds.length ? g.subcategoryIds : undefined,
           manufacturerIds:
             g.manufacturerIds && g.manufacturerIds.length
               ? g.manufacturerIds
@@ -487,6 +498,7 @@ export function DiscountsPage() {
       .filter((g) => g !== null) as Array<{
       productIds?: string[];
       categoryIds?: string[];
+      subcategoryIds?: string[];
       manufacturerIds?: string[];
       countryIds?: string[];
       tags?: string[];
@@ -509,6 +521,7 @@ export function DiscountsPage() {
           stackable: values.stackable,
           productIds: values.productIds || [],
           categoryIds: values.categoryIds || [],
+          subcategoryIds: values.subcategoryIds || [],
           manufacturerIds: values.manufacturerIds || [],
           countryIds: values.countryIds || [],
           tags: values.tags || [],
@@ -532,6 +545,7 @@ export function DiscountsPage() {
           stackable: values.stackable,
           productIds: values.productIds || [],
           categoryIds: values.categoryIds || [],
+          subcategoryIds: values.subcategoryIds || [],
           manufacturerIds: values.manufacturerIds || [],
           countryIds: values.countryIds || [],
           tags: values.tags || [],
@@ -766,6 +780,18 @@ export function DiscountsPage() {
                       />
                     </Form.Item>
                     <Form.Item
+                      label={t("discounts.form.subcategories")}
+                      name="subcategoryIds">
+                      <Select
+                        mode="multiple"
+                        placeholder={t("discounts.form.subcategories.placeholder")}
+                        options={subcategories.map((s) => ({
+                          value: s._id,
+                          label: s.name,
+                        }))}
+                      />
+                    </Form.Item>
+                    <Form.Item
                       label={t("discounts.form.manufacturers")}
                       name="manufacturerIds">
                       <Select
@@ -849,6 +875,21 @@ export function DiscountsPage() {
                                     options={categories.map((c) => ({
                                       value: c._id,
                                       label: c.name,
+                                    }))}
+                                    style={{ minWidth: 240 }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label={t("discounts.form.group.subcategories")}
+                                  name={[name, "subcategoryIds"]}>
+                                  <Select
+                                    mode="multiple"
+                                    placeholder={t(
+                                      "discounts.form.subcategories.placeholder",
+                                    )}
+                                    options={subcategories.map((s) => ({
+                                      value: s._id,
+                                      label: s.name,
                                     }))}
                                     style={{ minWidth: 240 }}
                                   />

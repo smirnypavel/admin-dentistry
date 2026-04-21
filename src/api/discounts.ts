@@ -3,6 +3,7 @@ import { api } from "./client";
 export type TargetGroup = {
   productIds?: string[];
   categoryIds?: string[];
+  subcategoryIds?: string[];
   manufacturerIds?: string[];
   countryIds?: string[];
   tags?: string[];
@@ -21,6 +22,7 @@ export type Discount = {
   stackable?: boolean;
   productIds?: string[];
   categoryIds?: string[];
+  subcategoryIds?: string[];
   manufacturerIds?: string[];
   countryIds?: string[];
   tags?: string[];
@@ -70,6 +72,7 @@ export type CreateDiscountDto = {
   stackable?: boolean;
   productIds?: string[];
   categoryIds?: string[];
+  subcategoryIds?: string[];
   manufacturerIds?: string[];
   countryIds?: string[];
   tags?: string[];

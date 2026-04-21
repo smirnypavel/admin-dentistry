@@ -30,6 +30,7 @@ import {
 } from "../api/promo-codes";
 import { listCategories, type Category } from "../api/categories";
 import { listProducts, type Product } from "../api/products";
+import { listSubcategories, type Subcategory } from "../api/subcategories";
 import { useI18n } from "../store/i18n";
 
 type EditorState = {
@@ -51,6 +52,7 @@ export function PromoCodesTab() {
   const items = data?.items || [];
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
   const [form] = Form.useForm<{
@@ -65,8 +67,10 @@ export function PromoCodesTab() {
     endsAt?: string | null;
     allowedProductIds?: string[];
     allowedCategoryIds?: string[];
+    allowedSubcategoryIds?: string[];
     excludedProductIds?: string[];
     excludedCategoryIds?: string[];
+    excludedSubcategoryIds?: string[];
   }>();
 
   const [editor, setEditor] = useState<EditorState>({
@@ -93,11 +97,13 @@ export function PromoCodesTab() {
 
   const loadRefs = useCallback(async () => {
     try {
-      const [cats, prods] = await Promise.all([
+      const [cats, subcats, prods] = await Promise.all([
         listCategories(),
+        listSubcategories(),
         listProducts({ limit: 500 }),
       ]);
       setCategories(cats);
+      setSubcategories(subcats);
       setProducts(prods.items || []);
     } catch {
       // ignore
@@ -153,8 +159,10 @@ export function PromoCodesTab() {
       endsAt: r.endsAt || null,
       allowedProductIds: r.allowedProductIds || [],
       allowedCategoryIds: r.allowedCategoryIds || [],
+      allowedSubcategoryIds: r.allowedSubcategoryIds || [],
       excludedProductIds: r.excludedProductIds || [],
       excludedCategoryIds: r.excludedCategoryIds || [],
+      excludedSubcategoryIds: r.excludedSubcategoryIds || [],
     });
     setEditor({ open: true, mode: "edit", record: r });
   };
@@ -207,8 +215,10 @@ export function PromoCodesTab() {
         endsAt: vals.endsAt || undefined,
         allowedProductIds: vals.allowedProductIds || [],
         allowedCategoryIds: vals.allowedCategoryIds || [],
+        allowedSubcategoryIds: vals.allowedSubcategoryIds || [],
         excludedProductIds: vals.excludedProductIds || [],
         excludedCategoryIds: vals.excludedCategoryIds || [],
+        excludedSubcategoryIds: vals.excludedSubcategoryIds || [],
       };
       if (editor.mode === "create") {
         await createPromoCode(dto);
@@ -506,6 +516,19 @@ export function PromoCodesTab() {
             />
           </Form.Item>
           <Form.Item
+            name="allowedSubcategoryIds"
+            label={t("promoCodes.form.allowedSubcategories")}>
+            <Select
+              mode="multiple"
+              allowClear
+              placeholder={t("promoCodes.form.allowedSubcategories.placeholder")}
+              options={subcategories.map((s) => ({
+                value: s._id,
+                label: s.name,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item
             name="allowedProductIds"
             label={t("promoCodes.form.allowedProducts")}>
             <Select
@@ -530,6 +553,19 @@ export function PromoCodesTab() {
               options={categories.map((c) => ({
                 value: c._id,
                 label: c.name,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item
+            name="excludedSubcategoryIds"
+            label={t("promoCodes.form.excludedSubcategories")}>
+            <Select
+              mode="multiple"
+              allowClear
+              placeholder={t("promoCodes.form.excludedSubcategories.placeholder")}
+              options={subcategories.map((s) => ({
+                value: s._id,
+                label: s.name,
               }))}
             />
           </Form.Item>

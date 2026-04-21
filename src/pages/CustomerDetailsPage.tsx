@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   App as AntApp,
+  Button,
   Descriptions,
   Spin,
   Table,
@@ -14,6 +15,7 @@ import { useI18n } from "../store/i18n";
 import {
   getCustomer,
   getCustomerOrders,
+  deleteCustomer,
   type CustomerDetail,
   type CustomerOrder,
   type ListCustomerOrdersResponse,
@@ -36,11 +38,13 @@ const statusColors: Record<string, string> = {
 
 export function CustomerDetailsPage() {
   const { t } = useI18n();
-  const { message } = AntApp.useApp();
+  const { message, modal } = AntApp.useApp();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
   const [loadingCustomer, setLoadingCustomer] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   const [ordersData, setOrdersData] =
     useState<ListCustomerOrdersResponse | null>(null);
@@ -78,6 +82,30 @@ export function CustomerDetailsPage() {
   useEffect(() => {
     void loadOrders();
   }, [loadOrders]);
+
+  const onDeleteCustomer = useCallback(() => {
+    if (!id || !customer) return;
+
+    modal.confirm({
+      title: t("customerDetails.delete.confirmTitle"),
+      content: t("customerDetails.delete.confirmText"),
+      okText: t("customerDetails.delete.confirmOk"),
+      okType: "danger",
+      cancelText: t("common.cancel"),
+      async onOk() {
+        setDeleting(true);
+        try {
+          await deleteCustomer(id);
+          message.success(t("customerDetails.delete.success"));
+          navigate("/customers");
+        } catch {
+          message.error(t("customerDetails.delete.error"));
+        } finally {
+          setDeleting(false);
+        }
+      },
+    });
+  }, [customer, id, message, modal, navigate, t]);
 
   /* Summary stats */
   const summary = useMemo(() => {
@@ -162,11 +190,28 @@ export function CustomerDetailsPage() {
 
   return (
     <AdminLayout>
-      <Title
-        level={4}
-        style={{ marginBottom: 16 }}>
-        {customer.name || customer.phone}
-      </Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 16,
+        }}>
+        <Title
+          level={4}
+          style={{ marginBottom: 0 }}>
+          {customer.name || customer.phone}
+        </Title>
+
+        <Button
+          danger
+          loading={deleting}
+          onClick={onDeleteCustomer}>
+          {t("customerDetails.delete.button")}
+        </Button>
+      </div>
 
       <Descriptions
         bordered
