@@ -569,10 +569,130 @@ function ContactsPreview({ data }: { data: Record<string, unknown> }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+// ─── Promotions Tab ────────────────────────────────────────────────────────────
+function PromotionsTab({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const set = (k: string, v: unknown) => onChange({ ...data, [k]: v });
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <Form.Item label="Заголовок секції">
+        <Input value={(data.sectionTitle as string) ?? ""} onChange={(e) => set("sectionTitle", e.target.value)} placeholder="Акційні пропозиції" />
+      </Form.Item>
+      <Divider orientation="left" orientationMargin={0} style={{ fontSize: 12, color: "#78716c" }}>Таймер зворотнього відліку</Divider>
+      <Form.Item label="Підпис таймера">
+        <Input value={(data.countdownLabel as string) ?? ""} onChange={(e) => set("countdownLabel", e.target.value)} placeholder="До кінця акції" />
+      </Form.Item>
+      <Form.Item label="Підзаголовок таймера">
+        <Input value={(data.countdownSublabel as string) ?? ""} onChange={(e) => set("countdownSublabel", e.target.value)} placeholder="Встигніть замовити!" />
+      </Form.Item>
+      <Divider orientation="left" orientationMargin={0} style={{ fontSize: 12, color: "#78716c" }}>Кнопки та підписи</Divider>
+      <Form.Item label="Підпис ціни">
+        <Input value={(data.priceLabel as string) ?? ""} onChange={(e) => set("priceLabel", e.target.value)} placeholder="Акційна ціна" />
+      </Form.Item>
+      <Form.Item label="Кнопка «Замовити»">
+        <Input value={(data.orderBtnText as string) ?? ""} onChange={(e) => set("orderBtnText", e.target.value)} placeholder="Замовити зараз" />
+      </Form.Item>
+      <Form.Item label="Кнопка «Деталі»">
+        <Input value={(data.detailsBtnText as string) ?? ""} onChange={(e) => set("detailsBtnText", e.target.value)} placeholder="Деталі" />
+      </Form.Item>
+      <Divider orientation="left" orientationMargin={0} style={{ fontSize: 12, color: "#78716c" }}>Кнопка показу всіх акцій</Divider>
+      <Form.Item label="Текст «Показати всі»">
+        <Input value={(data.showAllBtnText as string) ?? ""} onChange={(e) => set("showAllBtnText", e.target.value)} placeholder="Усі акційні пропозиції" />
+      </Form.Item>
+      <Form.Item label="Текст «Згорнути»">
+        <Input value={(data.collapseBtnText as string) ?? ""} onChange={(e) => set("collapseBtnText", e.target.value)} placeholder="Згорнути" />
+      </Form.Item>
+    </div>
+  );
+}
+
+// ─── Promotions Preview ────────────────────────────────────────────────────────
+function PromotionsPreview({ data }: { data: Record<string, unknown> }) {
+  const sectionTitle = (data.sectionTitle as string) || "Акційні пропозиції";
+  const countdownLabel = (data.countdownLabel as string) || "До кінця акції";
+  const countdownSublabel = (data.countdownSublabel as string) || "Встигніть замовити!";
+  const priceLabel = (data.priceLabel as string) || "Акційна ціна";
+  const orderBtnText = (data.orderBtnText as string) || "Замовити зараз";
+  const detailsBtnText = (data.detailsBtnText as string) || "Деталі";
+  const showAllBtnText = (data.showAllBtnText as string) || "Усі акційні пропозиції";
+  const collapseBtnText = (data.collapseBtnText as string) || "Згорнути";
+
+  return (
+    <div style={{ ...pv.page, background: "#fafaf8" }}>
+      {/* Header */}
+      <div style={{ padding: "24px 24px 12px", textAlign: "center", borderBottom: "1px solid #e7e5e4" }}>
+        <div style={{ fontSize: 22, fontWeight: 300, color: "#1c1917", letterSpacing: -0.5 }}>{sectionTitle}</div>
+      </div>
+
+      {/* Slider mockup */}
+      <div style={{ padding: "16px 24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          {/* Left: image placeholder */}
+          <div style={{ background: "linear-gradient(135deg, #fde68a, #fbbf24)", borderRadius: 12, height: 160, display: "flex", alignItems: "flex-end", padding: 12, position: "relative" }}>
+            <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, background: "rgba(0,0,0,0.15)", borderRadius: 12 }} />
+            <div style={{ background: "#1c1917", color: "#fff", padding: "6px 12px", borderRadius: 8, fontSize: 11, position: "relative", marginLeft: "auto" }}>
+              <span style={{ color: "#fbbf24" }}>★</span> Хіт продажів
+            </div>
+          </div>
+          {/* Right: content */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ fontSize: 15, fontWeight: 400, color: "#1c1917" }}>Преміум брекети зі знижкою</div>
+            <div style={{ fontSize: 11, color: "#57534e" }}>Спеціальна пропозиція на самолігуючі брекет-системи преміум класу.</div>
+            {/* Countdown */}
+            <div style={{ border: "2px solid #ef4444", borderRadius: 10, padding: "8px 10px", background: "#fff" }}>
+              <div style={{ fontSize: 10, color: "#57534e", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2, fontWeight: 500 }}>{countdownLabel}</div>
+              <div style={{ fontSize: 9, color: "#78716c", marginBottom: 4 }}>{countdownSublabel}</div>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {[{ v: "14", l: "дні" }, { v: "06", l: "год" }, { v: "32", l: "хв" }, { v: "45", l: "сек" }].map((u, i) => (
+                  <span key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "#dc2626" }}>{u.v}</span>
+                    <span style={{ fontSize: 8, color: "#78716c", textTransform: "uppercase" }}>{u.l}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            {/* Price */}
+            <div style={{ borderTop: "2px solid #e7e5e4", paddingTop: 8 }}>
+              <div style={{ fontSize: 10, color: "#57534e", fontWeight: 500, marginBottom: 2 }}>{priceLabel}</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: "#dc2626", marginBottom: 6 }}>2 500 ₴</div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ flex: 1, background: "#1c1917", color: "#fff", borderRadius: 8, padding: "6px 8px", fontSize: 11, textAlign: "center", fontWeight: 500 }}>{orderBtnText}</div>
+                <div style={{ border: "2px solid #d6d3d1", borderRadius: 8, padding: "6px 8px", fontSize: 11, fontWeight: 500 }}>{detailsBtnText}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Product cards grid (mini) */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: 16 }}>
+          {["Преміум брекети", "Комплект дуг 2+1", "Лігатури", "Стартовий набір"].map((title, i) => (
+            <div key={i} style={{ border: "2px solid #d6d3d1", borderRadius: 8, padding: "8px 6px", background: "#fff" }}>
+              <div style={{ background: `linear-gradient(135deg, #fde68a, #fbbf24)`, borderRadius: 6, height: 40, marginBottom: 6 }} />
+              <div style={{ fontSize: 10, fontWeight: 500, color: "#1c1917", marginBottom: 3, lineHeight: 1.3 }}>{title}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#dc2626" }}>2 500 ₴</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Show all / collapse buttons */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+          <div style={{ border: "2px solid #1c1917", borderRadius: 8, padding: "8px 20px", fontSize: 12, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+            🛍 {showAllBtnText}
+          </div>
+          <div style={{ border: "2px solid #d6d3d1", borderRadius: 8, padding: "8px 20px", fontSize: 12, fontWeight: 500, color: "#78716c" }}>
+            {collapseBtnText}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 const PAGE_KEYS = [
   { key: "about", label: "Про нас" },
   { key: "delivery", label: "Доставка" },
   { key: "contacts-page", label: "Контакти" },
+  { key: "promotions-section", label: "Акції" },
 ];
 
 export default function PagesContentPage() {
@@ -662,6 +782,7 @@ export default function PagesContentPage() {
                     {key === "about" && <AboutTab data={currentData} onChange={setCurrentData} />}
                     {key === "delivery" && <DeliveryTab data={currentData} onChange={setCurrentData} />}
                     {key === "contacts-page" && <ContactsTab data={currentData} onChange={setCurrentData} />}
+                    {key === "promotions-section" && <PromotionsTab data={currentData} onChange={setCurrentData} />}
                   </Form>
                 </Card>
               </div>
@@ -690,7 +811,7 @@ export default function PagesContentPage() {
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
                     <div style={{ flex: 1, background: "#fff", borderRadius: 4, padding: "2px 8px", fontSize: 11, color: "#78716c", marginLeft: 8 }}>
-                      orthostore.com.ua/{key === "contacts-page" ? "contacts" : key}
+                      orthostore.com.ua/{key === "contacts-page" ? "contacts" : key === "promotions-section" ? "" : key}
                     </div>
                     <Tag color="purple" style={{ fontSize: 10, margin: 0 }}>preview</Tag>
                   </div>
@@ -699,6 +820,7 @@ export default function PagesContentPage() {
                     {key === "about" && <AboutPreview data={currentData} galleryImages={galleryImages} />}
                     {key === "delivery" && <DeliveryPreview data={currentData} />}
                     {key === "contacts-page" && <ContactsPreview data={currentData} />}
+                    {key === "promotions-section" && <PromotionsPreview data={currentData} />}}
                   </div>
                 </Card>
               </div>
