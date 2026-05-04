@@ -40,6 +40,7 @@ import {
   PictureOutlined,
   FireOutlined,
   StarOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import logoUrl from "../assets/orthilogotype.png";
 
@@ -93,6 +94,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       gallery: t("layout.menu.gallery"),
       "promo-slides": t("layout.menu.promoSlides"),
       admins: t("layout.menu.admins"),
+      "pages-content": "Сторінки",
       reviews: "Відгуки",
     };
     const items = [] as { title: React.ReactNode; href?: string }[];
@@ -285,6 +287,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               key: "/hero",
               icon: <CrownOutlined />,
               label: <Link to="/hero">{t("layout.menu.hero")}</Link>,
+            },
+            {
+              key: "/pages-content",
+              icon: <FileTextOutlined />,
+              label: <Link to="/pages-content">Сторінки</Link>,
             },
             {
               key: "/gallery",
