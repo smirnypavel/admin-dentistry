@@ -8,8 +8,10 @@ import {
   Divider,
   Form,
   Input,
+  Modal,
   Space,
   Spin,
+  Switch,
   Tabs,
   Tag,
   Tooltip,
@@ -17,12 +19,21 @@ import {
 } from "antd";
 import {
   DeleteOutlined,
+  EditOutlined,
   EyeOutlined,
   PlusOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
 import { getAdminPageContent, updatePageContent } from "../api/pages";
 import { listGalleryImages, type GalleryImage } from "../api/gallery";
+import {
+  listPromoSlides,
+  createPromoSlide,
+  updatePromoSlide,
+  deletePromoSlide,
+  type PromoSlide,
+} from "../api/promo-slides";
+import { ImageUploader } from "../components/ImageUploader";
 import { AdminLayout } from "../components/AdminLayout";
 
 const { Title, Text } = Typography;
@@ -687,6 +698,228 @@ function PromotionsPreview({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+// ─── Inline Promo Slides Manager ─────────────────────────────────────────────
+type SlideFormValues = {
+  title: string;
+  description?: string;
+  price?: string;
+  oldPrice?: string;
+  badge?: string;
+  imageUrl?: string;
+  color?: string;
+  linkUrl?: string;
+  isActive: boolean;
+};
+
+function PromoSlidesManager() {
+  const { message, modal } = AntApp.useApp();
+  const [slides, setSlides] = useState<PromoSlide[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<PromoSlide | null>(null);
+  const [form] = Form.useForm<SlideFormValues>();
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setSlides(await listPromoSlides());
+    } catch {
+      message.error("Не вдалося завантажити слайди");
+    } finally {
+      setLoading(false);
+    }
+  }, [message]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const openCreate = () => {
+    setEditing(null);
+    form.resetFields();
+    form.setFieldsValue({ isActive: true, color: "from-yellow-300 to-yellow-400" });
+    setModalOpen(true);
+  };
+
+  const openEdit = (r: PromoSlide) => {
+    setEditing(r);
+    form.setFieldsValue({
+      title: r.title,
+      description: r.description || undefined,
+      price: r.price || undefined,
+      oldPrice: r.oldPrice || undefined,
+      badge: r.badge || undefined,
+      imageUrl: r.imageUrl || undefined,
+      color: r.color || undefined,
+      linkUrl: r.linkUrl || undefined,
+      isActive: r.isActive,
+    });
+    setModalOpen(true);
+  };
+
+  const onDelete = (r: PromoSlide) => {
+    modal.confirm({
+      title: "Видалити товар акції?",
+      content: `Видалити «${r.title}»?`,
+      okText: "Видалити",
+      okButtonProps: { danger: true },
+      async onOk() {
+        try {
+          await deletePromoSlide(r._id);
+          message.success("Видалено");
+          await load();
+        } catch {
+          message.error("Не вдалося видалити");
+        }
+      },
+    });
+  };
+
+  const onSave = async () => {
+    const v = await form.validateFields();
+    const payload = {
+      title: v.title,
+      description: v.description?.trim() || undefined,
+      price: v.price?.trim() || undefined,
+      oldPrice: v.oldPrice?.trim() || undefined,
+      badge: v.badge?.trim() || undefined,
+      imageUrl: v.imageUrl?.trim() || undefined,
+      color: v.color?.trim() || undefined,
+      linkUrl: v.linkUrl?.trim() || undefined,
+      isActive: !!v.isActive,
+      features: [],
+    };
+    try {
+      if (editing?._id) {
+        await updatePromoSlide(editing._id, payload);
+        message.success("Збережено");
+      } else {
+        await createPromoSlide(payload);
+        message.success("Товар додано");
+      }
+      setModalOpen(false);
+      await load();
+    } catch {
+      message.error("Не вдалося зберегти");
+    }
+  };
+
+  return (
+    <>
+      <Card
+        style={{ marginTop: 16 }}
+        size="small"
+        title={
+          <Space>
+            <span style={{ fontWeight: 600 }}>Товари акції</span>
+            <Tag color="blue" style={{ fontSize: 11 }}>слайдер + картки</Tag>
+          </Space>
+        }
+        extra={
+          <Button type="primary" icon={<PlusOutlined />} size="small" onClick={openCreate}>
+            Додати товар
+          </Button>
+        }
+      >
+        <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 12 }}>
+          Ці товари відображаються в <strong>обох блоках</strong>: у великому слайдері (вгорі) та в сітці карток нижче.
+        </Text>
+        <Spin spinning={loading}>
+          {slides.length === 0 && !loading ? (
+            <div style={{ textAlign: "center", color: "#a8a29e", padding: "24px 0", fontSize: 13 }}>
+              Немає товарів — натисніть «Додати товар»
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {slides.map((s) => (
+                <div
+                  key={s._id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 10px",
+                    border: "1px solid #e7e5e4",
+                    borderRadius: 8,
+                    background: s.isActive ? "#fff" : "#fafaf9",
+                    opacity: s.isActive ? 1 : 0.6,
+                  }}
+                >
+                  {s.imageUrl ? (
+                    <img src={s.imageUrl} alt="" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 44, height: 44, background: "#f0f0f0", borderRadius: 6, flexShrink: 0, display: "grid", placeItems: "center", color: "#bbb", fontSize: 11 }}>—</div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 500, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</div>
+                    <div style={{ fontSize: 12, color: "#78716c", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" as const }}>
+                      {s.price && <span style={{ fontWeight: 600, color: "#dc2626" }}>{s.price}</span>}
+                      {s.oldPrice && <span style={{ textDecoration: "line-through", color: "#a8a29e" }}>{s.oldPrice}</span>}
+                      {s.badge && <Tag color="gold" style={{ fontSize: 10, margin: 0 }}>{s.badge}</Tag>}
+                    </div>
+                  </div>
+                  <Tag color={s.isActive ? "green" : "default"} style={{ flexShrink: 0, fontSize: 11 }}>
+                    {s.isActive ? "Активний" : "Вимкнений"}
+                  </Tag>
+                  <Space size={4}>
+                    <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(s)} />
+                    <Button size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(s)} />
+                  </Space>
+                </div>
+              ))}
+            </div>
+          )}
+        </Spin>
+      </Card>
+
+      <Modal
+        open={modalOpen}
+        title={editing ? "Редагувати товар акції" : "Новий товар акції"}
+        onOk={onSave}
+        onCancel={() => setModalOpen(false)}
+        okText="Зберегти"
+        cancelText="Скасувати"
+        width={600}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+          <Form.Item name="title" label="Назва" rules={[{ required: true, message: "Вкажіть назву" }]}>
+            <Input placeholder="Преміум брекети зі знижкою" />
+          </Form.Item>
+          <Form.Item name="description" label="Опис">
+            <Input.TextArea rows={2} placeholder="Короткий опис пропозиції" />
+          </Form.Item>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item name="price" label="Акційна ціна">
+              <Input placeholder="2 500 ₴" />
+            </Form.Item>
+            <Form.Item name="oldPrice" label="Стара ціна">
+              <Input placeholder="2 940 ₴" />
+            </Form.Item>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item name="badge" label="Бейдж">
+              <Input placeholder="Хіт продажів" />
+            </Form.Item>
+            <Form.Item name="linkUrl" label="Посилання (на товар/категорію)">
+              <Input placeholder="/catalog/brekety" />
+            </Form.Item>
+          </div>
+          <Form.Item name="color" label="Колір градієнту (Tailwind)">
+            <Input placeholder="from-yellow-300 to-yellow-400" />
+          </Form.Item>
+          <Form.Item name="imageUrl" label="Фото товару">
+            <ImageUploader
+              value={form.getFieldValue("imageUrl")}
+              onChange={(url) => form.setFieldValue("imageUrl", url)}
+            />
+          </Form.Item>
+          <Form.Item name="isActive" label="Активний" valuePropName="checked">
+            <Switch />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+}
 
 const PAGE_KEYS = [
   { key: "about", label: "Про нас" },
@@ -785,6 +1018,7 @@ export default function PagesContentPage() {
                     {key === "promotions-section" && <PromotionsTab data={currentData} onChange={setCurrentData} />}
                   </Form>
                 </Card>
+                {key === "promotions-section" && <PromoSlidesManager />}
               </div>
 
               {/* ── Right: preview ── */}
