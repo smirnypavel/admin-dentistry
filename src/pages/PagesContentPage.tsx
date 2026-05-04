@@ -22,6 +22,7 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { getAdminPageContent, updatePageContent } from "../api/pages";
+import { listGalleryImages, type GalleryImage } from "../api/gallery";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -313,7 +314,7 @@ const pv: Record<string, React.CSSProperties> = {
 
 // ─── About Preview ────────────────────────────────────────────────────────────
 
-function AboutPreview({ data }: { data: Record<string, unknown> }) {
+function AboutPreview({ data, galleryImages }: { data: Record<string, unknown>; galleryImages: GalleryImage[] }) {
   const heroTitle = (data.heroTitle as string) ?? "";
   const heroSubtitle = (data.heroSubtitle as string) ?? "";
   const story = (data.story as string[]) ?? [];
@@ -337,6 +338,28 @@ function AboutPreview({ data }: { data: Record<string, unknown> }) {
           ))}
         </div>
       )}
+
+      {/* Gallery section */}
+      <div style={{ background: "#fafaf9", borderTop: "1px solid #e7e5e4", borderBottom: "1px solid #e7e5e4", padding: "16px 24px" }}>
+        <div style={{ ...pv.h2, marginBottom: 10, color: "#78716c", fontSize: 12, fontWeight: 500, letterSpacing: 1, textTransform: "uppercase" as const }}>Галерея фото</div>
+        {galleryImages.length === 0 ? (
+          <div style={{ color: "#a8a29e", fontSize: 12, fontStyle: "italic", padding: "8px 0" }}>
+            Немає фото — додайте їх у розділі <strong>Галерея</strong> (меню ліворуч)
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+            {galleryImages.filter((g) => g.isActive).map((img) => (
+              <div key={img._id} style={{ borderRadius: 8, overflow: "hidden", border: "2px solid #e7e5e4", aspectRatio: "3/4", background: "#f5f5f4", position: "relative" }}>
+                <img
+                  src={img.imageUrl}
+                  alt={img.altI18n?.uk ?? "gallery"}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {(pricingIntro || segments.length > 0) && (
         <div style={pv.section}>
@@ -558,6 +581,12 @@ export default function PagesContentPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dataMap, setDataMap] = useState<Record<string, Record<string, unknown>>>({});
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+
+  // Load gallery images once (for About preview)
+  useEffect(() => {
+    listGalleryImages().then(setGalleryImages).catch(() => {});
+  }, []);
 
   const loadPage = useCallback(async (key: string) => {
     if (dataMap[key]) return; // already loaded
@@ -665,7 +694,7 @@ export default function PagesContentPage() {
                   </div>
 
                   <div style={{ transform: "scale(0.9)", transformOrigin: "top left", width: "111%", minHeight: 200 }}>
-                    {key === "about" && <AboutPreview data={currentData} />}
+                    {key === "about" && <AboutPreview data={currentData} galleryImages={galleryImages} />}
                     {key === "delivery" && <DeliveryPreview data={currentData} />}
                     {key === "contacts-page" && <ContactsPreview data={currentData} />}
                   </div>
