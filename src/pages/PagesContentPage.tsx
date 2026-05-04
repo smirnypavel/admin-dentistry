@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { getAdminPageContent, updatePageContent } from "../api/pages";
 import { listGalleryImages, type GalleryImage } from "../api/gallery";
+import { AdminLayout } from "../components/AdminLayout";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -625,6 +626,7 @@ export default function PagesContentPage() {
     setDataMap((prev) => ({ ...prev, [activeTab]: d }));
 
   return (
+    <AdminLayout>
     <div style={{ padding: "24px 32px" }}>
       <div style={{ marginBottom: 20 }}>
         <Title level={3} style={{ margin: 0 }}>Редагування сторінок</Title>
@@ -705,5 +707,6 @@ export default function PagesContentPage() {
         }))}
       />
     </div>
+    </AdminLayout>
   );
 }
