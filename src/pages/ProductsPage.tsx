@@ -95,6 +95,7 @@ export function ProductsPage() {
     attributes?: Array<{ key: string; value: string }>;
     isActive: boolean;
     isNew?: boolean;
+    cashbackPercent?: number;
   }>();
 
   const [variantForm] = Form.useForm<ProductVariant & { _tmpId?: string }>();
@@ -227,6 +228,7 @@ export function ProductsPage() {
         })),
         isActive: r.isActive,
         isNew: r.isNew ?? false,
+        cashbackPercent: r.cashbackPercent ?? 0,
       });
       setVariants(
         (r.variants || []).map((v) => ({
@@ -383,6 +385,7 @@ export function ProductsPage() {
       images: [],
       isActive: true,
       isNew: false,
+      cashbackPercent: 0,
     });
     setVariants([]);
   };
@@ -487,6 +490,7 @@ export function ProductsPage() {
           variants: preparedVariants,
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
+          cashbackPercent: basics.cashbackPercent ?? 0,
         });
         message.success(t("products.save.created"));
       } else if (editor.mode === "edit" && editor.record) {
@@ -504,6 +508,7 @@ export function ProductsPage() {
           variants: preparedVariants,
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
+          cashbackPercent: basics.cashbackPercent ?? 0,
         });
         message.success(t("products.save.updated"));
       }
@@ -1150,6 +1155,12 @@ export function ProductsPage() {
                 name="isNew"
                 valuePropName="checked">
                 <Switch />
+              </Form.Item>
+              <Form.Item
+                label="Кешбек %"
+                name="cashbackPercent"
+                tooltip="Відсоток кешбеку для покупця (0 = без кешбеку, напр. 5 = 5%)">
+                <InputNumber min={0} max={100} precision={0} style={{ width: 120 }} addonAfter="%" placeholder="0" />
               </Form.Item>
             </Form>
           ) : (

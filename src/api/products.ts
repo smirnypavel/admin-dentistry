@@ -36,6 +36,7 @@ type ProductRaw = {
   optionsSummary?: Record<string, Array<string | number>>;
   isActive: boolean;
   isNew?: boolean;
+  cashbackPercent?: number;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -64,6 +65,7 @@ export type Product = {
   optionsSummary?: Record<string, Array<string | number>>;
   isActive: boolean;
   isNew?: boolean;
+  cashbackPercent?: number;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -131,6 +133,7 @@ export async function listProducts(
       optionsSummary: p.optionsSummary || undefined,
       isActive: p.isActive,
       isNew: p.isNew ?? false,
+      cashbackPercent: p.cashbackPercent ?? 0,
       createdAt: p.createdAt ?? null,
       updatedAt: p.updatedAt ?? null,
     })),
@@ -160,6 +163,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     optionsSummary: data.optionsSummary || undefined,
     isActive: data.isActive,
     isNew: data.isNew ?? false,
+    cashbackPercent: data.cashbackPercent ?? 0,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -179,6 +183,7 @@ export type CreateProductDto = {
   variants: ProductVariant[];
   isActive?: boolean;
   isNew?: boolean;
+  cashbackPercent?: number;
 };
 
 export async function createProduct(dto: CreateProductDto): Promise<Product> {
@@ -211,6 +216,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     variants: dto.variants,
     isActive: dto.isActive,
     isNew: dto.isNew,
+    cashbackPercent: dto.cashbackPercent,
   } as const;
   const { data } = await api.post<ProductRaw>("/admin/products", wire);
   return {
