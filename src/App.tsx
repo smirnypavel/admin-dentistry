@@ -16,6 +16,7 @@ import { ContactsPage } from "./pages/ContactsPage.tsx";
 import { HeroPage } from "./pages/HeroPage.tsx";
 import { GalleryPage } from "./pages/GalleryPage.tsx";
 import { PromoSlidesPage } from "./pages/PromoSlidesPage.tsx";
+import { PromoGridPage } from "./pages/PromoGridPage.tsx";
 import { CustomersPage } from "./pages/CustomersPage.tsx";
 import { CustomerDetailsPage } from "./pages/CustomerDetailsPage.tsx";
 import { ReviewsPage } from "./pages/ReviewsPage.tsx";
@@ -141,6 +142,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PromoSlidesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/promo-grid"
+            element={
+              <ProtectedRoute>
+                <PromoGridPage />
               </ProtectedRoute>
             }
           />

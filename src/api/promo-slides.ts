@@ -18,6 +18,7 @@ export type PromoSlide = {
   linkUrl?: string | null;
   sortOrder: number;
   isActive: boolean;
+  slot: 'slider' | 'grid';
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -30,8 +31,9 @@ export type UpdatePromoSlideRequest = Partial<
   Omit<PromoSlide, "_id" | "createdAt" | "updatedAt">
 >;
 
-export async function listPromoSlides() {
-  const { data } = await api.get<PromoSlide[]>("/admin/promo-slides");
+export async function listPromoSlides(slot?: 'slider' | 'grid') {
+  const params = slot ? `?slot=${slot}` : '';
+  const { data } = await api.get<PromoSlide[]>(`/admin/promo-slides${params}`);
   return data;
 }
 

@@ -975,7 +975,6 @@ const PAGE_KEYS = [
   { key: "about", label: "Про нас" },
   { key: "delivery", label: "Доставка" },
   { key: "contacts-page", label: "Контакти" },
-  { key: "promotions-section", label: "Акції" },
 ];
 
 export default function PagesContentPage() {
@@ -1065,7 +1064,6 @@ export default function PagesContentPage() {
                     {key === "about" && <AboutTab data={currentData} onChange={setCurrentData} />}
                     {key === "delivery" && <DeliveryTab data={currentData} onChange={setCurrentData} />}
                     {key === "contacts-page" && <ContactsTab data={currentData} onChange={setCurrentData} />}
-                    {key === "promotions-section" && <PromotionsTab data={currentData} onChange={setCurrentData} />}
                   </Form>
                 </Card>
               </div>
@@ -1094,7 +1092,7 @@ export default function PagesContentPage() {
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
                     <div style={{ flex: 1, background: "#fff", borderRadius: 4, padding: "2px 8px", fontSize: 11, color: "#78716c", marginLeft: 8 }}>
-                      orthostore.com.ua/{key === "contacts-page" ? "contacts" : key === "promotions-section" ? "" : key}
+                      orthostore.com.ua/{key === "contacts-page" ? "contacts" : key}
                     </div>
                     <Tag color="purple" style={{ fontSize: 10, margin: 0 }}>preview</Tag>
                   </div>
@@ -1103,7 +1101,6 @@ export default function PagesContentPage() {
                     {key === "about" && <AboutPreview data={currentData} galleryImages={galleryImages} />}
                     {key === "delivery" && <DeliveryPreview data={currentData} />}
                     {key === "contacts-page" && <ContactsPreview data={currentData} />}
-                    {key === "promotions-section" && <PromotionsPreview data={currentData} />}}
                   </div>
                 </Card>
               </div>

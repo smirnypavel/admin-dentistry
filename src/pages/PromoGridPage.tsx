@@ -34,8 +34,8 @@ import {
 } from "../api/promo-slides";
 import { useI18n } from "../store/i18n";
 
-const SLOT = 'slider' as const;
-const MAX_SLIDES = 5;
+const SLOT = "grid" as const;
+const MAX_SLIDES = 12;
 
 type FeatureRow = PromoSlideFeature & { _key: string };
 
@@ -54,7 +54,7 @@ type FormValues = {
 
 let featureKeyCounter = 0;
 
-export function PromoSlidesPage() {
+export function PromoGridPage() {
   const { message } = AntApp.useApp();
   const { t } = useI18n();
   const [form] = Form.useForm<FormValues>();
@@ -69,11 +69,11 @@ export function PromoSlidesPage() {
     try {
       setSlides(await listPromoSlides(SLOT));
     } catch {
-      message.error(t("promoSlides.loadError"));
+      message.error("Не вдалося завантажити товари сітки");
     } finally {
       setLoading(false);
     }
-  }, [message, t]);
+  }, [message]);
 
   useEffect(() => {
     void load();
@@ -81,12 +81,12 @@ export function PromoSlidesPage() {
 
   const openCreate = () => {
     if (slides.length >= MAX_SLIDES) {
-      void message.warning(`Максимум ${MAX_SLIDES} слайдів у слайдері. Видаліть один, щоб додати новий.`);
+      void message.warning(`Максимум ${MAX_SLIDES} товарів у сітці. Видаліть один, щоб додати новий.`);
       return;
     }
     setEditing(null);
     form.resetFields();
-    form.setFieldsValue({ isActive: true, color: "from-yellow-300 to-yellow-400" });
+    form.setFieldsValue({ isActive: true, color: "from-blue-400 to-blue-600" });
     setFeatures([]);
     setModalOpen(true);
   };
@@ -140,21 +140,21 @@ export function PromoSlidesPage() {
       } else {
         await createPromoSlide({ ...payload, slot: SLOT });
       }
-      message.success(t("promoSlides.save.success"));
+      message.success("Збережено");
       setModalOpen(false);
       await load();
     } catch {
-      message.error(t("promoSlides.save.error"));
+      message.error("Не вдалося зберегти");
     }
   };
 
   const onDelete = async (id: string) => {
     try {
       await deletePromoSlide(id);
-      message.success(t("promoSlides.delete.success"));
+      message.success("Видалено");
       await load();
     } catch {
-      message.error(t("promoSlides.delete.error"));
+      message.error("Не вдалося видалити");
     }
   };
 
@@ -167,12 +167,11 @@ export function PromoSlidesPage() {
     try {
       await reorderPromoSlides(newSlides.map((s) => s._id));
     } catch {
-      message.error(t("promoSlides.reorder.error"));
+      message.error("Не вдалося змінити порядок");
       await load();
     }
   };
 
-  /* ── Features sub-form ── */
   const addFeature = () => {
     setFeatures((prev) => [
       ...prev,
@@ -182,9 +181,7 @@ export function PromoSlidesPage() {
 
   const updateFeature = (key: string, field: "text" | "href", value: string) => {
     setFeatures((prev) =>
-      prev.map((f) =>
-        f._key === key ? { ...f, [field]: value } : f,
-      ),
+      prev.map((f) => (f._key === key ? { ...f, [field]: value } : f)),
     );
   };
 
@@ -214,7 +211,7 @@ export function PromoSlidesPage() {
       ),
     },
     {
-      title: t("promoSlides.col.image"),
+      title: "Фото",
       dataIndex: "imageUrl",
       width: 80,
       render: (url: string | null) =>
@@ -242,12 +239,12 @@ export function PromoSlidesPage() {
         ),
     },
     {
-      title: t("promoSlides.col.title"),
+      title: "Назва",
       dataIndex: "title",
       ellipsis: true,
     },
     {
-      title: t("promoSlides.col.price"),
+      title: "Ціна",
       width: 140,
       render: (_: unknown, r: PromoSlide) => (
         <Space direction="vertical" size={0}>
@@ -261,13 +258,13 @@ export function PromoSlidesPage() {
       ),
     },
     {
-      title: t("promoSlides.col.badge"),
+      title: "Бейдж",
       dataIndex: "badge",
       width: 140,
       render: (badge: string | null) => (badge ? <Tag color="gold">{badge}</Tag> : "—"),
     },
     {
-      title: t("promoSlides.col.active"),
+      title: "Активний",
       dataIndex: "isActive",
       width: 80,
       render: (v: boolean) => (
@@ -275,17 +272,13 @@ export function PromoSlidesPage() {
       ),
     },
     {
-      title: t("promoSlides.col.actions"),
+      title: "Дії",
       width: 120,
       render: (_: unknown, record: PromoSlide) => (
         <Space>
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => openEdit(record)}
-          />
+          <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           <Popconfirm
-            title={t("promoSlides.delete.confirmTitle")}
+            title="Видалити товар?"
             onConfirm={() => onDelete(record._id)}
             okType="danger"
           >
@@ -302,9 +295,9 @@ export function PromoSlidesPage() {
         <Space style={{ justifyContent: "space-between", width: "100%" }} wrap>
           <Space>
             <Typography.Title level={4} style={{ margin: 0 }}>
-              🎞 Акції Слайдер
+              🗂 Акції Сітка
             </Typography.Title>
-            <Tag color={slides.length >= MAX_SLIDES ? 'red' : 'blue'}>
+            <Tag color={slides.length >= MAX_SLIDES ? "red" : "blue"}>
               {slides.length} / {MAX_SLIDES}
             </Tag>
           </Space>
@@ -314,7 +307,7 @@ export function PromoSlidesPage() {
             onClick={openCreate}
             disabled={slides.length >= MAX_SLIDES}
           >
-            {t("promoSlides.actions.create")}
+            Додати товар
           </Button>
         </Space>
 
@@ -322,7 +315,7 @@ export function PromoSlidesPage() {
           <Alert
             type="warning"
             showIcon
-            message={`Досягнуто максимум ${MAX_SLIDES} слайдів. Видаліть один, щоб додати новий.`}
+            message={`Досягнуто максимум ${MAX_SLIDES} товарів. Видаліть один, щоб додати новий.`}
           />
         )}
 
@@ -337,11 +330,7 @@ export function PromoSlidesPage() {
 
         <Modal
           open={modalOpen}
-          title={
-            editing
-              ? t("promoSlides.modal.editTitle")
-              : t("promoSlides.modal.createTitle")
-          }
+          title={editing ? "Редагувати товар" : "Новий товар сітки"}
           onCancel={() => setModalOpen(false)}
           onOk={() => void onSave()}
           width={640}
@@ -349,37 +338,30 @@ export function PromoSlidesPage() {
         >
           <Form<FormValues> layout="vertical" form={form}>
             <Form.Item
-              label={t("promoSlides.form.title")}
+              label="Назва"
               name="title"
-              rules={[{ required: true, message: t("promoSlides.form.title.required") }]}
+              rules={[{ required: true, message: "Вкажіть назву" }]}
             >
               <Input />
             </Form.Item>
 
-            <Form.Item
-              label={t("promoSlides.form.description")}
-              name="description"
-            >
+            <Form.Item label="Опис" name="description">
               <Input.TextArea rows={3} />
             </Form.Item>
 
             <Space wrap>
-              <Form.Item label={t("promoSlides.form.price")} name="price">
+              <Form.Item label="Акційна ціна" name="price">
                 <Input placeholder="2 500 ₴" style={{ width: 160 }} />
               </Form.Item>
-              <Form.Item label={t("promoSlides.form.oldPrice")} name="oldPrice">
+              <Form.Item label="Стара ціна" name="oldPrice">
                 <Input placeholder="2 940 ₴" style={{ width: 160 }} />
               </Form.Item>
-              <Form.Item label={t("promoSlides.form.badge")} name="badge">
+              <Form.Item label="Бейдж" name="badge">
                 <Input placeholder="Хіт продажів" style={{ width: 180 }} />
               </Form.Item>
             </Space>
 
-            <Form.Item
-              label={t("promoSlides.form.image")}
-              name="imageUrl"
-              valuePropName="value"
-            >
+            <Form.Item label="Фото" name="imageUrl" valuePropName="value">
               <ImageUploader
                 folder="promo-slides"
                 accept={["image/jpeg", "image/png", "image/webp"]}
@@ -388,35 +370,28 @@ export function PromoSlidesPage() {
             </Form.Item>
 
             <Space wrap>
-              <Form.Item label={t("promoSlides.form.color")} name="color">
+              <Form.Item label="Колір (Tailwind градієнт)" name="color">
                 <Input
-                  placeholder="from-yellow-300 to-yellow-400"
+                  placeholder="from-blue-400 to-blue-600"
                   style={{ width: 280 }}
                 />
               </Form.Item>
-              <Form.Item label={t("promoSlides.form.linkUrl")} name="linkUrl">
+              <Form.Item label="Посилання" name="linkUrl">
                 <Input placeholder="/catalog/brekety" style={{ width: 240 }} />
               </Form.Item>
             </Space>
 
             <Space wrap>
-              <Form.Item label={t("promoSlides.form.sortOrder")} name="sortOrder">
+              <Form.Item label="Порядок" name="sortOrder">
                 <InputNumber min={0} style={{ width: 100 }} />
               </Form.Item>
-              <Form.Item
-                label={t("promoSlides.form.isActive")}
-                name="isActive"
-                valuePropName="checked"
-              >
+              <Form.Item label="Активний" name="isActive" valuePropName="checked">
                 <Switch />
               </Form.Item>
             </Space>
 
-            {/* Features sub-form */}
             <div style={{ marginTop: 8 }}>
-              <Typography.Text strong>
-                {t("promoSlides.form.features")}
-              </Typography.Text>
+              <Typography.Text strong>Особливості (список)</Typography.Text>
               <div style={{ marginTop: 8 }}>
                 {features.map((f) => (
                   <Space
@@ -425,19 +400,15 @@ export function PromoSlidesPage() {
                     align="start"
                   >
                     <Input
-                      placeholder={t("promoSlides.form.feature.text")}
+                      placeholder="Текст"
                       value={f.text}
-                      onChange={(e) =>
-                        updateFeature(f._key, "text", e.target.value)
-                      }
+                      onChange={(e) => updateFeature(f._key, "text", e.target.value)}
                       style={{ width: 260 }}
                     />
                     <Input
-                      placeholder={t("promoSlides.form.feature.href")}
+                      placeholder="Посилання (необов'язково)"
                       value={f.href || ""}
-                      onChange={(e) =>
-                        updateFeature(f._key, "href", e.target.value)
-                      }
+                      onChange={(e) => updateFeature(f._key, "href", e.target.value)}
                       style={{ width: 200 }}
                     />
                     <Button
@@ -448,13 +419,8 @@ export function PromoSlidesPage() {
                     />
                   </Space>
                 ))}
-                <Button
-                  type="dashed"
-                  icon={<PlusOutlined />}
-                  onClick={addFeature}
-                  size="small"
-                >
-                  {t("promoSlides.form.feature.add")}
+                <Button type="dashed" icon={<PlusOutlined />} onClick={addFeature} size="small">
+                  Додати
                 </Button>
               </div>
             </div>
@@ -465,4 +431,4 @@ export function PromoSlidesPage() {
   );
 }
 
-export default PromoSlidesPage;
+export default PromoGridPage;

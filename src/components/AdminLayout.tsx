@@ -92,7 +92,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       contacts: t("layout.menu.contacts"),
       hero: t("layout.menu.hero"),
       gallery: t("layout.menu.gallery"),
-      "promo-slides": t("layout.menu.promoSlides"),
+      "promo-slides": "🎞 Акції Слайдер",
+      "promo-grid": "🗂 Акції Сітка",
       admins: t("layout.menu.admins"),
       "pages-content": "Сторінки",
       reviews: "Відгуки",
@@ -302,7 +303,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               key: "/promo-slides",
               icon: <FireOutlined />,
               label: (
-                <Link to="/promo-slides">{t("layout.menu.promoSlides")}</Link>
+                <Link to="/promo-slides">🎞 Акції Слайдер</Link>
+              ),
+            },
+            {
+              key: "/promo-grid",
+              icon: <FireOutlined />,
+              label: (
+                <Link to="/promo-grid">🗂 Акції Сітка</Link>
               ),
             },
             {
