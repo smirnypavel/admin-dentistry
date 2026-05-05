@@ -583,6 +583,195 @@ function ContactsPreview({ data }: { data: Record<string, unknown> }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+// ─── Doctors (homepage block) ─────────────────────────────────────────────────
+
+interface DoctorEntry {
+  doctorName: string;
+  doctorPosition: string;
+  doctorClinic: string;
+  doctorDescription: string;
+  doctorImage: string;
+  clinicName: string;
+  clinicLocation: string;
+  clinicPhone: string;
+  clinicDescription: string;
+  clinicServices: string[];
+  clinicImage: string;
+}
+
+const EMPTY_DOCTOR: DoctorEntry = {
+  doctorName: "",
+  doctorPosition: "",
+  doctorClinic: "",
+  doctorDescription: "",
+  doctorImage: "",
+  clinicName: "",
+  clinicLocation: "",
+  clinicPhone: "",
+  clinicDescription: "",
+  clinicServices: [],
+  clinicImage: "",
+};
+
+function DoctorsTab({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const set = (key: string, val: unknown) => onChange({ ...data, [key]: val });
+  const entries: DoctorEntry[] = (data.testimonials as DoctorEntry[]) ?? [];
+
+  const setEntry = (i: number, field: keyof DoctorEntry, val: unknown) => {
+    const next = entries.map((e, idx) => idx === i ? { ...e, [field]: val } : e);
+    set("testimonials", next);
+  };
+
+  return (
+    <div style={{ maxWidth: 680 }}>
+      <Title level={5}>Слайди «ORTHOSTORE рекомендує»</Title>
+      <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 16 }}>
+        Кожен запис — один слайд. Лівий блок (лікар/відгук) і правий блок (клініка) синхронізовані.
+      </Text>
+
+      {entries.map((entry, i) => (
+        <Card
+          key={i}
+          size="small"
+          style={{ marginBottom: 16 }}
+          title={<span style={{ fontWeight: 500 }}>{entry.doctorName || `Слайд ${i + 1}`}</span>}
+          extra={
+            <Button
+              type="text"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              onClick={() => set("testimonials", entries.filter((_, idx) => idx !== i))}
+            />
+          }
+        >
+          <Divider orientation="left" plain style={{ fontSize: 12, color: "#78716c" }}>Лікар / відгук</Divider>
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Space wrap>
+              <Form.Item label="Ім'я" style={{ marginBottom: 0 }}>
+                <Input value={entry.doctorName} onChange={(e) => setEntry(i, "doctorName", e.target.value)} style={{ width: 200 }} />
+              </Form.Item>
+              <Form.Item label="Посада" style={{ marginBottom: 0 }}>
+                <Input value={entry.doctorPosition} onChange={(e) => setEntry(i, "doctorPosition", e.target.value)} style={{ width: 220 }} />
+              </Form.Item>
+            </Space>
+            <Form.Item label="Клініка (підпис)" style={{ marginBottom: 0 }}>
+              <Input value={entry.doctorClinic} onChange={(e) => setEntry(i, "doctorClinic", e.target.value)} />
+            </Form.Item>
+            <Form.Item label="Відгук" style={{ marginBottom: 0 }}>
+              <TextArea autoSize={{ minRows: 2 }} value={entry.doctorDescription} onChange={(e) => setEntry(i, "doctorDescription", e.target.value)} />
+            </Form.Item>
+            <Form.Item label="Фото лікаря (URL)" style={{ marginBottom: 0 }}>
+              <Input value={entry.doctorImage} onChange={(e) => setEntry(i, "doctorImage", e.target.value)} placeholder="/images/doctors/doctors.jpeg" />
+            </Form.Item>
+            <ImageUploader
+              label="або завантажити фото лікаря"
+              value={entry.doctorImage}
+              onChange={(url) => setEntry(i, "doctorImage", url)}
+            />
+          </Space>
+
+          <Divider orientation="left" plain style={{ fontSize: 12, color: "#78716c", marginTop: 16 }}>Клініка (правий блок)</Divider>
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Space wrap>
+              <Form.Item label="Назва клініки" style={{ marginBottom: 0 }}>
+                <Input value={entry.clinicName} onChange={(e) => setEntry(i, "clinicName", e.target.value)} style={{ width: 220 }} />
+              </Form.Item>
+              <Form.Item label="Телефон" style={{ marginBottom: 0 }}>
+                <Input value={entry.clinicPhone} onChange={(e) => setEntry(i, "clinicPhone", e.target.value)} style={{ width: 180 }} />
+              </Form.Item>
+            </Space>
+            <Form.Item label="Адреса" style={{ marginBottom: 0 }}>
+              <Input value={entry.clinicLocation} onChange={(e) => setEntry(i, "clinicLocation", e.target.value)} />
+            </Form.Item>
+            <Form.Item label="Опис клініки" style={{ marginBottom: 0 }}>
+              <TextArea autoSize={{ minRows: 2 }} value={entry.clinicDescription} onChange={(e) => setEntry(i, "clinicDescription", e.target.value)} />
+            </Form.Item>
+            <StringListEditor
+              label="Послуги (теги)"
+              value={entry.clinicServices}
+              onChange={(v) => setEntry(i, "clinicServices", v)}
+              placeholder="Назва послуги"
+            />
+            <Form.Item label="Фото клініки (URL)" style={{ marginBottom: 0 }}>
+              <Input value={entry.clinicImage} onChange={(e) => setEntry(i, "clinicImage", e.target.value)} placeholder="/images/doctors/likarnya.jpeg" />
+            </Form.Item>
+            <ImageUploader
+              label="або завантажити фото клініки"
+              value={entry.clinicImage}
+              onChange={(url) => setEntry(i, "clinicImage", url)}
+            />
+          </Space>
+        </Card>
+      ))}
+
+      <Button
+        type="dashed"
+        icon={<PlusOutlined />}
+        onClick={() => set("testimonials", [...entries, { ...EMPTY_DOCTOR, id: entries.length + 1 }])}
+      >
+        Додати слайд
+      </Button>
+    </div>
+  );
+}
+
+function DoctorsPreview({ data }: { data: Record<string, unknown> }) {
+  const entries: DoctorEntry[] = (data.testimonials as DoctorEntry[]) ?? [];
+  if (entries.length === 0) {
+    return <div style={{ padding: 24, color: "#a8a29e", fontSize: 13 }}>Немає слайдів — додайте перший запис.</div>;
+  }
+  const e = entries[0];
+  return (
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: "#1c1917" }}>
+      <div style={{ background: "#1c1917", color: "#fff", padding: "12px 16px" }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase" as const }}>ORTHOSTORE рекомендує</div>
+        <div style={{ fontSize: 11, color: "#a8a29e", marginTop: 2 }}>Лікарі та клініки, які працюють з нами</div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+        {/* Doctor */}
+        <div style={{ borderRight: "1px solid #e7e5e4", padding: 14 }}>
+          {e.doctorImage ? (
+            <div style={{ aspectRatio: "16/9", background: "#f5f5f4", borderRadius: 8, overflow: "hidden", marginBottom: 10, border: "2px solid #e7e5e4" }}>
+              <img src={e.doctorImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+            </div>
+          ) : (
+            <div style={{ aspectRatio: "16/9", background: "#f0f0ef", borderRadius: 8, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#a8a29e", fontSize: 12 }}>фото лікаря</div>
+          )}
+          <div style={{ fontWeight: 500, fontSize: 14 }}>{e.doctorName || <span style={{ color: "#ccc" }}>Ім'я…</span>}</div>
+          <div style={{ color: "#78716c", fontSize: 12 }}>{e.doctorPosition}</div>
+          <div style={{ color: "#a8a29e", fontSize: 11, marginBottom: 8 }}>{e.doctorClinic}</div>
+          <div style={{ color: "#57534e", fontSize: 12, lineHeight: 1.5 }}>{e.doctorDescription}</div>
+        </div>
+        {/* Clinic */}
+        <div style={{ padding: 14 }}>
+          {e.clinicImage ? (
+            <div style={{ aspectRatio: "16/9", background: "#1c1917", borderRadius: 8, overflow: "hidden", marginBottom: 10, border: "2px solid #1c1917" }}>
+              <img src={e.clinicImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          ) : (
+            <div style={{ aspectRatio: "16/9", background: "#2c2c2c", borderRadius: 8, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#666", fontSize: 12 }}>фото клініки</div>
+          )}
+          <div style={{ fontWeight: 500, fontSize: 14 }}>{e.clinicName || <span style={{ color: "#ccc" }}>Клініка…</span>}</div>
+          <div style={{ color: "#78716c", fontSize: 12, marginBottom: 4 }}>📍 {e.clinicLocation}</div>
+          {e.clinicPhone && <div style={{ color: "#78716c", fontSize: 12, marginBottom: 6 }}>{e.clinicPhone}</div>}
+          <div style={{ color: "#57534e", fontSize: 12, marginBottom: 8, lineHeight: 1.5 }}>{e.clinicDescription}</div>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
+            {e.clinicServices.map((s, i) => (
+              <span key={i} style={{ padding: "2px 8px", border: "1px solid #d6d3d1", borderRadius: 6, fontSize: 11, color: "#57534e" }}>{s}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+      {entries.length > 1 && (
+        <div style={{ padding: "8px 16px", borderTop: "1px solid #e7e5e4", fontSize: 11, color: "#a8a29e", textAlign: "center" }}>
+          + ще {entries.length - 1} слайд{entries.length - 1 > 1 ? 'и' : ''}
+        </div>
+      )}
+    </div>
+  );
+}
+
 type SlideFormValues = {
   title: string;
   description?: string;
@@ -975,6 +1164,7 @@ const PAGE_KEYS = [
   { key: "about", label: "Про нас" },
   { key: "delivery", label: "Доставка" },
   { key: "contacts-page", label: "Контакти" },
+  { key: "homepage-doctors", label: "Лікарі / клініки" },
 ];
 
 export default function PagesContentPage() {
@@ -1064,6 +1254,7 @@ export default function PagesContentPage() {
                     {key === "about" && <AboutTab data={currentData} onChange={setCurrentData} />}
                     {key === "delivery" && <DeliveryTab data={currentData} onChange={setCurrentData} />}
                     {key === "contacts-page" && <ContactsTab data={currentData} onChange={setCurrentData} />}
+                    {key === "homepage-doctors" && <DoctorsTab data={currentData} onChange={setCurrentData} />}
                   </Form>
                 </Card>
               </div>
@@ -1092,7 +1283,7 @@ export default function PagesContentPage() {
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
                     <div style={{ flex: 1, background: "#fff", borderRadius: 4, padding: "2px 8px", fontSize: 11, color: "#78716c", marginLeft: 8 }}>
-                      orthostore.com.ua/{key === "contacts-page" ? "contacts" : key}
+                      orthostore.com.ua/{key === "contacts-page" ? "contacts" : key === "homepage-doctors" ? "" : key}
                     </div>
                     <Tag color="purple" style={{ fontSize: 10, margin: 0 }}>preview</Tag>
                   </div>
@@ -1101,6 +1292,7 @@ export default function PagesContentPage() {
                     {key === "about" && <AboutPreview data={currentData} galleryImages={galleryImages} />}
                     {key === "delivery" && <DeliveryPreview data={currentData} />}
                     {key === "contacts-page" && <ContactsPreview data={currentData} />}
+                    {key === "homepage-doctors" && <DoctorsPreview data={currentData} />}
                   </div>
                 </Card>
               </div>
