@@ -21,6 +21,7 @@ import { CustomersPage } from "./pages/CustomersPage.tsx";
 import { CustomerDetailsPage } from "./pages/CustomerDetailsPage.tsx";
 import { ReviewsPage } from "./pages/ReviewsPage.tsx";
 import PagesContentPage from "./pages/PagesContentPage.tsx";
+import { MediaManagerPage } from "./pages/MediaManagerPage.tsx";
 import { ProtectedRoute } from "./routes/ProtectedRoute.tsx";
 import "./App.css";
 
@@ -190,6 +191,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/media"
+            element={
+              <ProtectedRoute>
+                <MediaManagerPage />
               </ProtectedRoute>
             }
           />

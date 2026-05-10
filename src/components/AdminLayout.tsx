@@ -97,6 +97,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       admins: t("layout.menu.admins"),
       "pages-content": "Сторінки",
       reviews: "Відгуки",
+      media: "Медіа",
     };
     const items = [] as { title: React.ReactNode; href?: string }[];
     if (segs.length === 0) {
@@ -312,6 +313,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               label: (
                 <Link to="/promo-grid">🗂 Акції Сітка</Link>
               ),
+            },
+            {
+              key: "/media",
+              icon: <FolderOutlined />,
+              label: <Link to="/media">Медіа</Link>,
             },
             {
               key: "/admins",
