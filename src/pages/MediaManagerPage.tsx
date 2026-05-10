@@ -240,11 +240,11 @@ export function MediaManagerPage() {
   return (
     <AdminLayout>
       <div style={{ padding: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8, flexWrap: "wrap" }}>
           <Typography.Title level={4} style={{ margin: 0 }}>
             📁 Медіа-менеджер
           </Typography.Title>
-          <Space>
+          <Space wrap>
             <Button icon={<FolderAddOutlined />} onClick={() => setNewFolderModal(true)}>
               Нова папка
             </Button>
@@ -268,27 +268,36 @@ export function MediaManagerPage() {
 
         <Layout style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", minHeight: 600 }}>
           {/* Left: Folder tree */}
-          <Sider width={240} style={{ background: "#fafafa", borderRight: "1px solid #f0f0f0", borderRadius: "8px 0 0 8px", padding: 8 }}>
-            <div style={{ padding: "4px 8px", fontWeight: 600, color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
+          <Sider
+            width={260}
+            collapsible
+            breakpoint="md"
+            collapsedWidth={0}
+            zeroWidthTriggerStyle={{ top: 12 }}
+            style={{ background: "#fafafa", borderRight: "1px solid #f0f0f0", borderRadius: "8px 0 0 8px" }}
+          >
+            <div style={{ padding: "12px 12px 4px", fontWeight: 600, color: "#888", fontSize: 11, textTransform: "uppercase", marginBottom: 4 }}>
               Папки
             </div>
-            {treeData.length === 0 ? (
-              <Empty description="Немає папок" image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ margin: "20px 0" }} />
-            ) : (
-              <Tree
-                showIcon
-                blockNode
-                loadData={onLoadData}
-                treeData={treeData}
-                expandedKeys={expandedKeys}
-                onExpand={(keys) => setExpandedKeys(keys as string[])}
-                selectedKeys={selectedFolder ? [selectedFolder] : []}
-                onSelect={(keys) => {
-                  const key = keys[0] as string | undefined;
-                  setSelectedFolder(key ?? "");
-                }}
-              />
-            )}
+            <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 280px)", paddingBottom: 8 }}>
+              {treeData.length === 0 ? (
+                <Empty description="Немає папок" image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ margin: "20px 0" }} />
+              ) : (
+                <Tree
+                  showIcon
+                  blockNode
+                  loadData={onLoadData}
+                  treeData={treeData}
+                  expandedKeys={expandedKeys}
+                  onExpand={(keys) => setExpandedKeys(keys as string[])}
+                  selectedKeys={selectedFolder ? [selectedFolder] : []}
+                  onSelect={(keys) => {
+                    const key = keys[0] as string | undefined;
+                    setSelectedFolder(key ?? "");
+                  }}
+                />
+              )}
+            </div>
 
             {selectedFolder && (
               <div style={{ padding: "8px 8px 0" }}>
@@ -327,8 +336,8 @@ export function MediaManagerPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-                    gap: 12,
+                    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                    gap: 10,
                   }}
                 >
                   {files.map((file) => (
