@@ -431,6 +431,7 @@ export function ProductsPage() {
       attributes?: Array<{ key: string; value: string }>;
       isActive?: boolean;
       isNew?: boolean;
+      cashbackPercent?: number;
     };
     // Safety net: ensure we have UA title (fallback to EN) and slug
     const titleUkTrim = (basics.titleUk || "").trim();

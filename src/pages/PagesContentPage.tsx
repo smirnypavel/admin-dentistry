@@ -665,7 +665,6 @@ function DoctorsTab({ data, onChange }: { data: Record<string, unknown>; onChang
               <Input value={entry.doctorImage} onChange={(e) => setEntry(i, "doctorImage", e.target.value)} placeholder="/images/doctors/doctors.jpeg" />
             </Form.Item>
             <ImageUploader
-              label="або завантажити фото лікаря"
               value={entry.doctorImage}
               onChange={(url) => setEntry(i, "doctorImage", url)}
             />
@@ -697,7 +696,6 @@ function DoctorsTab({ data, onChange }: { data: Record<string, unknown>; onChang
               <Input value={entry.clinicImage} onChange={(e) => setEntry(i, "clinicImage", e.target.value)} placeholder="/images/doctors/likarnya.jpeg" />
             </Form.Item>
             <ImageUploader
-              label="або завантажити фото клініки"
               value={entry.clinicImage}
               onChange={(url) => setEntry(i, "clinicImage", url)}
             />
@@ -849,7 +847,7 @@ function SlidesSelector({
           placeholder="Додати товар..."
           style={{ width: "100%" }}
           value={null}
-          onChange={(id) => add(id as string)}
+          onChange={(id) => add(id as unknown as string)}
           optionFilterProp="label"
           options={available.map((s) => ({ value: s._id, label: s.title }))}
         />
@@ -862,7 +860,8 @@ function SlidesSelector({
 }
 
 // ─── Promotions Tab ────────────────────────────────────────────────────────────
-function PromotionsTab({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function PromotionsTab({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
   const { message, modal } = AntApp.useApp();
   const [slides, setSlides] = useState<PromoSlide[]>([]);
   const [loadingSlides, setLoadingSlides] = useState(false);
@@ -1079,7 +1078,8 @@ function PromotionsTab({ data, onChange }: { data: Record<string, unknown>; onCh
 }
 
 // ─── Promotions Preview ────────────────────────────────────────────────────────
-function PromotionsPreview({ data }: { data: Record<string, unknown> }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function PromotionsPreview({ data }: { data: Record<string, unknown> }) {
   const sectionTitle = (data.sectionTitle as string) || "Акційні пропозиції";
   const countdownLabel = (data.countdownLabel as string) || "До кінця акції";
   const countdownSublabel = (data.countdownSublabel as string) || "Встигніть замовити!";

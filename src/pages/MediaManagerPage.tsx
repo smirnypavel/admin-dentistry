@@ -21,13 +21,11 @@ import {
 import type { DataNode } from "antd/es/tree";
 import {
   FolderOutlined,
-  FolderOpenOutlined,
   FolderAddOutlined,
   UploadOutlined,
   DeleteOutlined,
   CopyOutlined,
   ReloadOutlined,
-  PlusOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
@@ -58,8 +56,7 @@ function buildTreeNodes(folders: MediaFolder[]): DataNode[] {
   return folders.map((f) => ({
     key: f.path,
     title: f.name,
-    icon: ({ expanded }: { expanded: boolean }) =>
-      expanded ? <FolderOpenOutlined /> : <FolderOutlined />,
+    icon: <FolderOutlined />,
     isLeaf: false, // always expandable — sub-folders loaded on demand
   }));
 }
@@ -470,7 +467,7 @@ export function MediaManagerPage() {
               return false; // prevent auto-upload
             }}
             onRemove={(file) => {
-              setFilesToUpload((prev) => prev.filter((f) => f !== file));
+              setFilesToUpload((prev) => prev.filter((f) => f.name !== file.name));
             }}
             accept="image/*"
             fileList={filesToUpload.map((f, i) => ({

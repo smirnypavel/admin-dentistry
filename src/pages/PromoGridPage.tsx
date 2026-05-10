@@ -56,7 +56,7 @@ let featureKeyCounter = 0;
 
 export function PromoGridPage() {
   const { message } = AntApp.useApp();
-  const { t } = useI18n();
+  useI18n();
   const [form] = Form.useForm<FormValues>();
   const [loading, setLoading] = useState(false);
   const [slides, setSlides] = useState<PromoSlide[]>([]);
