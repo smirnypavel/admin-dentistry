@@ -14,7 +14,7 @@ import {
   Card,
   Tooltip,
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, InfoCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { ImageUploader } from "../components/ImageUploader";
 import {
   getHeroLatest,
@@ -37,6 +37,10 @@ type FormValues = {
   ctaLabelEn?: string;
   ctaUrl?: string;
   ctaExternal?: boolean;
+  cta2LabelUk?: string;
+  cta2LabelEn?: string;
+  cta2Url?: string;
+  cta2External?: boolean;
   theme?: "light" | "dark";
   isActive?: boolean;
 };
@@ -48,11 +52,14 @@ export function HeroPage() {
   const [loading, setLoading] = useState(false);
   const [current, setCurrent] = useState<Hero | null>(null);
 
+  const [bullets, setBullets] = useState<string[]>([]);
+
   const load = async () => {
     setLoading(true);
     try {
       const data = await getHeroLatest();
       setCurrent(data);
+      if (data) setBullets((data as Hero & { bullets?: string[] }).bullets ?? []);
       form.setFieldsValue(
         data
           ? {
@@ -67,6 +74,10 @@ export function HeroPage() {
               ctaLabelEn: data.cta?.labelI18n?.en,
               ctaUrl: data.cta?.url || undefined,
               ctaExternal: data.cta?.external ?? false,
+              cta2LabelUk: (data as Hero & { cta2?: Hero['cta'] }).cta2?.labelI18n?.uk,
+              cta2LabelEn: (data as Hero & { cta2?: Hero['cta'] }).cta2?.labelI18n?.en,
+              cta2Url: (data as Hero & { cta2?: Hero['cta'] }).cta2?.url || undefined,
+              cta2External: (data as Hero & { cta2?: Hero['cta'] }).cta2?.external ?? false,
               theme: data.theme || "light",
               isActive: data.isActive ?? false,
             }
@@ -104,6 +115,15 @@ export function HeroPage() {
         url: v.ctaUrl?.trim() || undefined,
         external: v.ctaExternal ?? false,
       },
+      cta2: v.cta2LabelUk || v.cta2LabelEn || v.cta2Url ? {
+        labelI18n:
+          v.cta2LabelUk || v.cta2LabelEn
+            ? { uk: v.cta2LabelUk, en: v.cta2LabelEn }
+            : undefined,
+        url: v.cta2Url?.trim() || undefined,
+        external: v.cta2External ?? false,
+      } : undefined,
+      bullets,
       theme: v.theme || "light",
       isActive: !!v.isActive,
     } as const;
@@ -349,6 +369,56 @@ export function HeroPage() {
               valuePropName="checked">
               <Switch />
             </Form.Item>
+          </Space>
+
+          <Divider orientation="left" plain style={{ fontSize: 12, color: "#888" }}>Друга кнопка CTA (необов&apos;язково)</Divider>
+          <Space wrap>
+            <Form.Item label="Текст кнопки (uk)" name="cta2LabelUk">
+              <Input placeholder="Отримати консультацію" />
+            </Form.Item>
+            <Form.Item label="Текст кнопки (en)" name="cta2LabelEn">
+              <Input placeholder="Get consultation" />
+            </Form.Item>
+            <Form.Item label="URL" name="cta2Url">
+              <Input placeholder="/contacts" />
+            </Form.Item>
+            <Form.Item label="Зовнішнє посилання" name="cta2External" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Space>
+
+          <Divider orientation="left" plain style={{ fontSize: 12, color: "#888" }}>Bullet-поінти (переваги під підзаголовком)</Divider>
+          <div style={{ marginBottom: 16 }}>
+            {bullets.map((b, i) => (
+              <Space key={i} style={{ display: "flex", marginBottom: 6 }} align="baseline">
+                <Input
+                  value={b}
+                  onChange={(e) => {
+                    const next = [...bullets];
+                    next[i] = e.target.value;
+                    setBullets(next);
+                  }}
+                  placeholder="Прямі поставки від виробників"
+                  style={{ width: 420 }}
+                />
+                <Button
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => setBullets(bullets.filter((_, idx) => idx !== i))}
+                />
+              </Space>
+            ))}
+            <Button
+              type="dashed"
+              icon={<PlusOutlined />}
+              onClick={() => setBullets([...bullets, ""])}
+            >
+              Додати пункт
+            </Button>
+          </div>
+
+          <Space wrap>
             <Form.Item
               label={t("hero.form.theme")}
               name="theme"
