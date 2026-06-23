@@ -970,12 +970,24 @@ export const ruProducts: I18nDict = {
   "products.variants.modal.addTitle": "Новый вариант",
   "products.variants.modal.editTitle": "Редактирование варианта",
   "products.variants.options.hint":
-    "Характеристики варианта: цвет, размер, паз и т.д. Слева — название, справа — значение.",
+    "Опции — это то, что покупатель видит как название варианта на сайте (напр. «0.22» или «Красный»). Если не заполнить — на сайте покажется код SKU.",
   "products.variants.option.add": "Добавить опцию",
   "products.variants.option.key.placeholder": "Название (напр. Цвет)",
   "products.variants.option.key.required": "Укажите название",
   "products.variants.option.value.placeholder": "Значение (напр. Красный)",
   "products.variants.option.value.required": "Укажите значение",
+  // Variant table / hints
+  "products.variants.table.siteLabel": "Название на сайте",
+  "products.variants.siteLabel.skuTooltip":
+    "Опции не заполнены — покупатель увидит этот код SKU вместо понятного названия.",
+  "products.variants.clone.tooltip": "Дублировать вариант",
+  "products.variants.form.sku.tooltip":
+    "Внутренний артикул для учёта. На сайте показывается только если не заполнены опции.",
+  "products.variants.form.isActive.tooltip":
+    "Выключенный вариант не показывается на сайте.",
+  "products.variants.noOptions.title": "У части вариантов не заполнены опции",
+  "products.variants.noOptions.hint":
+    "Покупатель увидит коды SKU вместо понятных названий. Заполните опции (напр. размер, цвет), чтобы кнопки выбора были понятными.",
 
   "products.bulk.applyToSelected": "Применить скидку к выбранным",
   "products.bulk.removeFromSelected": "Убрать скидку у выбранных",
@@ -1104,12 +1116,24 @@ export const ukProducts: I18nDict = {
   "products.variants.modal.addTitle": "Новий варіант",
   "products.variants.modal.editTitle": "Редагування варіанту",
   "products.variants.options.hint":
-    "Характеристики варіанту: колір, розмір, паз тощо. Зліва — назва, справа — значення.",
+    "Опції — це те, що покупець бачить як назву варіанту на сайті (напр. «0.22» або «Червоний»). Якщо не заповнити — на сайті покажеться код SKU.",
   "products.variants.option.add": "Додати опцію",
   "products.variants.option.key.placeholder": "Назва (напр. Колір)",
   "products.variants.option.key.required": "Вкажіть назву",
   "products.variants.option.value.placeholder": "Значення (напр. Червоний)",
   "products.variants.option.value.required": "Вкажіть значення",
+  // Variant table / hints
+  "products.variants.table.siteLabel": "Назва на сайті",
+  "products.variants.siteLabel.skuTooltip":
+    "Опції не заповнені — покупець побачить цей код SKU замість зрозумілої назви.",
+  "products.variants.clone.tooltip": "Дублювати варіант",
+  "products.variants.form.sku.tooltip":
+    "Внутрішній артикул для обліку. На сайті показується лише якщо не заповнені опції.",
+  "products.variants.form.isActive.tooltip":
+    "Вимкнений варіант не показується на сайті.",
+  "products.variants.noOptions.title": "У частини варіантів не заповнені опції",
+  "products.variants.noOptions.hint":
+    "Покупець побачить коди SKU замість зрозумілих назв. Заповніть опції (напр. розмір, колір), щоб кнопки вибору були зрозумілими.",
 
   "products.bulk.applyToSelected": "Застосувати знижку до вибраних",
   "products.bulk.removeFromSelected": "Прибрати знижку у вибраних",

@@ -16,10 +16,12 @@ import {
   Switch,
   Table,
   Tag,
+  Tooltip,
   Typography,
   theme as antdTheme,
 } from "antd";
 import {
+  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
@@ -571,9 +573,59 @@ export function ProductsPage() {
     [],
   );
 
+  // Clone a variant — fast way to enter near-identical variants
+  const onCloneVariant = useCallback(
+    (v: ProductVariant & { _tmpId?: string }) => {
+      setVariants((prev) => {
+        const idx = prev.findIndex((x) =>
+          x._id ? x._id === v._id : x._tmpId === v._tmpId,
+        );
+        const copy: ProductVariant & { _tmpId?: string } = {
+          ...v,
+          _id: undefined,
+          _tmpId: crypto.randomUUID(),
+          sku: v.sku ? `${v.sku}-copy` : v.sku,
+          options: { ...(v.options || {}) },
+          images: [...(v.images || [])],
+        };
+        const next = [...prev];
+        next.splice(idx >= 0 ? idx + 1 : prev.length, 0, copy);
+        return next;
+      });
+    },
+    [],
+  );
+
+  // Human-readable variant label exactly as a customer sees it on the site
+  const variantSiteLabel = useCallback(
+    (v: ProductVariant & { _tmpId?: string }) => {
+      const opts = Object.values(v.options || {})
+        .map((x) => String(x))
+        .filter(Boolean);
+      return opts.length ? opts.join(" · ") : "";
+    },
+    [],
+  );
+
   const variantColumns: ColumnsType<ProductVariant & { _tmpId?: string }> =
     useMemo(
       () => [
+        {
+          title: t("products.variants.table.siteLabel"),
+          key: "siteLabel",
+          width: 200,
+          fixed: "left" as const,
+          render: (_: unknown, r) => {
+            const label = variantSiteLabel(r);
+            return label ? (
+              <Typography.Text strong>{label}</Typography.Text>
+            ) : (
+              <Tooltip title={t("products.variants.siteLabel.skuTooltip")}>
+                <Tag color="warning">{r.sku || "—"}</Tag>
+              </Tooltip>
+            );
+          },
+        },
         { title: "SKU", dataIndex: "sku", key: "sku", width: 160 },
         {
           title: t("products.variants.table.manufacturer"),
@@ -637,7 +689,8 @@ export function ProductsPage() {
         {
           title: t("common.actions"),
           key: "actions",
-          width: 180,
+          width: 230,
+          fixed: "right" as const,
           render: (_: unknown, r) => (
             <Space>
               <Button
@@ -646,18 +699,32 @@ export function ProductsPage() {
                 onClick={() => openEditVariant(r)}>
                 {t("common.edit")}
               </Button>
+              <Tooltip title={t("products.variants.clone.tooltip")}>
+                <Button
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => onCloneVariant(r)}
+                />
+              </Tooltip>
               <Button
                 size="small"
                 danger
                 icon={<DeleteOutlined />}
-                onClick={() => onRemoveVariant(r)}>
-                {t("common.delete")}
-              </Button>
+                onClick={() => onRemoveVariant(r)}
+              />
             </Space>
           ),
         },
       ],
-      [manufacturers, countries, openEditVariant, onRemoveVariant, t],
+      [
+        manufacturers,
+        countries,
+        openEditVariant,
+        onRemoveVariant,
+        onCloneVariant,
+        variantSiteLabel,
+        t,
+      ],
     );
 
   const openAddVariant = () => {
@@ -1292,6 +1359,16 @@ export function ProductsPage() {
                           />
                         )}
 
+                        {variants.length > 1 &&
+                          variants.some((v) => !variantSiteLabel(v)) && (
+                            <Alert
+                              type="info"
+                              showIcon
+                              message={t("products.variants.noOptions.title")}
+                              description={t("products.variants.noOptions.hint")}
+                            />
+                          )}
+
                         <Table
                           rowKey={(r) => r._id || r._tmpId || r.sku}
                           columns={variantColumns}
@@ -1331,6 +1408,7 @@ export function ProductsPage() {
                   <Form.Item
                     label={t("products.variants.form.sku")}
                     name="sku"
+                    tooltip={t("products.variants.form.sku.tooltip")}
                     rules={[
                       {
                         required: true,
@@ -1410,6 +1488,7 @@ export function ProductsPage() {
                     label={t("products.variants.form.isActive")}
                     name="isActive"
                     valuePropName="checked"
+                    tooltip={t("products.variants.form.isActive.tooltip")}
                     initialValue={true}>
                     <Switch />
                   </Form.Item>
