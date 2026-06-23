@@ -2,21 +2,28 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminLayout } from "../components/AdminLayout";
 import {
   App as AntApp,
+  Alert,
   Button,
+  Divider,
   Drawer,
   Form,
   Input,
   InputNumber,
+  Modal,
   Tabs,
   Select,
   Space,
-  Steps,
   Switch,
   Table,
   Tag,
   Typography,
   theme as antdTheme,
 } from "antd";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useQueryParam } from "../hooks/useQueryParam";
 import {
@@ -48,7 +55,19 @@ type EditorState = {
   open: boolean;
   mode: "create" | "edit";
   record?: Product | null;
-  step: number; // 0 basics, 1 variants
+  step: number; // kept for compatibility; single-form editor no longer uses steps
+};
+
+// Variant modal form values: options entered as key/value pairs
+type VariantFormValues = {
+  sku: string;
+  manufacturerId: string;
+  countryId?: string;
+  price: number;
+  unit?: string;
+  barcode?: string;
+  isActive: boolean;
+  optionsList?: Array<{ key: string; value: string }>;
 };
 
 export function ProductsPage() {
@@ -99,10 +118,14 @@ export function ProductsPage() {
     cashbackPercent?: number;
   }>();
 
-  const [variantForm] = Form.useForm<ProductVariant & { _tmpId?: string }>();
+  const [variantForm] = Form.useForm<VariantFormValues>();
   const [variants, setVariants] = useState<
     Array<ProductVariant & { _tmpId?: string }>
   >([]);
+  const [variantModalOpen, setVariantModalOpen] = useState(false);
+  const [editingVariantKey, setEditingVariantKey] = useState<string | null>(
+    null,
+  );
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -394,31 +417,14 @@ export function ProductsPage() {
 
   // moved: onEdit, onDelete wrapped in useCallback above
 
-  const onSubmitBasics = async () => {
-    try {
-      const values = await form.validateFields();
-      // If UA title is empty but EN is present, auto-fill UA from EN
-      const titleUkTrim = (values.titleUk || "").trim();
-      const titleEnTrim = (values.titleEn || "").trim();
-      if (!titleUkTrim && titleEnTrim) {
-        form.setFieldValue("titleUk", titleEnTrim);
-      }
-      // Generate slug from whichever title is available
-      if (!values.slug) {
-        const base = titleUkTrim || titleEnTrim || "";
-        if (base) {
-          const nextSlug = slugify(base);
-          values.slug = nextSlug;
-          form.setFieldValue("slug", nextSlug);
-        }
-      }
-      setEditor((s) => ({ ...s, step: 1 }));
-    } catch {
-      // ignore
-    }
-  };
-
   const onSaveAll = async () => {
+    // Validate basics inline first (surfaces the title error on its field)
+    try {
+      await form.validateFields();
+    } catch {
+      message.error(t("products.form.title.required"));
+      return;
+    }
     // Include values from unmounted basics form while on step 1
     const basics = form.getFieldsValue(true) as {
       titleUk?: string;
@@ -531,9 +537,23 @@ export function ProductsPage() {
     }
   };
 
-  const onEditVariant = useCallback(
+  const openEditVariant = useCallback(
     (v: ProductVariant & { _tmpId?: string }) => {
-      variantForm.setFieldsValue({ ...v });
+      setEditingVariantKey(v._id || v._tmpId || null);
+      variantForm.setFieldsValue({
+        sku: v.sku,
+        manufacturerId: v.manufacturerId,
+        countryId: v.countryId ?? undefined,
+        price: v.price,
+        unit: v.unit ?? undefined,
+        barcode: v.barcode ?? undefined,
+        isActive: v.isActive,
+        optionsList: Object.entries(v.options || {}).map(([key, value]) => ({
+          key,
+          value: String(value ?? ""),
+        })),
+      });
+      setVariantModalOpen(true);
     },
     [variantForm],
   );
@@ -618,12 +638,14 @@ export function ProductsPage() {
             <Space>
               <Button
                 size="small"
-                onClick={() => onEditVariant(r)}>
+                icon={<EditOutlined />}
+                onClick={() => openEditVariant(r)}>
                 {t("common.edit")}
               </Button>
               <Button
                 size="small"
                 danger
+                icon={<DeleteOutlined />}
                 onClick={() => onRemoveVariant(r)}>
                 {t("common.delete")}
               </Button>
@@ -631,49 +653,69 @@ export function ProductsPage() {
           ),
         },
       ],
-      [manufacturers, countries, onEditVariant, onRemoveVariant, t],
+      [manufacturers, countries, openEditVariant, onRemoveVariant, t],
     );
 
-  const onAddVariant = () => {
+  const openAddVariant = () => {
+    setEditingVariantKey(null);
     variantForm.resetFields();
-    setVariants((prev) => [
-      {
-        _tmpId: crypto.randomUUID(),
-        sku: "",
-        manufacturerId: "",
-        price: 0,
-        isActive: true,
-        options: {},
-        images: [],
-        unit: undefined,
-        barcode: undefined,
-        countryId: undefined,
-      },
-      ...prev,
-    ]);
+    variantForm.setFieldsValue({
+      sku: "",
+      manufacturerId: "",
+      price: 0,
+      isActive: true,
+      optionsList: [],
+    });
+    setVariantModalOpen(true);
   };
 
-  // moved: handlers wrapped in useCallback above
-
-  const onApplyVariant = async () => {
+  const onSaveVariant = async () => {
     try {
       const v = await variantForm.validateFields();
-      setVariants((prev) => {
-        const idx = prev.findIndex((x) =>
-          x._id ? x._id === v._id : x._tmpId === v._tmpId,
-        );
-        if (idx >= 0) {
-          const copy = [...prev];
-          copy[idx] = { ...copy[idx], ...v };
-          return copy;
-        }
-        return [{ _tmpId: crypto.randomUUID(), ...v }, ...prev];
+      // Convert key/value pairs back into an options object
+      const options: Record<string, string | number> = {};
+      (v.optionsList || []).forEach(({ key, value }) => {
+        const k = (key || "").trim();
+        if (!k) return;
+        const raw = String(value ?? "").trim();
+        const num = Number(raw);
+        options[k] = raw !== "" && !isNaN(num) ? num : raw;
       });
-      message.success("Вариант сохранён в черновике");
+      const data = {
+        sku: v.sku.trim(),
+        manufacturerId: v.manufacturerId,
+        countryId: v.countryId || undefined,
+        price: v.price,
+        unit: v.unit || undefined,
+        barcode: v.barcode || undefined,
+        isActive: v.isActive,
+        options,
+      };
+      setVariants((prev) => {
+        if (editingVariantKey) {
+          return prev.map((x) =>
+            (x._id || x._tmpId) === editingVariantKey ? { ...x, ...data } : x,
+          );
+        }
+        return [{ _tmpId: crypto.randomUUID(), images: [], ...data }, ...prev];
+      });
+      setVariantModalOpen(false);
+      setEditingVariantKey(null);
     } catch {
-      // validation errors
+      // validation errors are shown inline
     }
   };
+
+  // Price range across current variants (live feedback in the editor)
+  const variantPriceRange = useMemo(() => {
+    const prices = variants
+      .map((v) => Number(v.price) || 0)
+      .filter((p) => p > 0);
+    if (!prices.length) return null;
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return min === max ? `${min} ₴` : `${min} – ${max} ₴`;
+  }, [variants]);
 
   return (
     <AdminLayout>
@@ -882,36 +924,25 @@ export function ProductsPage() {
           }
           extra={
             <Space>
-              {editor.step === 0 ? (
-                <Button
-                  type="primary"
-                  onClick={onSubmitBasics}>
-                  {t("products.editor.next")}
-                </Button>
-              ) : (
-                <>
-                  <Button onClick={() => setEditor((s) => ({ ...s, step: 0 }))}>
-                    {t("common.back")}
-                  </Button>
-                  <Button
-                    type="primary"
-                    onClick={onSaveAll}>
-                    {t("common.save")}
-                  </Button>
-                </>
-              )}
+              <Button
+                onClick={() =>
+                  setEditor({
+                    open: false,
+                    mode: "create",
+                    record: null,
+                    step: 0,
+                  })
+                }>
+                {t("common.cancel")}
+              </Button>
+              <Button
+                type="primary"
+                onClick={onSaveAll}>
+                {t("common.save")}
+              </Button>
             </Space>
           }>
-          <Steps
-            items={[
-              { title: t("products.steps.basics") },
-              { title: t("products.steps.variants") },
-            ]}
-            current={editor.step}
-            style={{ marginBottom: 16 }}
-          />
-
-          {editor.step === 0 ? (
+          <>
             <Form
               layout="vertical"
               form={form}
@@ -926,6 +957,9 @@ export function ProductsPage() {
                   if (base) form.setFieldsValue({ slug: slugify(base) });
                 }
               }}>
+              <Divider orientation="left" style={{ marginTop: 0 }}>
+                {t("products.section.basics")}
+              </Divider>
               <Tabs
                 items={[
                   {
@@ -1057,6 +1091,9 @@ export function ProductsPage() {
                   placeholder={t("products.form.tags.placeholder")}
                 />
               </Form.Item>
+              <Divider orientation="left">
+                {t("products.section.attributes")}
+              </Divider>
               <Form.Item label={t("products.form.attributes")}>
                 <Form.List name="attributes">
                   {(fields, { add, remove }) => (
@@ -1114,6 +1151,9 @@ export function ProductsPage() {
                   )}
                 </Form.List>
               </Form.Item>
+              <Divider orientation="left">
+                {t("products.section.media")}
+              </Divider>
               <Form.Item
                 label={t("products.form.images")}
                 shouldUpdate>
@@ -1164,6 +1204,9 @@ export function ProductsPage() {
                   form.setFieldValue("images", merged);
                 }}
               />
+              <Divider orientation="left">
+                {t("products.section.settings")}
+              </Divider>
               <Form.Item
                 label={t("products.form.isActive")}
                 name="isActive"
@@ -1183,24 +1226,74 @@ export function ProductsPage() {
                 <InputNumber min={0} max={100} precision={0} style={{ width: 120 }} addonAfter="%" placeholder="0" />
               </Form.Item>
             </Form>
-          ) : (
+
+            <Divider orientation="left">
+              {t("products.section.variants")}
+            </Divider>
             <Space
               direction="vertical"
-              style={{ width: "100%" }}>
-              <Space style={{ width: "100%", justifyContent: "space-between" }}>
-                <Typography.Title
-                  level={4}
-                  style={{ margin: 0 }}>
-                  {t("products.steps.variants")}
-                </Typography.Title>
-                <Button onClick={onAddVariant}>
+              style={{ width: "100%" }}
+              size="middle">
+              <Space
+                style={{ width: "100%", justifyContent: "space-between" }}
+                wrap>
+                <Space size="large">
+                  <Typography.Text type="secondary">
+                    {t("products.variants.count")}: {variants.length}
+                  </Typography.Text>
+                  {variantPriceRange && (
+                    <Typography.Text strong>
+                      {t("products.variants.priceRange")}: {variantPriceRange}
+                    </Typography.Text>
+                  )}
+                </Space>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={openAddVariant}>
                   {t("products.variants.add")}
                 </Button>
               </Space>
 
+              {variants.length === 0 && (
+                <Alert
+                  type="warning"
+                  showIcon
+                  message={t("products.variants.empty.title")}
+                  description={t("products.variants.empty.hint")}
+                />
+              )}
+
+              <Table
+                rowKey={(r) => r._id || r._tmpId || r.sku}
+                columns={variantColumns}
+                dataSource={variants}
+                pagination={false}
+                size="small"
+                scroll={{ x: "max-content" }}
+              />
+            </Space>
+
+            {/* Variant editor modal */}
+            <Modal
+              open={variantModalOpen}
+              width={680}
+              title={
+                editingVariantKey
+                  ? t("products.variants.modal.editTitle")
+                  : t("products.variants.modal.addTitle")
+              }
+              okText={t("common.save")}
+              cancelText={t("common.cancel")}
+              onOk={onSaveVariant}
+              onCancel={() => {
+                setVariantModalOpen(false);
+                setEditingVariantKey(null);
+              }}>
               <Form
                 layout="vertical"
-                form={variantForm}>
+                form={variantForm}
+                style={{ marginTop: 12 }}>
                 <Space wrap>
                   <Form.Item
                     label={t("products.variants.form.sku")}
@@ -1211,38 +1304,7 @@ export function ProductsPage() {
                         message: t("products.variants.form.sku.required"),
                       },
                     ]}>
-                    <Input style={{ width: 200 }} />
-                  </Form.Item>
-                  <Form.Item
-                    label={t("products.variants.form.manufacturer")}
-                    name="manufacturerId"
-                    rules={[
-                      {
-                        required: true,
-                        message: t(
-                          "products.variants.form.manufacturer.required",
-                        ),
-                      },
-                    ]}>
-                    <Select
-                      style={{ width: 240 }}
-                      options={manufacturers.map((m) => ({
-                        value: m._id,
-                        label: m.name,
-                      }))}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label={t("products.variants.form.country")}
-                    name="countryId">
-                    <Select
-                      allowClear
-                      style={{ width: 220 }}
-                      options={countries.map((c) => ({
-                        value: c._id,
-                        label: c.name,
-                      }))}
-                    />
+                    <Input style={{ width: 280 }} />
                   </Form.Item>
                   <Form.Item
                     label={t("products.variants.form.price")}
@@ -1255,21 +1317,61 @@ export function ProductsPage() {
                     ]}>
                     <InputNumber
                       min={0}
-                      style={{ width: 140 }}
+                      style={{ width: 160 }}
+                      addonAfter="₴"
                     />
                   </Form.Item>
+                </Space>
+                <Space wrap>
+                  <Form.Item
+                    label={t("products.variants.form.manufacturer")}
+                    name="manufacturerId"
+                    rules={[
+                      {
+                        required: true,
+                        message: t(
+                          "products.variants.form.manufacturer.required",
+                        ),
+                      },
+                    ]}>
+                    <Select
+                      showSearch
+                      optionFilterProp="label"
+                      style={{ width: 280 }}
+                      options={manufacturers.map((m) => ({
+                        value: m._id,
+                        label: m.name,
+                      }))}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label={t("products.variants.form.country")}
+                    name="countryId">
+                    <Select
+                      allowClear
+                      showSearch
+                      optionFilterProp="label"
+                      style={{ width: 280 }}
+                      options={countries.map((c) => ({
+                        value: c._id,
+                        label: c.name,
+                      }))}
+                    />
+                  </Form.Item>
+                </Space>
+                <Space wrap>
                   <Form.Item
                     label={t("products.variants.form.unit")}
                     name="unit">
                     <Input
-                      style={{ width: 120 }}
+                      style={{ width: 160 }}
                       placeholder={t("products.variants.form.unit.placeholder")}
                     />
                   </Form.Item>
                   <Form.Item
                     label={t("products.variants.form.barcode")}
                     name="barcode">
-                    <Input style={{ width: 200 }} />
+                    <Input style={{ width: 240 }} />
                   </Form.Item>
                   <Form.Item
                     label={t("products.variants.form.isActive")}
@@ -1279,49 +1381,81 @@ export function ProductsPage() {
                     <Switch />
                   </Form.Item>
                 </Space>
-                <Form.Item
-                  label={t("products.variants.form.options")}
-                  tooltip={t("products.variants.form.options.tooltip")}>
-                  <Input.TextArea
-                    rows={2}
-                    placeholder={t(
-                      "products.variants.form.options.placeholder",
-                    )}
-                    onBlur={(e) => {
-                      const text = e.target.value || "";
-                      const pairs = text
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean);
-                      const obj: Record<string, string | number> = {};
-                      for (const p of pairs) {
-                        const [k, ...rest] = p.split(":");
-                        const v = rest.join(":").trim();
-                        if (!k) continue;
-                        const maybeNum = Number(v);
-                        obj[k.trim()] = isNaN(maybeNum) ? v : maybeNum;
-                      }
-                      variantForm.setFieldValue("options", obj);
-                    }}
-                  />
-                </Form.Item>
-                <Space>
-                  <Button
-                    onClick={onApplyVariant}
-                    type="primary">
-                    {t("products.variants.form.apply")}
-                  </Button>
-                </Space>
-              </Form>
 
-              <Table
-                rowKey={(r) => r._id || r._tmpId || r.sku}
-                columns={variantColumns}
-                dataSource={variants}
-                pagination={false}
-              />
-            </Space>
-          )}
+                <Divider orientation="left" plain>
+                  {t("products.variants.form.options")}
+                </Divider>
+                <Typography.Paragraph
+                  type="secondary"
+                  style={{ fontSize: 12, marginTop: -8 }}>
+                  {t("products.variants.options.hint")}
+                </Typography.Paragraph>
+                <Form.List name="optionsList">
+                  {(fields, { add, remove }) => (
+                    <Space
+                      direction="vertical"
+                      style={{ width: "100%" }}>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Space
+                          key={key}
+                          align="baseline"
+                          wrap>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "key"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t(
+                                  "products.variants.option.key.required",
+                                ),
+                              },
+                            ]}
+                            style={{ marginBottom: 8 }}>
+                            <Input
+                              placeholder={t(
+                                "products.variants.option.key.placeholder",
+                              )}
+                              style={{ width: 240 }}
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "value"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t(
+                                  "products.variants.option.value.required",
+                                ),
+                              },
+                            ]}
+                            style={{ marginBottom: 8 }}>
+                            <Input
+                              placeholder={t(
+                                "products.variants.option.value.placeholder",
+                              )}
+                              style={{ width: 240 }}
+                            />
+                          </Form.Item>
+                          <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => remove(name)}
+                          />
+                        </Space>
+                      ))}
+                      <Button
+                        icon={<PlusOutlined />}
+                        onClick={() => add({ key: "", value: "" })}>
+                        {t("products.variants.option.add")}
+                      </Button>
+                    </Space>
+                  )}
+                </Form.List>
+              </Form>
+            </Modal>
+          </>
         </Drawer>
 
         <Drawer
