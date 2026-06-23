@@ -30,6 +30,7 @@ import {
 } from "../api/products";
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
+import { MediaPicker } from "../components/MediaPicker";
 import { slugify } from "../utils/slugify";
 import { listCategories, type Category } from "../api/categories";
 import { listSubcategories, type Subcategory } from "../api/subcategories";
@@ -113,6 +114,7 @@ export function ProductsPage() {
   const [bulkVisible, setBulkVisible] = useState(false);
   const [bulkMode, setBulkMode] = useState<"add" | "remove">("add");
   const [bulkDiscountId, setBulkDiscountId] = useState<string | undefined>();
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
   const loadRefs = useCallback(async () => {
     try {
@@ -1131,20 +1133,37 @@ export function ProductsPage() {
                               form.setFieldValue("images", next);
                             }}
                             folder="products"
+                            showMediaPicker={false}
                           />
                         ))}
                       </Space>
-                      <ImageUploader
-                        value={null}
-                        onChange={(nu) => {
-                          if (nu) form.setFieldValue("images", [...imgs, nu]);
-                        }}
-                        folder="products"
-                      />
+                      <Space>
+                        <ImageUploader
+                          value={null}
+                          onChange={(nu) => {
+                            if (nu) form.setFieldValue("images", [...imgs, nu]);
+                          }}
+                          folder="products"
+                          showMediaPicker={false}
+                        />
+                        <Button onClick={() => setMediaPickerOpen(true)}>
+                          {t("products.form.selectFromMedia")}
+                        </Button>
+                      </Space>
                     </Space>
                   );
                 }}
               </Form.Item>
+              <MediaPicker
+                open={mediaPickerOpen}
+                onClose={() => setMediaPickerOpen(false)}
+                initialFolder="products"
+                onSelect={(urls) => {
+                  const imgs: string[] = form.getFieldValue("images") || [];
+                  const merged = [...imgs, ...urls.filter((u) => !imgs.includes(u))];
+                  form.setFieldValue("images", merged);
+                }}
+              />
               <Form.Item
                 label={t("products.form.isActive")}
                 name="isActive"

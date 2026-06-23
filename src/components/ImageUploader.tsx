@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { Upload, Image, App as AntApp, Space, Button } from "antd";
 import type { UploadProps } from "antd";
-import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  UploadOutlined,
+  DeleteOutlined,
+  PictureOutlined,
+} from "@ant-design/icons";
 import { uploadImage } from "../api/uploads";
 import { useI18n } from "../store/i18n";
+import { MediaPicker } from "./MediaPicker";
 
 type Props = {
   value?: string | null;
@@ -12,6 +17,7 @@ type Props = {
   disabled?: boolean;
   accept?: string[]; // e.g., ['image/jpeg','image/png']
   maxSizeMB?: number; // e.g., 2
+  showMediaPicker?: boolean; // allow choosing from the media library (default: true)
 };
 
 export function ImageUploader({
@@ -21,10 +27,12 @@ export function ImageUploader({
   disabled,
   accept = ["image/jpeg", "image/png", "image/webp"],
   maxSizeMB = 2,
+  showMediaPicker = true,
 }: Props) {
   const { t } = useI18n();
   const { message } = AntApp.useApp();
   const [loading, setLoading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const beforeUpload: UploadProps["beforeUpload"] = async (file) => {
     // Basic client validation
@@ -70,18 +78,39 @@ export function ImageUploader({
           </Button>
         </Space>
       ) : null}
-      <Upload
-        multiple={false}
-        showUploadList={false}
-        beforeUpload={beforeUpload}
-        disabled={disabled || loading}>
-        <Button
-          icon={<UploadOutlined />}
-          loading={loading}
-          disabled={disabled}>
-          {value ? t("uploader.replace") : t("uploader.upload")}
-        </Button>
-      </Upload>
+      <Space wrap>
+        <Upload
+          multiple={false}
+          showUploadList={false}
+          beforeUpload={beforeUpload}
+          disabled={disabled || loading}>
+          <Button
+            icon={<UploadOutlined />}
+            loading={loading}
+            disabled={disabled}>
+            {value ? t("uploader.replace") : t("uploader.upload")}
+          </Button>
+        </Upload>
+        {showMediaPicker ? (
+          <Button
+            icon={<PictureOutlined />}
+            disabled={disabled || loading}
+            onClick={() => setPickerOpen(true)}>
+            {t("uploader.fromMedia")}
+          </Button>
+        ) : null}
+      </Space>
+      {showMediaPicker ? (
+        <MediaPicker
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          multiple={false}
+          initialFolder={folder}
+          onSelect={(urls) => {
+            if (urls[0]) onChange?.(urls[0]);
+          }}
+        />
+      ) : null}
     </Space>
   );
 }

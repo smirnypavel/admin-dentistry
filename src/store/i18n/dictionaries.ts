@@ -510,6 +510,7 @@ export const commonRu: I18nDict = {
   "uploader.error": "Не удалось загрузить изображение",
   "uploader.typeError": "Недопустимый тип файла",
   "uploader.sizeError": "Файл слишком большой (макс. {mb} МБ)",
+  "uploader.fromMedia": "Выбрать из медиа",
 };
 
 export const commonUk: I18nDict = {
@@ -536,6 +537,7 @@ export const commonUk: I18nDict = {
   "uploader.error": "Не вдалося завантажити зображення",
   "uploader.typeError": "Неприпустимий тип файлу",
   "uploader.sizeError": "Файл занадто великий (макс. {mb} МБ)",
+  "uploader.fromMedia": "Вибрати з медіа",
 };
 
 // Discounts
@@ -920,6 +922,7 @@ export const ruProducts: I18nDict = {
   "products.form.attr.value.placeholder": "Значение (например, restoration)",
   "products.form.attr.add": "Добавить атрибут",
   "products.form.images": "Изображения товара",
+  "products.form.selectFromMedia": "Выбрать из медиа",
   "products.form.isActive": "Активен",
   "products.form.isNew": "Бейдж NEW",
 
@@ -1032,6 +1035,7 @@ export const ukProducts: I18nDict = {
   "products.form.attr.value.placeholder": "Значення (наприклад, restoration)",
   "products.form.attr.add": "Додати атрибут",
   "products.form.images": "Зображення товару",
+  "products.form.selectFromMedia": "Вибрати з медіа",
   "products.form.isActive": "Активний",
   "products.form.isNew": "Бейдж NEW",
 
