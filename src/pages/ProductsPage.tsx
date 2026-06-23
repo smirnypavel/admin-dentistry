@@ -126,6 +126,7 @@ export function ProductsPage() {
   const [editingVariantKey, setEditingVariantKey] = useState<string | null>(
     null,
   );
+  const [editorTab, setEditorTab] = useState("basics");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -236,6 +237,7 @@ export function ProductsPage() {
 
   const onEdit = useCallback(
     (r: Product) => {
+      setEditorTab("basics");
       setEditor({ open: true, mode: "edit", record: r, step: 0 });
       form.setFieldsValue({
         titleUk: r.titleI18n?.uk || r.title || "",
@@ -397,6 +399,7 @@ export function ProductsPage() {
   );
 
   const onCreate = () => {
+    setEditorTab("basics");
     setEditor({ open: true, mode: "create", record: null, step: 0 });
     form.setFieldsValue({
       titleUk: "",
@@ -422,6 +425,7 @@ export function ProductsPage() {
     try {
       await form.validateFields();
     } catch {
+      setEditorTab("basics");
       message.error(t("products.form.title.required"));
       return;
     }
@@ -957,11 +961,18 @@ export function ProductsPage() {
                   if (base) form.setFieldsValue({ slug: slugify(base) });
                 }
               }}>
-              <Divider orientation="left" style={{ marginTop: 0 }}>
-                {t("products.section.basics")}
-              </Divider>
               <Tabs
+                activeKey={editorTab}
+                onChange={setEditorTab}
                 items={[
+                  {
+                    key: "basics",
+                    label: t("products.section.basics"),
+                    forceRender: true,
+                    children: (
+                      <>
+                        <Tabs
+                          items={[
                   {
                     key: "uk",
                     label: t("products.form.lang.uk") || "Українська",
@@ -1091,10 +1102,15 @@ export function ProductsPage() {
                   placeholder={t("products.form.tags.placeholder")}
                 />
               </Form.Item>
-              <Divider orientation="left">
-                {t("products.section.attributes")}
-              </Divider>
-              <Form.Item label={t("products.form.attributes")}>
+                      </>
+                    ),
+                  },
+                  {
+                    key: "attributes",
+                    label: t("products.section.attributes"),
+                    forceRender: true,
+                    children: (
+                      <Form.Item label={t("products.form.attributes")}>
                 <Form.List name="attributes">
                   {(fields, { add, remove }) => (
                     <Space
@@ -1150,13 +1166,17 @@ export function ProductsPage() {
                     </Space>
                   )}
                 </Form.List>
-              </Form.Item>
-              <Divider orientation="left">
-                {t("products.section.media")}
-              </Divider>
-              <Form.Item
-                label={t("products.form.images")}
-                shouldUpdate>
+                      </Form.Item>
+                    ),
+                  },
+                  {
+                    key: "media",
+                    label: t("products.section.media"),
+                    children: (
+                      <>
+                        <Form.Item
+                          label={t("products.form.images")}
+                          shouldUpdate>
                 {() => {
                   const imgs: string[] = form.getFieldValue("images") || [];
                   return (
@@ -1203,12 +1223,18 @@ export function ProductsPage() {
                   const merged = [...imgs, ...urls.filter((u) => !imgs.includes(u))];
                   form.setFieldValue("images", merged);
                 }}
-              />
-              <Divider orientation="left">
-                {t("products.section.settings")}
-              </Divider>
-              <Form.Item
-                label={t("products.form.isActive")}
+                        />
+                      </>
+                    ),
+                  },
+                  {
+                    key: "settings",
+                    label: t("products.section.settings"),
+                    forceRender: true,
+                    children: (
+                      <>
+                        <Form.Item
+                          label={t("products.form.isActive")}
                 name="isActive"
                 valuePropName="checked">
                 <Switch />
@@ -1219,60 +1245,67 @@ export function ProductsPage() {
                 valuePropName="checked">
                 <Switch />
               </Form.Item>
-              <Form.Item
-                label="Кешбек %"
-                name="cashbackPercent"
-                tooltip="Відсоток кешбеку для покупця (0 = без кешбеку, напр. 5 = 5%)">
-                <InputNumber min={0} max={100} precision={0} style={{ width: 120 }} addonAfter="%" placeholder="0" />
-              </Form.Item>
-            </Form>
+                        <Form.Item
+                          label="Кешбек %"
+                          name="cashbackPercent"
+                          tooltip="Відсоток кешбеку для покупця (0 = без кешбеку, напр. 5 = 5%)">
+                          <InputNumber min={0} max={100} precision={0} style={{ width: 120 }} addonAfter="%" placeholder="0" />
+                        </Form.Item>
+                      </>
+                    ),
+                  },
+                  {
+                    key: "variants",
+                    label: `${t("products.section.variants")} (${variants.length})`,
+                    children: (
+                      <Space
+                        direction="vertical"
+                        style={{ width: "100%" }}
+                        size="middle">
+                        <Space
+                          style={{ width: "100%", justifyContent: "space-between" }}
+                          wrap>
+                          <Space size="large">
+                            <Typography.Text type="secondary">
+                              {t("products.variants.count")}: {variants.length}
+                            </Typography.Text>
+                            {variantPriceRange && (
+                              <Typography.Text strong>
+                                {t("products.variants.priceRange")}: {variantPriceRange}
+                              </Typography.Text>
+                            )}
+                          </Space>
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={openAddVariant}>
+                            {t("products.variants.add")}
+                          </Button>
+                        </Space>
 
-            <Divider orientation="left">
-              {t("products.section.variants")}
-            </Divider>
-            <Space
-              direction="vertical"
-              style={{ width: "100%" }}
-              size="middle">
-              <Space
-                style={{ width: "100%", justifyContent: "space-between" }}
-                wrap>
-                <Space size="large">
-                  <Typography.Text type="secondary">
-                    {t("products.variants.count")}: {variants.length}
-                  </Typography.Text>
-                  {variantPriceRange && (
-                    <Typography.Text strong>
-                      {t("products.variants.priceRange")}: {variantPriceRange}
-                    </Typography.Text>
-                  )}
-                </Space>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={openAddVariant}>
-                  {t("products.variants.add")}
-                </Button>
-              </Space>
+                        {variants.length === 0 && (
+                          <Alert
+                            type="warning"
+                            showIcon
+                            message={t("products.variants.empty.title")}
+                            description={t("products.variants.empty.hint")}
+                          />
+                        )}
 
-              {variants.length === 0 && (
-                <Alert
-                  type="warning"
-                  showIcon
-                  message={t("products.variants.empty.title")}
-                  description={t("products.variants.empty.hint")}
-                />
-              )}
-
-              <Table
-                rowKey={(r) => r._id || r._tmpId || r.sku}
-                columns={variantColumns}
-                dataSource={variants}
-                pagination={false}
-                size="small"
-                scroll={{ x: "max-content" }}
+                        <Table
+                          rowKey={(r) => r._id || r._tmpId || r.sku}
+                          columns={variantColumns}
+                          dataSource={variants}
+                          pagination={false}
+                          size="small"
+                          scroll={{ x: "max-content" }}
+                        />
+                      </Space>
+                    ),
+                  },
+                ]}
               />
-            </Space>
+            </Form>
 
             {/* Variant editor modal */}
             <Modal
