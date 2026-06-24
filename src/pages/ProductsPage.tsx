@@ -1177,7 +1177,15 @@ export function ProductsPage() {
                     label: t("products.section.attributes"),
                     forceRender: true,
                     children: (
-                      <Form.Item label={t("products.form.attributes")}>
+                      <>
+                        <Alert
+                          type="info"
+                          showIcon
+                          style={{ marginBottom: 16 }}
+                          message={t("products.attributes.help.title")}
+                          description={t("products.attributes.help.desc")}
+                        />
+                        <Form.Item label={t("products.form.attributes")}>
                 <Form.List name="attributes">
                   {(fields, { add, remove }) => (
                     <Space
@@ -1233,7 +1241,8 @@ export function ProductsPage() {
                     </Space>
                   )}
                 </Form.List>
-                      </Form.Item>
+                        </Form.Item>
+                      </>
                     ),
                   },
                   {
