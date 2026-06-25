@@ -476,8 +476,9 @@ export function ProductsPage() {
         else if (!isNaN(Number(raw)) && raw !== "") parsed = Number(raw);
         return { key: key.trim(), value: parsed };
       });
+    // Send only fields the backend DTO allows — _id and variantKey are
+    // forbidden (forbidNonWhitelisted) and are regenerated server-side.
     const preparedVariants: ProductVariant[] = variants.map((v) => ({
-      _id: v._id,
       sku: v.sku,
       manufacturerId: v.manufacturerId,
       countryId: v.countryId || undefined,
@@ -487,7 +488,6 @@ export function ProductsPage() {
       images: v.images || [],
       barcode: v.barcode || undefined,
       isActive: v.isActive,
-      variantKey: v.variantKey,
     }));
     try {
       if (editor.mode === "create") {
