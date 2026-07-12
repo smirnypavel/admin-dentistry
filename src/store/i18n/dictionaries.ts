@@ -967,9 +967,23 @@ export const ruProducts: I18nDict = {
   // Variants block
   "products.variants.count": "Вариантов",
   "products.variants.priceRange": "Цена",
-  "products.variants.empty.title": "Нет ни одного варианта",
+  "products.variants.empty.title": "Нет ни одной комбинации",
   "products.variants.empty.hint":
-    "Добавьте хотя бы один вариант — иначе у товара не будет цены и его нельзя купить.",
+    "Добавьте группы опций и нажмите «Сгенерировать комбинации», либо нажмите её без опций — чтобы создать один вариант с ценой.",
+  "products.variants.help.title": "Как это работает",
+  "products.variants.help.desc":
+    "Задайте группы опций (напр. «Размер»: 0.22, «Тип»: Верхняя челюсть / Нижняя челюсть / Шт.). Система сама создаст все комбинации — вам останется проставить цену по каждой. Производитель и страна — общие для всего товара.",
+  "products.variants.manufacturer.required":
+    "Укажите производителя товара (общий для всех вариантов)",
+  "products.variants.optionGroups.title": "Группы опций",
+  "products.variants.optionGroups.hint":
+    "Напр. «Размер» со значениями 0.18, 0.22 или «Тип» со значениями Верхняя челюсть, Нижняя челюсть. Значения вводите через запятую или Enter.",
+  "products.variants.optionGroups.name.placeholder": "Название группы (напр. Размер)",
+  "products.variants.optionGroups.values.placeholder":
+    "Значения (напр. Верхняя челюсть, Нижняя челюсть)",
+  "products.variants.optionGroups.add": "Добавить группу опций",
+  "products.variants.generate": "Сгенерировать комбинации",
+  "products.variants.combinations.title": "Комбинации и цены",
   "products.variants.modal.addTitle": "Новый вариант",
   "products.variants.modal.editTitle": "Редактирование варианта",
   "products.variants.options.hint":
@@ -1116,9 +1130,23 @@ export const ukProducts: I18nDict = {
   // Variants block
   "products.variants.count": "Варіантів",
   "products.variants.priceRange": "Ціна",
-  "products.variants.empty.title": "Немає жодного варіанту",
+  "products.variants.empty.title": "Немає жодної комбінації",
   "products.variants.empty.hint":
-    "Додайте хоча б один варіант — інакше у товару не буде ціни і його не можна купити.",
+    "Додайте групи опцій і натисніть «Згенерувати комбінації», або натисніть її без опцій — щоб створити один варіант з ціною.",
+  "products.variants.help.title": "Як це працює",
+  "products.variants.help.desc":
+    "Задайте групи опцій (напр. «Розмір»: 0.22, «Тип»: Верхня щелепа / Нижня щелепа / Шт.). Система сама створить усі комбінації — вам лишиться проставити ціну по кожній. Виробник і країна — спільні для всього товару.",
+  "products.variants.manufacturer.required":
+    "Вкажіть виробника товару (спільний для всіх варіантів)",
+  "products.variants.optionGroups.title": "Групи опцій",
+  "products.variants.optionGroups.hint":
+    "Напр. «Розмір» зі значеннями 0.18, 0.22 або «Тип» зі значеннями Верхня щелепа, Нижня щелепа. Значення вводьте через кому або Enter.",
+  "products.variants.optionGroups.name.placeholder": "Назва групи (напр. Розмір)",
+  "products.variants.optionGroups.values.placeholder":
+    "Значення (напр. Верхня щелепа, Нижня щелепа)",
+  "products.variants.optionGroups.add": "Додати групу опцій",
+  "products.variants.generate": "Згенерувати комбінації",
+  "products.variants.combinations.title": "Комбінації та ціни",
   "products.variants.modal.addTitle": "Новий варіант",
   "products.variants.modal.editTitle": "Редагування варіанту",
   "products.variants.options.hint":

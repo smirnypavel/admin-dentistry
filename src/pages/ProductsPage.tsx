@@ -4,28 +4,20 @@ import {
   App as AntApp,
   Alert,
   Button,
-  Divider,
   Drawer,
   Form,
   Input,
   InputNumber,
-  Modal,
   Tabs,
   Select,
   Space,
   Switch,
   Table,
   Tag,
-  Tooltip,
   Typography,
   theme as antdTheme,
 } from "antd";
-import {
-  CopyOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useQueryParam } from "../hooks/useQueryParam";
 import {
@@ -60,17 +52,52 @@ type EditorState = {
   step: number; // kept for compatibility; single-form editor no longer uses steps
 };
 
-// Variant modal form values: options entered as key/value pairs
-type VariantFormValues = {
-  sku: string;
-  manufacturerId: string;
-  countryId?: string;
-  price: number;
-  unit?: string;
-  barcode?: string;
-  isActive: boolean;
-  optionsList?: Array<{ key: string; value: string }>;
-};
+type OptionGroup = { name: string; values: string[] };
+
+// Derive option groups (name → distinct values) from a list of variants
+function deriveOptionGroups(
+  vs: Array<{ options?: Record<string, string | number> }>,
+): OptionGroup[] {
+  const map = new Map<string, string[]>();
+  for (const v of vs) {
+    for (const [k, val] of Object.entries(v.options || {})) {
+      const arr = map.get(k) ?? [];
+      const sval = String(val);
+      if (!arr.includes(sval)) arr.push(sval);
+      map.set(k, arr);
+    }
+  }
+  return Array.from(map.entries()).map(([name, values]) => ({ name, values }));
+}
+
+// Stable signature for a combination's option values (order-independent)
+function optionsSignature(options: Record<string, string | number>): string {
+  return Object.keys(options)
+    .sort()
+    .map((k) => `${k}=${String(options[k])}`)
+    .join("|");
+}
+
+// Cartesian product of option groups → list of option objects
+function buildCombinations(
+  groups: OptionGroup[],
+): Array<Record<string, string>> {
+  const active = groups.filter(
+    (g) => g.name.trim() && g.values.length > 0,
+  );
+  if (active.length === 0) return [];
+  let combos: Array<Record<string, string>> = [{}];
+  for (const g of active) {
+    const next: Array<Record<string, string>> = [];
+    for (const combo of combos) {
+      for (const val of g.values) {
+        next.push({ ...combo, [g.name.trim()]: val });
+      }
+    }
+    combos = next;
+  }
+  return combos;
+}
 
 export function ProductsPage() {
   const { t } = useI18n();
@@ -120,14 +147,18 @@ export function ProductsPage() {
     cashbackPercent?: number;
   }>();
 
-  const [variantForm] = Form.useForm<VariantFormValues>();
   const [variants, setVariants] = useState<
     Array<ProductVariant & { _tmpId?: string }>
   >([]);
-  const [variantModalOpen, setVariantModalOpen] = useState(false);
-  const [editingVariantKey, setEditingVariantKey] = useState<string | null>(
-    null,
-  );
+  // Option groups (e.g. "Розмір" → ["0.22"], "Тип" → ["Верхня щелепа", ...])
+  const [optionGroups, setOptionGroups] = useState<
+    Array<{ name: string; values: string[] }>
+  >([]);
+  // Product-level manufacturer/country applied to every generated combination
+  const [variantManufacturerId, setVariantManufacturerId] = useState<
+    string | undefined
+  >();
+  const [variantCountryId, setVariantCountryId] = useState<string | undefined>();
   const [editorTab, setEditorTab] = useState("basics");
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -259,11 +290,17 @@ export function ProductsPage() {
         isNew: r.isNew ?? false,
         cashbackPercent: r.cashbackPercent ?? 0,
       });
-      setVariants(
-        (r.variants || []).map((v) => ({
-          ...v,
-          _tmpId: v._id || crypto.randomUUID(),
-        })),
+      const vs = (r.variants || []).map((v) => ({
+        ...v,
+        _tmpId: v._id || crypto.randomUUID(),
+      }));
+      setVariants(vs);
+      setOptionGroups(deriveOptionGroups(vs));
+      setVariantManufacturerId(
+        vs[0]?.manufacturerId ? String(vs[0].manufacturerId) : undefined,
+      );
+      setVariantCountryId(
+        vs[0]?.countryId ? String(vs[0].countryId) : undefined,
       );
     },
     [form],
@@ -418,6 +455,9 @@ export function ProductsPage() {
       cashbackPercent: 0,
     });
     setVariants([]);
+    setOptionGroups([]);
+    setVariantManufacturerId(undefined);
+    setVariantCountryId(undefined);
   };
 
   // moved: onEdit, onDelete wrapped in useCallback above
@@ -476,12 +516,19 @@ export function ProductsPage() {
         else if (!isNaN(Number(raw)) && raw !== "") parsed = Number(raw);
         return { key: key.trim(), value: parsed };
       });
+    // Manufacturer is required per variant; it is set at product level and
+    // applied to every combination.
+    if (variants.length > 0 && !variantManufacturerId) {
+      setEditorTab("variants");
+      message.error(t("products.variants.manufacturer.required"));
+      return;
+    }
     // Send only fields the backend DTO allows — _id and variantKey are
     // forbidden (forbidNonWhitelisted) and are regenerated server-side.
     const preparedVariants: ProductVariant[] = variants.map((v) => ({
       sku: v.sku,
-      manufacturerId: v.manufacturerId,
-      countryId: v.countryId || undefined,
+      manufacturerId: variantManufacturerId as string,
+      countryId: variantCountryId || undefined,
       options: v.options || {},
       price: v.price,
       unit: v.unit || undefined,
@@ -543,239 +590,136 @@ export function ProductsPage() {
     }
   };
 
-  const openEditVariant = useCallback(
-    (v: ProductVariant & { _tmpId?: string }) => {
-      setEditingVariantKey(v._id || v._tmpId || null);
-      variantForm.setFieldsValue({
-        sku: v.sku,
-        manufacturerId: v.manufacturerId,
-        countryId: v.countryId ?? undefined,
-        price: v.price,
-        unit: v.unit ?? undefined,
-        barcode: v.barcode ?? undefined,
-        isActive: v.isActive,
-        optionsList: Object.entries(v.options || {}).map(([key, value]) => ({
-          key,
-          value: String(value ?? ""),
-        })),
-      });
-      setVariantModalOpen(true);
-    },
-    [variantForm],
-  );
+  // ── Option groups management ───────────────────────────────────────────
+  const addOptionGroup = () =>
+    setOptionGroups((prev) => [...prev, { name: "", values: [] }]);
 
-  const onRemoveVariant = useCallback(
-    (v: ProductVariant & { _tmpId?: string }) => {
+  const removeOptionGroup = (idx: number) =>
+    setOptionGroups((prev) => prev.filter((_, i) => i !== idx));
+
+  const updateOptionGroup = (idx: number, patch: Partial<OptionGroup>) =>
+    setOptionGroups((prev) =>
+      prev.map((g, i) => (i === idx ? { ...g, ...patch } : g)),
+    );
+
+  // Build combination rows from the option groups, preserving already-entered
+  // SKU/price/active for combinations that still exist (matched by options).
+  const regenerateCombinations = () => {
+    const combos = buildCombinations(optionGroups);
+    setVariants((prev) => {
+      const bySig = new Map(
+        prev.map((v) => [optionsSignature(v.options || {}), v]),
+      );
+      if (combos.length === 0) {
+        const existing = prev[0];
+        return [
+          existing
+            ? { ...existing, options: {} }
+            : {
+                _tmpId: crypto.randomUUID(),
+                sku: "",
+                manufacturerId: "",
+                price: 0,
+                isActive: true,
+                options: {},
+                images: [],
+              },
+        ];
+      }
+      return combos.map((options) => {
+        const existing = bySig.get(optionsSignature(options));
+        return existing
+          ? { ...existing, options }
+          : {
+              _tmpId: crypto.randomUUID(),
+              sku: "",
+              manufacturerId: "",
+              price: 0,
+              isActive: true,
+              options,
+              images: [],
+            };
+      });
+    });
+  };
+
+  const updateVariantField = useCallback(
+    (
+      tmpId: string,
+      field: "sku" | "price" | "isActive",
+      value: string | number | boolean,
+    ) => {
       setVariants((prev) =>
-        prev.filter((x) => (x._id ? x._id !== v._id : x._tmpId !== v._tmpId)),
+        prev.map((v) =>
+          v._tmpId === tmpId ? { ...v, [field]: value } : v,
+        ),
       );
     },
     [],
   );
 
-  // Clone a variant — fast way to enter near-identical variants
-  const onCloneVariant = useCallback(
-    (v: ProductVariant & { _tmpId?: string }) => {
-      setVariants((prev) => {
-        const idx = prev.findIndex((x) =>
-          x._id ? x._id === v._id : x._tmpId === v._tmpId,
-        );
-        const copy: ProductVariant & { _tmpId?: string } = {
-          ...v,
-          _id: undefined,
-          _tmpId: crypto.randomUUID(),
-          sku: v.sku ? `${v.sku}-copy` : v.sku,
-          options: { ...(v.options || {}) },
-          images: [...(v.images || [])],
-        };
-        const next = [...prev];
-        next.splice(idx >= 0 ? idx + 1 : prev.length, 0, copy);
-        return next;
-      });
-    },
-    [],
-  );
-
-  // Human-readable variant label exactly as a customer sees it on the site
-  const variantSiteLabel = useCallback(
-    (v: ProductVariant & { _tmpId?: string }) => {
-      const opts = Object.values(v.options || {})
-        .map((x) => String(x))
-        .filter(Boolean);
-      return opts.length ? opts.join(" · ") : "";
-    },
-    [],
-  );
-
-  const variantColumns: ColumnsType<ProductVariant & { _tmpId?: string }> =
-    useMemo(
-      () => [
+  // Table columns: one read-only column per option group + editable SKU/price/active
+  const combinationColumns: ColumnsType<ProductVariant & { _tmpId?: string }> =
+    useMemo(() => {
+      const optionCols = optionGroups
+        .filter((g) => g.name.trim())
+        .map((g) => ({
+          title: g.name.trim(),
+          key: `opt_${g.name}`,
+          render: (_: unknown, r: ProductVariant & { _tmpId?: string }) => (
+            <Tag>{String(r.options?.[g.name.trim()] ?? "—")}</Tag>
+          ),
+        }));
+      return [
+        ...optionCols,
         {
-          title: t("products.variants.table.siteLabel"),
-          key: "siteLabel",
-          width: 200,
-          fixed: "left" as const,
-          render: (_: unknown, r) => {
-            const label = variantSiteLabel(r);
-            return label ? (
-              <Typography.Text strong>{label}</Typography.Text>
-            ) : (
-              <Tooltip title={t("products.variants.siteLabel.skuTooltip")}>
-                <Tag color="warning">{r.sku || "—"}</Tag>
-              </Tooltip>
-            );
-          },
-        },
-        { title: "SKU", dataIndex: "sku", key: "sku", width: 160 },
-        {
-          title: t("products.variants.table.manufacturer"),
-          dataIndex: "manufacturerId",
-          key: "manufacturerId",
-          width: 200,
-          render: (v: string) =>
-            manufacturers.find((m) => m._id === v)?.name || v,
+          title: "SKU",
+          key: "sku",
+          width: 180,
+          render: (_: unknown, r) => (
+            <Input
+              size="small"
+              value={r.sku}
+              placeholder="SKU"
+              onChange={(e) =>
+                updateVariantField(r._tmpId as string, "sku", e.target.value)
+              }
+            />
+          ),
         },
         {
-          title: t("products.variants.table.country"),
-          dataIndex: "countryId",
-          key: "countryId",
-          width: 160,
-          render: (v?: string) =>
-            v ? countries.find((c) => c._id === v)?.name || v : "—",
-        },
-        {
-          title: t("products.variants.table.price"),
-          dataIndex: "price",
+          title: t("products.variants.form.price"),
           key: "price",
-          width: 120,
-        },
-        {
-          title: t("products.variants.table.unit"),
-          dataIndex: "unit",
-          key: "unit",
-          width: 80,
-          render: (v?: string) => v || "—",
-        },
-        {
-          title: t("products.variants.table.barcode"),
-          dataIndex: "barcode",
-          key: "barcode",
-          width: 160,
-          render: (v?: string) => v || "—",
-        },
-        {
-          title: t("products.variants.table.options"),
-          key: "options",
+          width: 150,
           render: (_: unknown, r) => (
-            <Space wrap>
-              {Object.entries(r.options || {}).map(([k, v]) => (
-                <Tag key={k}>{`${k}: ${String(v)}`}</Tag>
-              ))}
-            </Space>
+            <InputNumber
+              size="small"
+              min={0}
+              value={r.price}
+              addonAfter="₴"
+              style={{ width: 130 }}
+              onChange={(val) =>
+                updateVariantField(r._tmpId as string, "price", Number(val) || 0)
+              }
+            />
           ),
         },
         {
-          title: t("products.variants.table.isActive"),
-          dataIndex: "isActive",
+          title: t("products.variants.form.isActive"),
           key: "isActive",
-          width: 100,
-          render: (v: boolean) =>
-            v ? (
-              <Tag color="success">{t("common.yes")}</Tag>
-            ) : (
-              <Tag>{t("common.no")}</Tag>
-            ),
-        },
-        {
-          title: t("common.actions"),
-          key: "actions",
-          width: 230,
-          fixed: "right" as const,
+          width: 90,
           render: (_: unknown, r) => (
-            <Space>
-              <Button
-                size="small"
-                icon={<EditOutlined />}
-                onClick={() => openEditVariant(r)}>
-                {t("common.edit")}
-              </Button>
-              <Tooltip title={t("products.variants.clone.tooltip")}>
-                <Button
-                  size="small"
-                  icon={<CopyOutlined />}
-                  onClick={() => onCloneVariant(r)}
-                />
-              </Tooltip>
-              <Button
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => onRemoveVariant(r)}
-              />
-            </Space>
+            <Switch
+              size="small"
+              checked={r.isActive}
+              onChange={(val) =>
+                updateVariantField(r._tmpId as string, "isActive", val)
+              }
+            />
           ),
         },
-      ],
-      [
-        manufacturers,
-        countries,
-        openEditVariant,
-        onRemoveVariant,
-        onCloneVariant,
-        variantSiteLabel,
-        t,
-      ],
-    );
-
-  const openAddVariant = () => {
-    setEditingVariantKey(null);
-    variantForm.resetFields();
-    variantForm.setFieldsValue({
-      sku: "",
-      manufacturerId: "",
-      price: 0,
-      isActive: true,
-      optionsList: [],
-    });
-    setVariantModalOpen(true);
-  };
-
-  const onSaveVariant = async () => {
-    try {
-      const v = await variantForm.validateFields();
-      // Convert key/value pairs back into an options object
-      const options: Record<string, string | number> = {};
-      (v.optionsList || []).forEach(({ key, value }) => {
-        const k = (key || "").trim();
-        if (!k) return;
-        const raw = String(value ?? "").trim();
-        const num = Number(raw);
-        options[k] = raw !== "" && !isNaN(num) ? num : raw;
-      });
-      const data = {
-        sku: v.sku.trim(),
-        manufacturerId: v.manufacturerId,
-        countryId: v.countryId || undefined,
-        price: v.price,
-        unit: v.unit || undefined,
-        barcode: v.barcode || undefined,
-        isActive: v.isActive,
-        options,
-      };
-      setVariants((prev) => {
-        if (editingVariantKey) {
-          return prev.map((x) =>
-            (x._id || x._tmpId) === editingVariantKey ? { ...x, ...data } : x,
-          );
-        }
-        return [{ _tmpId: crypto.randomUUID(), images: [], ...data }, ...prev];
-      });
-      setVariantModalOpen(false);
-      setEditingVariantKey(null);
-    } catch {
-      // validation errors are shown inline
-    }
-  };
+      ];
+    }, [optionGroups, updateVariantField, t]);
 
   // Price range across current variants (live feedback in the editor)
   const variantPriceRange = useMemo(() => {
@@ -1337,245 +1281,156 @@ export function ProductsPage() {
                       <Space
                         direction="vertical"
                         style={{ width: "100%" }}
-                        size="middle">
-                        <Space
-                          style={{ width: "100%", justifyContent: "space-between" }}
-                          wrap>
-                          <Space size="large">
-                            <Typography.Text type="secondary">
-                              {t("products.variants.count")}: {variants.length}
+                        size="large">
+                        <Alert
+                          type="info"
+                          showIcon
+                          message={t("products.variants.help.title")}
+                          description={t("products.variants.help.desc")}
+                        />
+
+                        {/* Product-level manufacturer / country */}
+                        <Space wrap size="large">
+                          <div>
+                            <div style={{ marginBottom: 4 }}>
+                              {t("products.variants.form.manufacturer")}{" "}
+                              <span style={{ color: "#ff4d4f" }}>*</span>
+                            </div>
+                            <Select
+                              showSearch
+                              optionFilterProp="label"
+                              placeholder={t("products.variants.form.manufacturer")}
+                              style={{ width: 280 }}
+                              value={variantManufacturerId}
+                              onChange={(v) => setVariantManufacturerId(v)}
+                              options={manufacturers.map((m) => ({
+                                value: m._id,
+                                label: m.name,
+                              }))}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ marginBottom: 4 }}>
+                              {t("products.variants.form.country")}
+                            </div>
+                            <Select
+                              allowClear
+                              showSearch
+                              optionFilterProp="label"
+                              placeholder={t("products.variants.form.country")}
+                              style={{ width: 240 }}
+                              value={variantCountryId}
+                              onChange={(v) => setVariantCountryId(v)}
+                              options={countries.map((c) => ({
+                                value: c._id,
+                                label: c.name,
+                              }))}
+                            />
+                          </div>
+                        </Space>
+
+                        {/* Option groups */}
+                        <div>
+                          <Typography.Text strong>
+                            {t("products.variants.optionGroups.title")}
+                          </Typography.Text>
+                          <Typography.Paragraph
+                            type="secondary"
+                            style={{ fontSize: 12, margin: "4px 0 12px" }}>
+                            {t("products.variants.optionGroups.hint")}
+                          </Typography.Paragraph>
+                          <Space direction="vertical" style={{ width: "100%" }}>
+                            {optionGroups.map((g, idx) => (
+                              <Space key={idx} align="baseline" wrap>
+                                <Input
+                                  placeholder={t(
+                                    "products.variants.optionGroups.name.placeholder",
+                                  )}
+                                  style={{ width: 200 }}
+                                  value={g.name}
+                                  onChange={(e) =>
+                                    updateOptionGroup(idx, { name: e.target.value })
+                                  }
+                                />
+                                <Select
+                                  mode="tags"
+                                  style={{ minWidth: 320 }}
+                                  placeholder={t(
+                                    "products.variants.optionGroups.values.placeholder",
+                                  )}
+                                  value={g.values}
+                                  onChange={(vals) =>
+                                    updateOptionGroup(idx, { values: vals })
+                                  }
+                                  tokenSeparators={[","]}
+                                />
+                                <Button
+                                  danger
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => removeOptionGroup(idx)}
+                                />
+                              </Space>
+                            ))}
+                            <Space>
+                              <Button
+                                icon={<PlusOutlined />}
+                                onClick={addOptionGroup}>
+                                {t("products.variants.optionGroups.add")}
+                              </Button>
+                              <Button
+                                type="primary"
+                                onClick={regenerateCombinations}>
+                                {t("products.variants.generate")}
+                              </Button>
+                            </Space>
+                          </Space>
+                        </div>
+
+                        {/* Combinations */}
+                        <div>
+                          <Space
+                            style={{
+                              width: "100%",
+                              justifyContent: "space-between",
+                            }}
+                            wrap>
+                            <Typography.Text strong>
+                              {t("products.variants.combinations.title")}
                             </Typography.Text>
                             {variantPriceRange && (
-                              <Typography.Text strong>
-                                {t("products.variants.priceRange")}: {variantPriceRange}
+                              <Typography.Text type="secondary">
+                                {t("products.variants.priceRange")}:{" "}
+                                {variantPriceRange}
                               </Typography.Text>
                             )}
                           </Space>
-                          <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={openAddVariant}>
-                            {t("products.variants.add")}
-                          </Button>
-                        </Space>
 
-                        {variants.length === 0 && (
-                          <Alert
-                            type="warning"
-                            showIcon
-                            message={t("products.variants.empty.title")}
-                            description={t("products.variants.empty.hint")}
-                          />
-                        )}
-
-                        {variants.length > 1 &&
-                          variants.some((v) => !variantSiteLabel(v)) && (
+                          {variants.length === 0 ? (
                             <Alert
-                              type="info"
+                              style={{ marginTop: 12 }}
+                              type="warning"
                               showIcon
-                              message={t("products.variants.noOptions.title")}
-                              description={t("products.variants.noOptions.hint")}
+                              message={t("products.variants.empty.title")}
+                              description={t("products.variants.empty.hint")}
+                            />
+                          ) : (
+                            <Table
+                              style={{ marginTop: 12 }}
+                              rowKey={(r) => r._id || r._tmpId || r.sku}
+                              columns={combinationColumns}
+                              dataSource={variants}
+                              pagination={false}
+                              size="small"
+                              scroll={{ x: "max-content" }}
                             />
                           )}
-
-                        <Table
-                          rowKey={(r) => r._id || r._tmpId || r.sku}
-                          columns={variantColumns}
-                          dataSource={variants}
-                          pagination={false}
-                          size="small"
-                          scroll={{ x: "max-content" }}
-                        />
+                        </div>
                       </Space>
                     ),
                   },
                 ]}
               />
             </Form>
-
-            {/* Variant editor modal */}
-            <Modal
-              open={variantModalOpen}
-              width={680}
-              title={
-                editingVariantKey
-                  ? t("products.variants.modal.editTitle")
-                  : t("products.variants.modal.addTitle")
-              }
-              okText={t("common.save")}
-              cancelText={t("common.cancel")}
-              onOk={onSaveVariant}
-              onCancel={() => {
-                setVariantModalOpen(false);
-                setEditingVariantKey(null);
-              }}>
-              <Form
-                layout="vertical"
-                form={variantForm}
-                style={{ marginTop: 12 }}>
-                <Space wrap>
-                  <Form.Item
-                    label={t("products.variants.form.sku")}
-                    name="sku"
-                    tooltip={t("products.variants.form.sku.tooltip")}
-                    rules={[
-                      {
-                        required: true,
-                        message: t("products.variants.form.sku.required"),
-                      },
-                    ]}>
-                    <Input style={{ width: 280 }} />
-                  </Form.Item>
-                  <Form.Item
-                    label={t("products.variants.form.price")}
-                    name="price"
-                    rules={[
-                      {
-                        required: true,
-                        message: t("products.variants.form.price.required"),
-                      },
-                    ]}>
-                    <InputNumber
-                      min={0}
-                      style={{ width: 160 }}
-                      addonAfter="₴"
-                    />
-                  </Form.Item>
-                </Space>
-                <Space wrap>
-                  <Form.Item
-                    label={t("products.variants.form.manufacturer")}
-                    name="manufacturerId"
-                    rules={[
-                      {
-                        required: true,
-                        message: t(
-                          "products.variants.form.manufacturer.required",
-                        ),
-                      },
-                    ]}>
-                    <Select
-                      showSearch
-                      optionFilterProp="label"
-                      style={{ width: 280 }}
-                      options={manufacturers.map((m) => ({
-                        value: m._id,
-                        label: m.name,
-                      }))}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label={t("products.variants.form.country")}
-                    name="countryId">
-                    <Select
-                      allowClear
-                      showSearch
-                      optionFilterProp="label"
-                      style={{ width: 280 }}
-                      options={countries.map((c) => ({
-                        value: c._id,
-                        label: c.name,
-                      }))}
-                    />
-                  </Form.Item>
-                </Space>
-                <Space wrap>
-                  <Form.Item
-                    label={t("products.variants.form.unit")}
-                    name="unit">
-                    <Input
-                      style={{ width: 160 }}
-                      placeholder={t("products.variants.form.unit.placeholder")}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label={t("products.variants.form.barcode")}
-                    name="barcode">
-                    <Input style={{ width: 240 }} />
-                  </Form.Item>
-                  <Form.Item
-                    label={t("products.variants.form.isActive")}
-                    name="isActive"
-                    valuePropName="checked"
-                    tooltip={t("products.variants.form.isActive.tooltip")}
-                    initialValue={true}>
-                    <Switch />
-                  </Form.Item>
-                </Space>
-
-                <Divider orientation="left" plain>
-                  {t("products.variants.form.options")}
-                </Divider>
-                <Typography.Paragraph
-                  type="secondary"
-                  style={{ fontSize: 12, marginTop: -8 }}>
-                  {t("products.variants.options.hint")}
-                </Typography.Paragraph>
-                <Form.List name="optionsList">
-                  {(fields, { add, remove }) => (
-                    <Space
-                      direction="vertical"
-                      style={{ width: "100%" }}>
-                      {fields.map(({ key, name, ...restField }) => (
-                        <Space
-                          key={key}
-                          align="baseline"
-                          wrap>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "key"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: t(
-                                  "products.variants.option.key.required",
-                                ),
-                              },
-                            ]}
-                            style={{ marginBottom: 8 }}>
-                            <Input
-                              placeholder={t(
-                                "products.variants.option.key.placeholder",
-                              )}
-                              style={{ width: 240 }}
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "value"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: t(
-                                  "products.variants.option.value.required",
-                                ),
-                              },
-                            ]}
-                            style={{ marginBottom: 8 }}>
-                            <Input
-                              placeholder={t(
-                                "products.variants.option.value.placeholder",
-                              )}
-                              style={{ width: 240 }}
-                            />
-                          </Form.Item>
-                          <Button
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => remove(name)}
-                          />
-                        </Space>
-                      ))}
-                      <Button
-                        icon={<PlusOutlined />}
-                        onClick={() => add({ key: "", value: "" })}>
-                        {t("products.variants.option.add")}
-                      </Button>
-                    </Space>
-                  )}
-                </Form.List>
-              </Form>
-            </Modal>
           </>
         </Drawer>
 
