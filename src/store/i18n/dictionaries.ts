@@ -989,6 +989,9 @@ export const ruProducts: I18nDict = {
     "Цена какой комбинации показывается в каталоге и по умолчанию на странице товара. Если не выбрано — берётся минимальная.",
   "products.variants.displayPrice.needSku":
     "Заполните SKU этой комбинации, чтобы выбрать её ценой каталога",
+  "products.variants.dupSku.title": "Есть одинаковые SKU",
+  "products.variants.dupSku.hint":
+    "У каждой комбинации должен быть уникальный SKU — иначе цена в каталоге и корзина могут путать варианты.",
   "products.variants.modal.addTitle": "Новый вариант",
   "products.variants.modal.editTitle": "Редактирование варианта",
   "products.variants.options.hint":
@@ -1157,6 +1160,9 @@ export const ukProducts: I18nDict = {
     "Ціна якої комбінації показується в каталозі та за замовчуванням на сторінці товару. Якщо не вибрано — береться мінімальна.",
   "products.variants.displayPrice.needSku":
     "Заповніть SKU цієї комбінації, щоб обрати її ціною каталогу",
+  "products.variants.dupSku.title": "Є однакові SKU",
+  "products.variants.dupSku.hint":
+    "Кожна комбінація повинна мати унікальний SKU — інакше ціна в каталозі та кошик можуть плутати варіанти.",
   "products.variants.modal.addTitle": "Новий варіант",
   "products.variants.modal.editTitle": "Редагування варіанту",
   "products.variants.options.hint":

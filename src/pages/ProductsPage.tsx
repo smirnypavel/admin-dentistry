@@ -161,8 +161,10 @@ export function ProductsPage() {
     string | undefined
   >();
   const [variantCountryId, setVariantCountryId] = useState<string | undefined>();
-  // SKU of the combination whose price is shown in the catalog / product page
-  const [defaultVariantSku, setDefaultVariantSku] = useState<string | undefined>();
+  // Row (_tmpId) of the combination whose price is shown in the catalog
+  const [defaultVariantTmpId, setDefaultVariantTmpId] = useState<
+    string | undefined
+  >();
   const [editorTab, setEditorTab] = useState("basics");
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -306,7 +308,10 @@ export function ProductsPage() {
       setVariantCountryId(
         vs[0]?.countryId ? String(vs[0].countryId) : undefined,
       );
-      setDefaultVariantSku(r.defaultVariantSku || undefined);
+      const defRow = r.defaultVariantSku
+        ? vs.find((v) => v.sku === r.defaultVariantSku)
+        : undefined;
+      setDefaultVariantTmpId(defRow?._tmpId);
     },
     [form],
   );
@@ -463,7 +468,7 @@ export function ProductsPage() {
     setOptionGroups([]);
     setVariantManufacturerId(undefined);
     setVariantCountryId(undefined);
-    setDefaultVariantSku(undefined);
+    setDefaultVariantTmpId(undefined);
   };
 
   // moved: onEdit, onDelete wrapped in useCallback above
@@ -542,12 +547,9 @@ export function ProductsPage() {
       barcode: v.barcode || undefined,
       isActive: v.isActive,
     }));
-    // Only keep the display SKU if it still matches an existing variant
+    // Display SKU = SKU of the chosen combination row (if it has one)
     const resolvedDefaultSku =
-      defaultVariantSku &&
-      preparedVariants.some((v) => v.sku === defaultVariantSku)
-        ? defaultVariantSku
-        : undefined;
+      variants.find((v) => v._tmpId === defaultVariantTmpId)?.sku || undefined;
     try {
       if (editor.mode === "create") {
         await createProduct({
@@ -746,15 +748,27 @@ export function ProductsPage() {
                 r.sku ? "" : t("products.variants.displayPrice.needSku")
               }>
               <Radio
-                checked={!!r.sku && r.sku === defaultVariantSku}
+                checked={r._tmpId === defaultVariantTmpId}
                 disabled={!r.sku}
-                onChange={() => setDefaultVariantSku(r.sku)}
+                onChange={() => setDefaultVariantTmpId(r._tmpId)}
               />
             </Tooltip>
           ),
         },
       ];
-    }, [optionGroups, updateVariantField, defaultVariantSku, t]);
+    }, [optionGroups, updateVariantField, defaultVariantTmpId, t]);
+
+  // Warn when SKUs repeat — they must be unique for catalog price / cart to work
+  const hasDuplicateSkus = useMemo(() => {
+    const seen = new Set<string>();
+    for (const v of variants) {
+      const s = (v.sku || "").trim();
+      if (!s) continue;
+      if (seen.has(s)) return true;
+      seen.add(s);
+    }
+    return false;
+  }, [variants]);
 
   // Price range across current variants (live feedback in the editor)
   const variantPriceRange = useMemo(() => {
@@ -1449,15 +1463,26 @@ export function ProductsPage() {
                               description={t("products.variants.empty.hint")}
                             />
                           ) : (
-                            <Table
-                              style={{ marginTop: 12 }}
-                              rowKey={(r) => r._id || r._tmpId || r.sku}
-                              columns={combinationColumns}
-                              dataSource={variants}
-                              pagination={false}
-                              size="small"
-                              scroll={{ x: "max-content" }}
-                            />
+                            <>
+                              {hasDuplicateSkus && (
+                                <Alert
+                                  style={{ marginTop: 12 }}
+                                  type="warning"
+                                  showIcon
+                                  message={t("products.variants.dupSku.title")}
+                                  description={t("products.variants.dupSku.hint")}
+                                />
+                              )}
+                              <Table
+                                style={{ marginTop: 12 }}
+                                rowKey={(r) => r._id || r._tmpId || r.sku}
+                                columns={combinationColumns}
+                                dataSource={variants}
+                                pagination={false}
+                                size="small"
+                                scroll={{ x: "max-content" }}
+                              />
+                            </>
                           )}
                         </div>
                       </Space>
