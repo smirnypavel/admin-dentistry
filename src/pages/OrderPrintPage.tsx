@@ -48,6 +48,15 @@ export default function OrderPrintPage() {
     { title: "SKU", dataIndex: "sku", key: "sku", width: 120 },
     { title: t("orderDetails.table.title"), dataIndex: "title", key: "title" },
     {
+      title: t("orderDetails.item.options"),
+      dataIndex: "options",
+      key: "options",
+      render: (opts: Record<string, string | number>) =>
+        Object.entries(opts || {})
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ") || "—",
+    },
+    {
       title: t("orderDetails.table.quantity"),
       dataIndex: "quantity",
       key: "quantity",
