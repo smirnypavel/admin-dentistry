@@ -19,13 +19,20 @@ export function useQueryParam(key: string, initial = "", debounceMs = 300) {
       setValue(next);
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
-        const newParams = new URLSearchParams(params);
-        if (next && next.trim()) newParams.set(key, next.trim());
-        else newParams.delete(key);
-        setParams(newParams, { replace: true });
+        // Functional updater so concurrent writes (e.g. page + pageSize)
+        // merge against the latest params instead of clobbering each other.
+        setParams(
+          (prev) => {
+            const newParams = new URLSearchParams(prev);
+            if (next && next.trim()) newParams.set(key, next.trim());
+            else newParams.delete(key);
+            return newParams;
+          },
+          { replace: true },
+        );
       }, debounceMs);
     };
-  }, [params, setParams, key, debounceMs]);
+  }, [setParams, key, debounceMs]);
 
   useEffect(
     () => () => {
