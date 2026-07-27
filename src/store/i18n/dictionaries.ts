@@ -984,6 +984,11 @@ export const ruProducts: I18nDict = {
   "products.variants.optionGroups.add": "Добавить группу опций",
   "products.variants.generate": "Сгенерировать комбинации",
   "products.variants.combinations.title": "Комбинации и цены",
+  "products.variants.displayPrice.title": "Цена в каталоге",
+  "products.variants.displayPrice.tooltip":
+    "Цена какой комбинации показывается в каталоге и по умолчанию на странице товара. Если не выбрано — берётся минимальная.",
+  "products.variants.displayPrice.needSku":
+    "Заполните SKU этой комбинации, чтобы выбрать её ценой каталога",
   "products.variants.modal.addTitle": "Новый вариант",
   "products.variants.modal.editTitle": "Редактирование варианта",
   "products.variants.options.hint":
@@ -1147,6 +1152,11 @@ export const ukProducts: I18nDict = {
   "products.variants.optionGroups.add": "Додати групу опцій",
   "products.variants.generate": "Згенерувати комбінації",
   "products.variants.combinations.title": "Комбінації та ціни",
+  "products.variants.displayPrice.title": "Ціна в каталозі",
+  "products.variants.displayPrice.tooltip":
+    "Ціна якої комбінації показується в каталозі та за замовчуванням на сторінці товару. Якщо не вибрано — береться мінімальна.",
+  "products.variants.displayPrice.needSku":
+    "Заповніть SKU цієї комбінації, щоб обрати її ціною каталогу",
   "products.variants.modal.addTitle": "Новий варіант",
   "products.variants.modal.editTitle": "Редагування варіанту",
   "products.variants.options.hint":

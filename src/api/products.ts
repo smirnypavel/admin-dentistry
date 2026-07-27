@@ -37,6 +37,7 @@ type ProductRaw = {
   isActive: boolean;
   isNew?: boolean;
   cashbackPercent?: number;
+  defaultVariantSku?: string;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -66,6 +67,7 @@ export type Product = {
   isActive: boolean;
   isNew?: boolean;
   cashbackPercent?: number;
+  defaultVariantSku?: string;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -134,6 +136,7 @@ export async function listProducts(
       isActive: p.isActive,
       isNew: p.isNew ?? false,
       cashbackPercent: p.cashbackPercent ?? 0,
+      defaultVariantSku: p.defaultVariantSku ?? undefined,
       createdAt: p.createdAt ?? null,
       updatedAt: p.updatedAt ?? null,
     })),
@@ -184,6 +187,7 @@ export type CreateProductDto = {
   isActive?: boolean;
   isNew?: boolean;
   cashbackPercent?: number;
+  defaultVariantSku?: string;
 };
 
 export async function createProduct(dto: CreateProductDto): Promise<Product> {
@@ -217,6 +221,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     isActive: dto.isActive,
     isNew: dto.isNew,
     cashbackPercent: dto.cashbackPercent,
+    defaultVariantSku: dto.defaultVariantSku,
   } as const;
   const { data } = await api.post<ProductRaw>("/admin/products", wire);
   return {

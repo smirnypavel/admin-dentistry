@@ -8,10 +8,12 @@ import {
   Form,
   Input,
   InputNumber,
+  Radio,
   Tabs,
   Select,
   Space,
   Switch,
+  Tooltip,
   Table,
   Tag,
   Typography,
@@ -159,6 +161,8 @@ export function ProductsPage() {
     string | undefined
   >();
   const [variantCountryId, setVariantCountryId] = useState<string | undefined>();
+  // SKU of the combination whose price is shown in the catalog / product page
+  const [defaultVariantSku, setDefaultVariantSku] = useState<string | undefined>();
   const [editorTab, setEditorTab] = useState("basics");
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -302,6 +306,7 @@ export function ProductsPage() {
       setVariantCountryId(
         vs[0]?.countryId ? String(vs[0].countryId) : undefined,
       );
+      setDefaultVariantSku(r.defaultVariantSku || undefined);
     },
     [form],
   );
@@ -458,6 +463,7 @@ export function ProductsPage() {
     setOptionGroups([]);
     setVariantManufacturerId(undefined);
     setVariantCountryId(undefined);
+    setDefaultVariantSku(undefined);
   };
 
   // moved: onEdit, onDelete wrapped in useCallback above
@@ -536,6 +542,12 @@ export function ProductsPage() {
       barcode: v.barcode || undefined,
       isActive: v.isActive,
     }));
+    // Only keep the display SKU if it still matches an existing variant
+    const resolvedDefaultSku =
+      defaultVariantSku &&
+      preparedVariants.some((v) => v.sku === defaultVariantSku)
+        ? defaultVariantSku
+        : undefined;
     try {
       if (editor.mode === "create") {
         await createProduct({
@@ -553,6 +565,7 @@ export function ProductsPage() {
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
           cashbackPercent: basics.cashbackPercent ?? 0,
+          defaultVariantSku: resolvedDefaultSku,
         });
         message.success(t("products.save.created"));
       } else if (editor.mode === "edit" && editor.record) {
@@ -571,6 +584,7 @@ export function ProductsPage() {
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
           cashbackPercent: basics.cashbackPercent ?? 0,
+          defaultVariantSku: resolvedDefaultSku ?? "",
         });
         message.success(t("products.save.updated"));
       }
@@ -718,8 +732,29 @@ export function ProductsPage() {
             />
           ),
         },
+        {
+          title: (
+            <Tooltip title={t("products.variants.displayPrice.tooltip")}>
+              <span>{t("products.variants.displayPrice.title")}</span>
+            </Tooltip>
+          ),
+          key: "displayPrice",
+          width: 120,
+          render: (_: unknown, r) => (
+            <Tooltip
+              title={
+                r.sku ? "" : t("products.variants.displayPrice.needSku")
+              }>
+              <Radio
+                checked={!!r.sku && r.sku === defaultVariantSku}
+                disabled={!r.sku}
+                onChange={() => setDefaultVariantSku(r.sku)}
+              />
+            </Tooltip>
+          ),
+        },
       ];
-    }, [optionGroups, updateVariantField, t]);
+    }, [optionGroups, updateVariantField, defaultVariantSku, t]);
 
   // Price range across current variants (live feedback in the editor)
   const variantPriceRange = useMemo(() => {
