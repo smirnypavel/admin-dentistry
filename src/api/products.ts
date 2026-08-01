@@ -313,6 +313,41 @@ export async function updateProduct(
   };
 }
 
+export async function cloneProduct(
+  id: string,
+  body?: { skuSuffix?: string; titlePrefix?: string },
+): Promise<Product> {
+  const { data } = await api.post<ProductRaw>(
+    `/admin/products/${id}/clone`,
+    body ?? {},
+  );
+  return {
+    _id: data._id,
+    slug: data.slug,
+    title: data.titleI18n?.uk || data.titleI18n?.en || "",
+    titleI18n: data.titleI18n,
+    description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
+    descriptionI18n: data.descriptionI18n ?? null,
+    categoryIds: data.categoryIds || [],
+    subcategoryIds: data.subcategoryIds || [],
+    tags: data.tags || [],
+    images: data.images || [],
+    attributes: data.attributes || [],
+    variants: data.variants || [],
+    manufacturerIds: data.manufacturerIds || [],
+    countryIds: data.countryIds || [],
+    priceMin: data.priceMin ?? undefined,
+    priceMax: data.priceMax ?? undefined,
+    optionsSummary: data.optionsSummary || undefined,
+    isActive: data.isActive,
+    isNew: data.isNew ?? false,
+    cashbackPercent: data.cashbackPercent ?? 0,
+    defaultVariantSku: data.defaultVariantSku ?? undefined,
+    createdAt: data.createdAt ?? null,
+    updatedAt: data.updatedAt ?? null,
+  };
+}
+
 export async function deleteProduct(id: string): Promise<Product | null> {
   const { data } = await api.delete<ProductRaw | null>(`/admin/products/${id}`);
   if (!data) return null;

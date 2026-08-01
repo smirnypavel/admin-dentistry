@@ -19,10 +19,11 @@ import {
   Typography,
   theme as antdTheme,
 } from "antd";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { CopyOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useQueryParam } from "../hooks/useQueryParam";
 import {
+  cloneProduct,
   createProduct,
   deleteProduct,
   listProducts,
@@ -337,6 +338,30 @@ export function ProductsPage() {
     [load, message, modal, t],
   );
 
+  const onClone = useCallback(
+    (r: Product) => {
+      modal.confirm({
+        title: t("products.clone.title"),
+        content: `${t("products.clone.confirm")} «${r.title}»?`,
+        okText: t("products.clone.ok"),
+        onOk: async () => {
+          try {
+            const created = await cloneProduct(r._id, {
+              titlePrefix: t("products.clone.prefix"),
+              skuSuffix: "-copy",
+            });
+            message.success(t("products.clone.success"));
+            await load();
+            onEdit(created); // open the copy for editing right away
+          } catch {
+            message.error(t("products.clone.error"));
+          }
+        },
+      });
+    },
+    [load, message, modal, onEdit, t],
+  );
+
   const columns: ColumnsType<Product> = useMemo(
     () => [
       {
@@ -426,13 +451,19 @@ export function ProductsPage() {
       {
         title: t("common.actions"),
         key: "actions",
-        width: 220,
+        width: 300,
         render: (_: unknown, r) => (
           <Space>
             <Button
               size="small"
               onClick={() => onEdit(r)}>
               {t("common.edit")}
+            </Button>
+            <Button
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => onClone(r)}>
+              {t("products.clone.button")}
             </Button>
             <Button
               size="small"
@@ -444,7 +475,7 @@ export function ProductsPage() {
         ),
       },
     ],
-    [onEdit, onDelete, t],
+    [onEdit, onClone, onDelete, t],
   );
 
   const onCreate = () => {
