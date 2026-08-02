@@ -38,6 +38,7 @@ type ProductRaw = {
   isNew?: boolean;
   cashbackPercent?: number;
   defaultVariantSku?: string;
+  categoryOrder?: Record<string, number>;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -68,6 +69,7 @@ export type Product = {
   isNew?: boolean;
   cashbackPercent?: number;
   defaultVariantSku?: string;
+  categoryOrder?: Record<string, number>;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -137,10 +139,22 @@ export async function listProducts(
       isNew: p.isNew ?? false,
       cashbackPercent: p.cashbackPercent ?? 0,
       defaultVariantSku: p.defaultVariantSku ?? undefined,
+      categoryOrder: p.categoryOrder ?? undefined,
       createdAt: p.createdAt ?? null,
       updatedAt: p.updatedAt ?? null,
     })),
   };
+}
+
+export async function reorderProducts(
+  categoryId: string,
+  orderedIds: string[],
+): Promise<{ updated: number }> {
+  const { data } = await api.patch<{ updated: number }>(
+    "/admin/products/reorder",
+    { categoryId, orderedIds },
+  );
+  return data;
 }
 
 export async function getProduct(id: string): Promise<Product | null> {

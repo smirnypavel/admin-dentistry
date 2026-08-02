@@ -1038,6 +1038,15 @@ export const ruProducts: I18nDict = {
   "products.clone.prefix": "Копия:",
   "products.clone.success": "Копия создана — отредактируйте её",
   "products.clone.error": "Не удалось дублировать товар",
+  "products.reorder.button": "Порядок в категории",
+  "products.reorder.needCategory": "Выберите категорию, чтобы менять порядок",
+  "products.reorder.title": "Порядок товаров",
+  "products.reorder.hint":
+    "Перетащите строку, используйте стрелки ↑/↓ или впишите номер. Порядок применится в этой категории на сайте.",
+  "products.reorder.empty": "В этой категории нет товаров",
+  "products.reorder.loadError": "Не удалось загрузить товары",
+  "products.reorder.saved": "Порядок сохранён",
+  "products.reorder.saveError": "Не удалось сохранить порядок",
 
   "products.save.created": "Товар создан",
   "products.save.updated": "Товар обновлён",
@@ -1216,6 +1225,15 @@ export const ukProducts: I18nDict = {
   "products.clone.prefix": "Копія:",
   "products.clone.success": "Копію створено — відредагуйте її",
   "products.clone.error": "Не вдалося дублювати товар",
+  "products.reorder.button": "Порядок у категорії",
+  "products.reorder.needCategory": "Оберіть категорію, щоб змінювати порядок",
+  "products.reorder.title": "Порядок товарів",
+  "products.reorder.hint":
+    "Перетягніть рядок, використайте стрілки ↑/↓ або впишіть номер. Порядок застосується в цій категорії на сайті.",
+  "products.reorder.empty": "У цій категорії немає товарів",
+  "products.reorder.loadError": "Не вдалося завантажити товари",
+  "products.reorder.saved": "Порядок збережено",
+  "products.reorder.saveError": "Не вдалося зберегти порядок",
 
   "products.save.created": "Товар створено",
   "products.save.updated": "Товар оновлено",

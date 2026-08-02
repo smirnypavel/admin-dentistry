@@ -35,6 +35,7 @@ import {
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
+import { ProductReorderDrawer } from "../components/ProductReorderDrawer";
 import { slugify } from "../utils/slugify";
 import { listCategories, type Category } from "../api/categories";
 import { listSubcategories, type Subcategory } from "../api/subcategories";
@@ -179,6 +180,7 @@ export function ProductsPage() {
   const [bulkMode, setBulkMode] = useState<"add" | "remove">("add");
   const [bulkDiscountId, setBulkDiscountId] = useState<string | undefined>();
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [reorderOpen, setReorderOpen] = useState(false);
 
   const loadRefs = useCallback(async () => {
     try {
@@ -958,6 +960,16 @@ export function ProductsPage() {
             ]}
             allowClear
           />
+          <Tooltip
+            title={
+              categoryId ? "" : t("products.reorder.needCategory")
+            }>
+            <Button
+              disabled={!categoryId}
+              onClick={() => setReorderOpen(true)}>
+              {t("products.reorder.button")}
+            </Button>
+          </Tooltip>
           <Button
             type="primary"
             onClick={onCreate}>
@@ -1584,6 +1596,16 @@ export function ProductsPage() {
             </div>
           </Space>
         </Drawer>
+
+        <ProductReorderDrawer
+          open={reorderOpen}
+          categoryId={categoryId}
+          categoryName={
+            categories.find((c) => c._id === categoryId)?.name || undefined
+          }
+          onClose={() => setReorderOpen(false)}
+          onSaved={() => void load()}
+        />
       </Space>
     </AdminLayout>
   );
