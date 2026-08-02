@@ -27,6 +27,7 @@ import {
   CopyOutlined,
   ReloadOutlined,
   InboxOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
 import {
@@ -35,6 +36,7 @@ import {
   createFolder,
   deleteFolder,
   deleteFile,
+  moveFile,
   uploadFile,
   type MediaFolder,
   type MediaFile,
@@ -82,6 +84,10 @@ export function MediaManagerPage() {
   const [newFolderName, setNewFolderName] = useState("");
   const [uploadModal, setUploadModal] = useState(false);
   const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
+  const [moveModal, setMoveModal] = useState(false);
+  const [fileToMove, setFileToMove] = useState<MediaFile | null>(null);
+  const [moveTarget, setMoveTarget] = useState<string>("");
+  const [moving, setMoving] = useState(false);
 
   const treeRef = useRef<DataNode[]>([]);
   treeRef.current = treeData;
@@ -206,6 +212,33 @@ export function MediaManagerPage() {
       void message.success("Файл видалено");
     } catch {
       void message.error("Не вдалося видалити файл");
+    }
+  };
+
+  // ── Move file to another folder ───────────────────────────────────────────
+  const openMove = (file: MediaFile) => {
+    setFileToMove(file);
+    setMoveTarget(selectedFolder || "");
+    setMoveModal(true);
+  };
+
+  const handleMove = async () => {
+    if (!fileToMove) return;
+    setMoving(true);
+    try {
+      await moveFile(fileToMove.public_id, moveTarget);
+      // remove from the current listing (it now lives in another folder)
+      setFiles((prev) => prev.filter((f) => f.public_id !== fileToMove.public_id));
+      if (selectedFile?.public_id === fileToMove.public_id) setSelectedFile(null);
+      void message.success(
+        moveTarget ? `Переміщено у «${moveTarget}»` : "Переміщено в корінь",
+      );
+      setMoveModal(false);
+      setFileToMove(null);
+    } catch {
+      void message.error("Не вдалося перемістити файл");
+    } finally {
+      setMoving(false);
     }
   };
 
@@ -366,6 +399,9 @@ export function MediaManagerPage() {
                         <Tooltip title="Копіювати URL" key="copy">
                           <CopyOutlined onClick={(e) => { e.stopPropagation(); copyUrl(file.secure_url); }} />
                         </Tooltip>,
+                        <Tooltip title="Перемістити" key="move">
+                          <SwapOutlined onClick={(e) => { e.stopPropagation(); openMove(file); }} />
+                        </Tooltip>,
                         <Popconfirm
                           key="del"
                           title="Видалити файл?"
@@ -408,6 +444,9 @@ export function MediaManagerPage() {
                   <Space>
                     <Button icon={<CopyOutlined />} size="small" onClick={() => copyUrl(selectedFile.secure_url)}>
                       Копіювати URL
+                    </Button>
+                    <Button icon={<SwapOutlined />} size="small" onClick={() => openMove(selectedFile)}>
+                      Перемістити
                     </Button>
                     <Popconfirm title="Видалити файл?" onConfirm={() => void handleDeleteFile(selectedFile)} okText="Так" cancelText="Ні">
                       <Button danger size="small" icon={<DeleteOutlined />}>Видалити</Button>
@@ -492,6 +531,49 @@ export function MediaManagerPage() {
               Підтримуються JPG, PNG, WebP. Фото автоматично стискаються без помітної втрати якості.
             </p>
           </Dragger>
+        </Modal>
+
+        {/* ── Move file modal ──────────────────────────────────────────────── */}
+        <Modal
+          title="Перемістити файл"
+          open={moveModal}
+          onOk={() => void handleMove()}
+          onCancel={() => { setMoveModal(false); setFileToMove(null); }}
+          okText="Перемістити"
+          cancelText="Скасувати"
+          okButtonProps={{ loading: moving, disabled: !fileToMove }}
+          width={480}
+        >
+          <div style={{ marginBottom: 8 }}>
+            <Text type="secondary">Файл: </Text>
+            <b>{fileToMove?.public_id.split("/").pop()}</b>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <Text type="secondary">Перемістити у: </Text>
+            <Tag color="blue">{moveTarget || "Корінь"}</Tag>
+          </div>
+          <Button
+            size="small"
+            type={moveTarget === "" ? "primary" : "default"}
+            onClick={() => setMoveTarget("")}
+            style={{ marginBottom: 8 }}
+          >
+            Корінь (без папки)
+          </Button>
+          <div style={{ maxHeight: 320, overflow: "auto", border: "1px solid #f0f0f0", borderRadius: 8, padding: 8 }}>
+            {treeData.length === 0 ? (
+              <Empty description="Немає папок" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            ) : (
+              <Tree
+                showIcon
+                blockNode
+                loadData={onLoadData}
+                treeData={treeData}
+                selectedKeys={moveTarget ? [moveTarget] : []}
+                onSelect={(keys) => setMoveTarget((keys[0] as string) ?? "")}
+              />
+            )}
+          </div>
         </Modal>
       </div>
     </AdminLayout>

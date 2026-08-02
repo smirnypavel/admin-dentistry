@@ -43,6 +43,14 @@ export async function deleteFile(publicId: string): Promise<void> {
   await api.post("/admin/uploads/image/delete", { publicId });
 }
 
+export async function moveFile(publicId: string, folder: string): Promise<MediaFile> {
+  const { data } = await api.post<MediaFile>("/admin/media/files/move", {
+    publicId,
+    folder,
+  });
+  return data;
+}
+
 export async function uploadFile(file: File, folder: string): Promise<MediaFile> {
   const form = new FormData();
   form.append("file", file);
