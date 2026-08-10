@@ -6,10 +6,15 @@ export function useQueryParam(key: string, initial = "", debounceMs = 300) {
   const initialFromUrl = params.get(key) ?? initial;
   const [value, setValue] = useState<string>(initialFromUrl);
   const timerRef = useRef<number | null>(null);
+  // True while a locally-set value hasn't been written to the URL yet.
+  const pendingRef = useRef(false);
 
-  // Keep state in sync if URL changes externally
-  // Important: depend ONLY on params/key so typing locally doesn't get overwritten
+  // Keep state in sync if the URL changes externally (back/forward).
+  // Skip while a local edit is pending, otherwise an unrelated params change
+  // (e.g. another filter writing to the URL) would clobber the value the user
+  // just picked — which showed up as "selects only on the second try".
   useEffect(() => {
+    if (pendingRef.current) return;
     const fromUrl = params.get(key) ?? "";
     setValue(fromUrl);
   }, [params, key]);
@@ -17,6 +22,7 @@ export function useQueryParam(key: string, initial = "", debounceMs = 300) {
   const set = useMemo(() => {
     return (next: string) => {
       setValue(next);
+      pendingRef.current = true;
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         // Functional updater so concurrent writes (e.g. page + pageSize)
@@ -30,6 +36,7 @@ export function useQueryParam(key: string, initial = "", debounceMs = 300) {
           },
           { replace: true },
         );
+        pendingRef.current = false;
       }, debounceMs);
     };
   }, [setParams, key, debounceMs]);
