@@ -88,6 +88,7 @@ export function MediaManagerPage() {
   const [fileToMove, setFileToMove] = useState<MediaFile | null>(null);
   const [moveTarget, setMoveTarget] = useState<string>("");
   const [moving, setMoving] = useState(false);
+  const [moveTreeKey, setMoveTreeKey] = useState(0);
 
   const treeRef = useRef<DataNode[]>([]);
   treeRef.current = treeData;
@@ -219,6 +220,7 @@ export function MediaManagerPage() {
   const openMove = (file: MediaFile) => {
     setFileToMove(file);
     setMoveTarget(selectedFolder || "");
+    setMoveTreeKey((k) => k + 1); // remount tree → nested folders expand on reopen
     setMoveModal(true);
   };
 
@@ -565,6 +567,7 @@ export function MediaManagerPage() {
               <Empty description="Немає папок" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             ) : (
               <Tree
+                key={moveTreeKey}
                 showIcon
                 blockNode
                 loadData={onLoadData}

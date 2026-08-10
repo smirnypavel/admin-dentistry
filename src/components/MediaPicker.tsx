@@ -59,6 +59,9 @@ export function MediaPicker({
   // Tree state
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [loadedKeys, setLoadedKeys] = useState<Set<string>>(new Set());
+  // Bumped on each open to remount the Tree and reset AntD's internal
+  // loaded/expanded state (otherwise nested folders won't expand on reopen).
+  const [treeKey, setTreeKey] = useState(0);
   const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
@@ -87,6 +90,7 @@ export function MediaPicker({
     setSelectedFolder(initialFolder);
     setLoadedKeys(new Set());
     setExpandedKeys([]);
+    setTreeKey((k) => k + 1);
     void loadRootFolders();
   }, [open, initialFolder, loadRootFolders]);
 
@@ -223,6 +227,7 @@ export function MediaPicker({
               />
             ) : (
               <Tree
+                key={treeKey}
                 showIcon
                 blockNode
                 loadData={onLoadData}
