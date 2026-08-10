@@ -116,7 +116,7 @@ export function ProductsPage() {
   const [countryIds, setCountryIds] = useQueryParam("countryId", "");
   const [tagsFilter, setTagsFilter] = useQueryParam("tags", "");
   const [isActiveStr, setIsActiveStr] = useQueryParam("isActive", "");
-  const [sort, setSort] = useQueryParam("sort", "-createdAt");
+  const [sort, setSort] = useQueryParam("sort", "order");
   const [optKey, setOptKey] = useQueryParam("optk", "");
   const [optVal, setOptVal] = useQueryParam("optv", "");
   const [pageStr, setPageStr] = useQueryParam("page", "1");
@@ -925,6 +925,10 @@ export function ProductsPage() {
               setPageStr("1");
             }}
             options={[
+              {
+                value: "order",
+                label: t("products.filters.sort.manual"),
+              },
               {
                 value: "-createdAt",
                 label: t("products.filters.sort.newFirst"),
