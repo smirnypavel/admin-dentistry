@@ -879,6 +879,7 @@ export const ruProducts: I18nDict = {
 
   "products.filters.search": "Поиск по названию/описанию",
   "products.filters.category.placeholder": "Категория",
+  "products.filters.subcategory.placeholder": "Подкатегория",
   "products.filters.manufacturers.placeholder": "Производители",
   "products.filters.countries.placeholder": "Страны",
   "products.filters.tags.placeholder": "Теги",
@@ -1067,6 +1068,7 @@ export const ukProducts: I18nDict = {
 
   "products.filters.search": "Пошук за назвою/описом",
   "products.filters.category.placeholder": "Категорія",
+  "products.filters.subcategory.placeholder": "Підкатегорія",
   "products.filters.manufacturers.placeholder": "Виробники",
   "products.filters.countries.placeholder": "Країни",
   "products.filters.tags.placeholder": "Теги",

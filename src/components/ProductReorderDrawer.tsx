@@ -26,6 +26,8 @@ type Props = {
   open: boolean;
   categoryId: string;
   categoryName?: string;
+  subcategoryId?: string;
+  subcategoryName?: string;
   onClose: () => void;
   onSaved: () => void;
 };
@@ -34,6 +36,8 @@ export function ProductReorderDrawer({
   open,
   categoryId,
   categoryName,
+  subcategoryId,
+  subcategoryName,
   onClose,
   onSaved,
 }: Props) {
@@ -44,20 +48,30 @@ export function ProductReorderDrawer({
   const [saving, setSaving] = useState(false);
   const dragIndex = useRef<number | null>(null);
 
+  // Order within the selected subcategory if one is chosen, else the category
+  const orderKey = subcategoryId || categoryId;
+  const positionOf = useCallback(
+    (p: Product) =>
+      subcategoryId
+        ? p.subcategoryOrder?.[subcategoryId]
+        : p.categoryOrder?.[categoryId],
+    [subcategoryId, categoryId],
+  );
+
   const load = useCallback(async () => {
-    if (!categoryId) return;
+    if (!orderKey) return;
     setLoading(true);
     try {
       const res = await listProducts({
-        category: categoryId,
+        category: categoryId || undefined,
+        subcategory: subcategoryId || undefined,
         page: 1,
         limit: 200,
         sort: "-createdAt",
       });
       const sorted = [...res.items].sort((a, b) => {
-        const pa = a.categoryOrder?.[categoryId];
-        const pb = b.categoryOrder?.[categoryId];
-        // products with a position first (by position), the rest keep API order
+        const pa = positionOf(a);
+        const pb = positionOf(b);
         if (pa != null && pb != null) return pa - pb;
         if (pa != null) return -1;
         if (pb != null) return 1;
@@ -69,7 +83,7 @@ export function ProductReorderDrawer({
     } finally {
       setLoading(false);
     }
-  }, [categoryId, message, t]);
+  }, [orderKey, categoryId, subcategoryId, positionOf, message, t]);
 
   useEffect(() => {
     if (open) void load();
@@ -89,7 +103,7 @@ export function ProductReorderDrawer({
     setSaving(true);
     try {
       await reorderProducts(
-        categoryId,
+        subcategoryId ? { subcategoryId } : { categoryId },
         items.map((p) => p._id),
       );
       void message.success(t("products.reorder.saved"));
@@ -107,7 +121,7 @@ export function ProductReorderDrawer({
       open={open}
       width={560}
       onClose={onClose}
-      title={`${t("products.reorder.title")}${categoryName ? ` — ${categoryName}` : ""}`}
+      title={`${t("products.reorder.title")}${subcategoryName ? ` — ${subcategoryName}` : categoryName ? ` — ${categoryName}` : ""}`}
       extra={
         <Space>
           <Button onClick={onClose}>{t("common.cancel")}</Button>

@@ -107,20 +107,24 @@ export function ProductsPage() {
   const { t } = useI18n();
   const { message, modal } = AntApp.useApp();
   const { token } = antdTheme.useToken();
+  // Discrete selects write to the URL immediately (0ms) — debounce is only for
+  // typed inputs; the delay caused "selects only on the second try".
   const [q, setQ] = useQueryParam("q", "");
-  const [categoryId, setCategoryId] = useQueryParam("category", "");
+  const [categoryId, setCategoryId] = useQueryParam("category", "", 0);
+  const [subcategoryId, setSubcategoryId] = useQueryParam("subcategory", "", 0);
   const [manufacturerIds, setManufacturerIds] = useQueryParam(
     "manufacturerId",
     "",
+    0,
   );
-  const [countryIds, setCountryIds] = useQueryParam("countryId", "");
-  const [tagsFilter, setTagsFilter] = useQueryParam("tags", "");
-  const [isActiveStr, setIsActiveStr] = useQueryParam("isActive", "");
-  const [sort, setSort] = useQueryParam("sort", "order");
+  const [countryIds, setCountryIds] = useQueryParam("countryId", "", 0);
+  const [tagsFilter, setTagsFilter] = useQueryParam("tags", "", 0);
+  const [isActiveStr, setIsActiveStr] = useQueryParam("isActive", "", 0);
+  const [sort, setSort] = useQueryParam("sort", "order", 0);
   const [optKey, setOptKey] = useQueryParam("optk", "");
   const [optVal, setOptVal] = useQueryParam("optv", "");
-  const [pageStr, setPageStr] = useQueryParam("page", "1");
-  const [limitStr, setLimitStr] = useQueryParam("limit", "20");
+  const [pageStr, setPageStr] = useQueryParam("page", "1", 0);
+  const [limitStr, setLimitStr] = useQueryParam("limit", "20", 0);
   const page = Math.max(1, parseInt(pageStr || "1") || 1);
   const limit = Math.min(50, Math.max(1, parseInt(limitStr || "20") || 20));
 
@@ -212,6 +216,7 @@ export function ProductsPage() {
         page,
         limit,
         category: categoryId || undefined,
+        subcategory: subcategoryId || undefined,
         manufacturerId: manufacturerIds
           ? manufacturerIds.split(",").filter(Boolean)
           : undefined,
@@ -250,6 +255,7 @@ export function ProductsPage() {
     q,
     sort,
     categoryId,
+    subcategoryId,
     manufacturerIds,
     countryIds,
     tagsFilter,
@@ -841,6 +847,23 @@ export function ProductsPage() {
             options={categories.map((c) => ({ value: c._id, label: c.name }))}
             onChange={(v) => {
               setCategoryId(v ?? "");
+              setSubcategoryId(""); // reset subcategory when category changes
+              setPageStr("1");
+            }}
+          />
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            disabled={!categoryId}
+            placeholder={t("products.filters.subcategory.placeholder")}
+            style={{ width: 220 }}
+            value={subcategoryId || undefined}
+            options={subcategories
+              .filter((s) => s.categoryId === categoryId)
+              .map((s) => ({ value: s._id, label: s.name }))}
+            onChange={(v) => {
+              setSubcategoryId(v ?? "");
               setPageStr("1");
             }}
           />
@@ -1606,6 +1629,10 @@ export function ProductsPage() {
           categoryId={categoryId}
           categoryName={
             categories.find((c) => c._id === categoryId)?.name || undefined
+          }
+          subcategoryId={subcategoryId}
+          subcategoryName={
+            subcategories.find((s) => s._id === subcategoryId)?.name || undefined
           }
           onClose={() => setReorderOpen(false)}
           onSaved={() => void load()}
