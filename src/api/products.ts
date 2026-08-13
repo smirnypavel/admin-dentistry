@@ -9,6 +9,7 @@ export type ProductVariant = {
   price: number;
   unit?: string | null;
   images?: string[];
+  videos?: string[];
   barcode?: string | null;
   isActive: boolean;
   variantKey?: string | null;
@@ -24,6 +25,7 @@ type ProductRaw = {
   subcategoryIds?: string[];
   tags?: string[];
   images?: string[];
+  videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   variants: ProductVariant[];
   manufacturerIds?: string[];
@@ -56,6 +58,7 @@ export type Product = {
   subcategoryIds?: string[];
   tags?: string[];
   images?: string[];
+  videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   variants: ProductVariant[];
   manufacturerIds?: string[];
@@ -127,6 +130,7 @@ export async function listProducts(
       subcategoryIds: p.subcategoryIds || [],
       tags: p.tags || [],
       images: p.images || [],
+      videos: p.videos || [],
       attributes: p.attributes || [],
       variants: p.variants || [],
       manufacturerIds: p.manufacturerIds || [],
@@ -174,6 +178,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -199,6 +204,7 @@ export type CreateProductDto = {
   subcategoryIds?: string[];
   tags?: string[];
   images?: string[];
+  videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   variants: ProductVariant[];
   isActive?: boolean;
@@ -233,6 +239,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     subcategoryIds: dto.subcategoryIds,
     tags: dto.tags,
     images: dto.images,
+    videos: dto.videos,
     attributes: dto.attributes,
     variants: dto.variants,
     isActive: dto.isActive,
@@ -252,6 +259,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -316,6 +324,7 @@ export async function updateProduct(
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -349,6 +358,7 @@ export async function cloneProduct(
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -379,6 +389,7 @@ export async function deleteProduct(id: string): Promise<Product | null> {
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -412,6 +423,7 @@ export async function addVariant(
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -446,6 +458,7 @@ export async function updateVariant(
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
@@ -478,6 +491,7 @@ export async function deleteVariant(
     subcategoryIds: data.subcategoryIds || [],
     tags: data.tags || [],
     images: data.images || [],
+    videos: data.videos || [],
     attributes: data.attributes || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],

@@ -25,3 +25,18 @@ export async function uploadImage(
   );
   return data;
 }
+
+export async function uploadVideo(
+  file: File,
+  folder?: string
+): Promise<UploadImageResponse> {
+  const form = new FormData();
+  form.append("file", file);
+  if (folder) form.append("folder", folder);
+  const { data } = await api.post<UploadImageResponse>(
+    "/admin/uploads/video",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}

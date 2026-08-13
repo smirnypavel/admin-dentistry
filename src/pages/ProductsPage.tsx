@@ -17,10 +17,17 @@ import {
   Table,
   Tag,
   Typography,
+  Upload,
   theme as antdTheme,
 } from "antd";
-import { CopyOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import { uploadVideo } from "../api/uploads";
 import { useQueryParam } from "../hooks/useQueryParam";
 import {
   cloneProduct,
@@ -149,6 +156,7 @@ export function ProductsPage() {
     subcategoryIds?: string[];
     tags?: string[];
     images?: string[];
+    videos?: string[];
     attributes?: Array<{ key: string; value: string }>;
     isActive: boolean;
     isNew?: boolean;
@@ -185,6 +193,7 @@ export function ProductsPage() {
   const [bulkDiscountId, setBulkDiscountId] = useState<string | undefined>();
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [reorderOpen, setReorderOpen] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const loadRefs = useCallback(async () => {
     try {
@@ -297,6 +306,7 @@ export function ProductsPage() {
         subcategoryIds: r.subcategoryIds || [],
         tags: r.tags || [],
         images: r.images || [],
+        videos: r.videos || [],
         attributes: (r.attributes || []).map((a) => ({
           key: a.key,
           value: String(a.value ?? ""),
@@ -499,6 +509,7 @@ export function ProductsPage() {
       subcategoryIds: [],
       tags: [],
       images: [],
+      videos: [],
       isActive: true,
       isNew: false,
       cashbackPercent: 0,
@@ -532,6 +543,7 @@ export function ProductsPage() {
       subcategoryIds?: string[];
       tags?: string[];
       images?: string[];
+      videos?: string[];
       attributes?: Array<{ key: string; value: string }>;
       isActive?: boolean;
       isNew?: boolean;
@@ -601,6 +613,7 @@ export function ProductsPage() {
           subcategoryIds: basics.subcategoryIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
+          videos: basics.videos || [],
           attributes,
           variants: preparedVariants,
           isActive: basics.isActive,
@@ -620,6 +633,7 @@ export function ProductsPage() {
           subcategoryIds: basics.subcategoryIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
+          videos: basics.videos || [],
           attributes,
           variants: preparedVariants,
           isActive: basics.isActive,
@@ -1363,6 +1377,96 @@ export function ProductsPage() {
                   form.setFieldValue("images", merged);
                 }}
                         />
+                        <Form.Item
+                          label={t("products.form.videos")}
+                          tooltip={t("products.form.videos.tooltip")}
+                          shouldUpdate>
+                          {() => {
+                            const vids: string[] =
+                              form.getFieldValue("videos") || [];
+                            return (
+                              <Space direction="vertical" style={{ width: "100%" }}>
+                                <Space wrap>
+                                  {vids.map((url, idx) => (
+                                    <div
+                                      key={idx}
+                                      style={{
+                                        border: "1px solid #f0f0f0",
+                                        borderRadius: 8,
+                                        padding: 6,
+                                      }}>
+                                      <video
+                                        src={url}
+                                        controls
+                                        style={{
+                                          width: 220,
+                                          height: 130,
+                                          background: "#000",
+                                          borderRadius: 4,
+                                          display: "block",
+                                        }}
+                                      />
+                                      <Button
+                                        danger
+                                        size="small"
+                                        block
+                                        icon={<DeleteOutlined />}
+                                        style={{ marginTop: 4 }}
+                                        onClick={() =>
+                                          form.setFieldValue(
+                                            "videos",
+                                            vids.filter((_, i) => i !== idx),
+                                          )
+                                        }>
+                                        {t("common.delete")}
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </Space>
+                                <Upload
+                                  accept="video/*"
+                                  showUploadList={false}
+                                  beforeUpload={(file) => {
+                                    if (file.size / (1024 * 1024) > 100) {
+                                      message.error(
+                                        t("products.form.videos.tooBig"),
+                                      );
+                                      return false;
+                                    }
+                                    setVideoUploading(true);
+                                    uploadVideo(
+                                      file as unknown as File,
+                                      "products/videos",
+                                    )
+                                      .then((res) => {
+                                        const cur: string[] =
+                                          form.getFieldValue("videos") || [];
+                                        form.setFieldValue("videos", [
+                                          ...cur,
+                                          res.secure_url || res.url,
+                                        ]);
+                                        message.success(
+                                          t("products.form.videos.uploaded"),
+                                        );
+                                      })
+                                      .catch(() =>
+                                        message.error(
+                                          t("products.form.videos.error"),
+                                        ),
+                                      )
+                                      .finally(() => setVideoUploading(false));
+                                    return false;
+                                  }}>
+                                  <Button
+                                    icon={<UploadOutlined />}
+                                    loading={videoUploading}>
+                                    {t("products.form.videos.upload")}
+                                  </Button>
+                                </Upload>
+                              </Space>
+                            );
+                          }}
+                        </Form.Item>
                       </>
                     ),
                   },
