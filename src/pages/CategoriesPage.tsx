@@ -5,6 +5,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Select,
   Space,
   Switch,
   Table,
@@ -39,9 +40,18 @@ type FormValues = {
   descUk?: string;
   descEn?: string;
   imageUrl?: string | null;
+  cardSize?: string;
   sort?: number;
   isActive?: boolean;
 };
+
+// Bento sizes for the catalog landing page (must match storefront mapping)
+const CARD_SIZE_OPTIONS = [
+  { value: "normal", label: "Звичайна (1×1)" },
+  { value: "wide", label: "Широка (2×1)" },
+  { value: "tall", label: "Висока (1×2)" },
+  { value: "large", label: "Велика (2×2)" },
+];
 
 export function CategoriesPage() {
   const { t } = useI18n();
@@ -108,6 +118,7 @@ export function CategoriesPage() {
       descUk: record.descriptionI18n?.uk,
       descEn: record.descriptionI18n?.en,
       imageUrl: record.imageUrl || undefined,
+      cardSize: record.cardSize || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -164,6 +175,7 @@ export function CategoriesPage() {
           descUk: payload.descUk || undefined,
           descEn: payload.descEn || undefined,
           imageUrl: payload.imageUrl || undefined,
+          cardSize: payload.cardSize || undefined,
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -431,6 +443,17 @@ export function CategoriesPage() {
             name="imageUrl"
             valuePropName="value">
             <ImageUploader folder="categories" />
+          </Form.Item>
+
+          <Form.Item
+            label="Розмір картки в каталозі"
+            name="cardSize"
+            tooltip="Визначає, скільки місця займає картка в bento-сітці на головній сторінці каталогу. Прив'язано до категорії — не залежить від перейменування.">
+            <Select
+              allowClear
+              placeholder="За замовчуванням (звичайна 1×1)"
+              options={CARD_SIZE_OPTIONS}
+            />
           </Form.Item>
 
           <Space size="large">

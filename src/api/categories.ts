@@ -7,6 +7,7 @@ type CategoryRaw = {
   nameI18n: { uk: string; en?: string };
   descriptionI18n?: { uk?: string; en?: string } | null;
   imageUrl?: string | null;
+  cardSize?: string | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -21,6 +22,7 @@ export type Category = {
   description?: string | null; // UI-friendly, prefer uk->en
   descriptionI18n?: { uk?: string; en?: string } | null;
   imageUrl?: string | null;
+  cardSize?: string | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -34,6 +36,7 @@ export type CreateCategoryDto = {
   descUk?: string;
   descEn?: string;
   imageUrl?: string;
+  cardSize?: string;
   sort?: number;
   isActive?: boolean;
 };
@@ -52,6 +55,7 @@ export async function listCategories(): Promise<Category[]> {
     description: c.descriptionI18n?.uk || c.descriptionI18n?.en || null,
     descriptionI18n: c.descriptionI18n ?? null,
     imageUrl: c.imageUrl ?? null,
+    cardSize: c.cardSize ?? null,
     sort: c.sort ?? null,
     isActive: c.isActive,
     createdAt: c.createdAt ?? null,
@@ -77,6 +81,7 @@ export async function createCategory(
         }
       : {}),
     imageUrl: payload.imageUrl,
+    cardSize: payload.cardSize,
     sort: payload.sort,
     isActive: payload.isActive,
   } as const;
@@ -90,6 +95,7 @@ export async function createCategory(
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     imageUrl: data.imageUrl ?? null,
+    cardSize: data.cardSize ?? null,
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
@@ -134,6 +140,7 @@ export async function updateCategory(
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     imageUrl: data.imageUrl ?? null,
+    cardSize: data.cardSize ?? null,
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
@@ -154,6 +161,7 @@ export async function deleteCategory(id: string): Promise<Category | null> {
     description: data.descriptionI18n?.uk || data.descriptionI18n?.en || null,
     descriptionI18n: data.descriptionI18n ?? null,
     imageUrl: data.imageUrl ?? null,
+    cardSize: data.cardSize ?? null,
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
