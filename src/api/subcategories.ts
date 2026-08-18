@@ -8,6 +8,7 @@ type SubcategoryRaw = {
   descriptionI18n?: { uk?: string; en?: string } | null;
   imageUrl?: string | null;
   categoryId: string;
+  parentSubcategoryId?: string | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -23,6 +24,7 @@ export type Subcategory = {
   descriptionI18n?: { uk?: string; en?: string } | null;
   imageUrl?: string | null;
   categoryId: string;
+  parentSubcategoryId?: string | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -37,6 +39,7 @@ export type CreateSubcategoryDto = {
   descEn?: string;
   imageUrl?: string;
   categoryId: string;
+  parentSubcategoryId?: string;
   sort?: number;
   isActive?: boolean;
 };
@@ -55,6 +58,7 @@ function mapRawToUi(c: SubcategoryRaw): Subcategory {
     descriptionI18n: c.descriptionI18n ?? null,
     imageUrl: c.imageUrl ?? null,
     categoryId: c.categoryId,
+    parentSubcategoryId: c.parentSubcategoryId ?? null,
     sort: c.sort ?? null,
     isActive: c.isActive,
     createdAt: c.createdAt ?? null,

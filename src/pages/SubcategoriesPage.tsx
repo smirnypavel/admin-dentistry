@@ -42,6 +42,7 @@ type FormValues = {
   descEn?: string;
   imageUrl?: string | null;
   categoryId: string;
+  parentSubcategoryId?: string;
   sort?: number;
   isActive?: boolean;
 };
@@ -92,6 +93,23 @@ export function SubcategoriesPage() {
     return m;
   }, [categories]);
 
+  // Candidate parents = top-level subcategories in the currently selected
+  // category (excludes the record being edited and any 3rd-level items, so the
+  // hierarchy stays at most two subcategory levels deep).
+  const watchedCategoryId = Form.useWatch("categoryId", form);
+  const parentOptions = useMemo(() => {
+    if (!watchedCategoryId) return [];
+    return items
+      .filter(
+        (s) =>
+          s.categoryId === watchedCategoryId &&
+          !s.parentSubcategoryId &&
+          s._id !== editing?._id,
+      )
+      .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
+      .map((s) => ({ value: s._id, label: s.name }));
+  }, [items, watchedCategoryId, editing]);
+
   const filtered = useMemo(() => {
     let list = items;
     if (filterCategoryId) {
@@ -128,6 +146,7 @@ export function SubcategoriesPage() {
       descEn: record.descriptionI18n?.en,
       imageUrl: record.imageUrl || undefined,
       categoryId: record.categoryId,
+      parentSubcategoryId: record.parentSubcategoryId || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -174,6 +193,7 @@ export function SubcategoriesPage() {
         await updateSubcategory(editing._id, {
           ...payload,
           imageUrl: payload.imageUrl ?? undefined,
+          parentSubcategoryId: payload.parentSubcategoryId ?? "",
         });
         message.success(t("subcategories.msg.save.updated"));
       } else {
@@ -185,6 +205,7 @@ export function SubcategoriesPage() {
           descEn: payload.descEn || undefined,
           imageUrl: payload.imageUrl || undefined,
           categoryId: payload.categoryId,
+          parentSubcategoryId: payload.parentSubcategoryId || "",
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -421,6 +442,20 @@ export function SubcategoriesPage() {
                 value: c._id,
                 label: c.name,
               }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Батьківська підгрупа"
+            name="parentSubcategoryId"
+            tooltip="Якщо обрано — ця група стає підгрупою всередині обраної. Залиште порожнім для групи першого рівня.">
+            <Select
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              placeholder="— (група першого рівня)"
+              options={parentOptions}
+              notFoundContent="Спочатку оберіть категорію та створіть групи 1-го рівня"
             />
           </Form.Item>
 

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import dayjs from "dayjs";
 import {
   App as AntApp,
   Alert,
   Badge,
   Button,
   Card,
+  DatePicker,
   Divider,
   Form,
   Input,
@@ -946,6 +948,16 @@ export function PromotionsTab({ data, onChange }: { data: Record<string, unknown
       </Form.Item>
       <Form.Item label="Підзаголовок таймера">
         <Input value={(data.countdownSublabel as string) ?? ""} onChange={(e) => set("countdownSublabel", e.target.value)} placeholder="Встигніть замовити!" />
+      </Form.Item>
+      <Form.Item label="Дата та час завершення акції" tooltip="Таймер рахує до цієї дати. Якщо не вказано — рахує до кінця поточного місяця.">
+        <DatePicker
+          showTime
+          style={{ width: "100%" }}
+          format="DD.MM.YYYY HH:mm"
+          value={data.countdownEndAt ? dayjs(data.countdownEndAt as string) : null}
+          onChange={(d) => set("countdownEndAt", d ? d.toISOString() : "")}
+          placeholder="Кінець місяця (за замовчуванням)"
+        />
       </Form.Item>
       <Divider orientation="left" orientationMargin={0} style={{ fontSize: 12, color: "#78716c" }}>Кнопки та підписи</Divider>
       <Form.Item label="Підпис ціни">
