@@ -187,6 +187,39 @@ export function ProductsPage() {
   const [countries, setCountries] = useState<Country[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
 
+  // Hierarchical subcategory labels so managers can tell apart same-named
+  // subgroups under different parents (e.g. Кусачки under ORTHOSTORE vs LE MED).
+  const subcatLabel = useCallback(
+    (s: Subcategory) => {
+      const catName =
+        categories.find((c) => c._id === s.categoryId)?.name || "?";
+      const parent = s.parentSubcategoryId
+        ? subcategories.find((p) => p._id === s.parentSubcategoryId)
+        : undefined;
+      return parent
+        ? `${parent.name} → ${s.name} (${catName})`
+        : `${s.name} (${catName})`;
+    },
+    [categories, subcategories],
+  );
+  // All subcategories as options, sorted so each parent is immediately followed
+  // by its child subgroups.
+  const subcatOptions = useMemo(() => {
+    const catName = (id: string) =>
+      categories.find((c) => c._id === id)?.name || "";
+    const key = (s: Subcategory) => {
+      const parent = s.parentSubcategoryId
+        ? subcategories.find((p) => p._id === s.parentSubcategoryId)
+        : undefined;
+      return parent
+        ? `${catName(s.categoryId)}|${parent.name}|1|${s.name}`
+        : `${catName(s.categoryId)}|${s.name}|0|`;
+    };
+    return [...subcategories]
+      .sort((a, b) => key(a).localeCompare(key(b), "uk"))
+      .map((s) => ({ value: s._id, label: subcatLabel(s), categoryId: s.categoryId }));
+  }, [subcategories, categories, subcatLabel]);
+
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkVisible, setBulkVisible] = useState(false);
   const [bulkMode, setBulkMode] = useState<"add" | "remove">("add");
@@ -873,9 +906,7 @@ export function ProductsPage() {
             placeholder={t("products.filters.subcategory.placeholder")}
             style={{ width: 220 }}
             value={subcategoryId || undefined}
-            options={subcategories
-              .filter((s) => s.categoryId === categoryId)
-              .map((s) => ({ value: s._id, label: s.name }))}
+            options={subcatOptions.filter((o) => o.categoryId === categoryId)}
             onChange={(v) => {
               setSubcategoryId(v ?? "");
               setPageStr("1");
@@ -1231,11 +1262,10 @@ export function ProductsPage() {
                 name="subcategoryIds">
                 <Select
                   mode="multiple"
+                  showSearch
+                  optionFilterProp="label"
                   placeholder={t("products.form.subcategories.placeholder")}
-                  options={subcategories.map((s) => ({
-                    value: s._id,
-                    label: `${s.name} (${categories.find((c) => c._id === s.categoryId)?.name || "?"})`,
-                  }))}
+                  options={subcatOptions}
                 />
               </Form.Item>
               <Form.Item

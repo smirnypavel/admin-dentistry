@@ -8,6 +8,7 @@ import {
   Select,
   Space,
   Switch,
+  Tag,
   Table,
   Tabs,
   App as AntApp,
@@ -251,6 +252,21 @@ export function SubcategoriesPage() {
       title: t("subcategories.columns.name"),
       dataIndex: "name",
       key: "name",
+      render: (name: string, record: Subcategory) => {
+        const parent = record.parentSubcategoryId
+          ? items.find((s) => s._id === record.parentSubcategoryId)
+          : undefined;
+        return parent ? (
+          <span>
+            <Tag color="blue" style={{ marginInlineEnd: 6 }}>
+              {parent.name}
+            </Tag>
+            {name}
+          </span>
+        ) : (
+          <b>{name}</b>
+        );
+      },
     },
     {
       title: t("subcategories.columns.category"),
