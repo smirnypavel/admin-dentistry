@@ -23,7 +23,7 @@ import {
 } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
-import { ProductPicker } from "../components/ProductPicker";
+import { RecommendationFields } from "../components/RecommendationFields";
 import type { Subcategory } from "../api/subcategories";
 import {
   createSubcategory,
@@ -46,6 +46,8 @@ type FormValues = {
   categoryId: string;
   parentSubcategoryId?: string;
   relatedProductIds?: string[];
+  relatedCategoryId?: string;
+  relatedSubcategoryId?: string;
   sort?: number;
   isActive?: boolean;
 };
@@ -151,6 +153,8 @@ export function SubcategoriesPage() {
       categoryId: record.categoryId,
       parentSubcategoryId: record.parentSubcategoryId || undefined,
       relatedProductIds: record.relatedProductIds || undefined,
+      relatedCategoryId: record.relatedCategoryId || undefined,
+      relatedSubcategoryId: record.relatedSubcategoryId || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -198,6 +202,9 @@ export function SubcategoriesPage() {
           ...payload,
           imageUrl: payload.imageUrl ?? undefined,
           parentSubcategoryId: payload.parentSubcategoryId ?? "",
+          relatedProductIds: payload.relatedProductIds ?? [],
+          relatedCategoryId: payload.relatedCategoryId ?? "",
+          relatedSubcategoryId: payload.relatedSubcategoryId ?? "",
         });
         message.success(t("subcategories.msg.save.updated"));
       } else {
@@ -211,6 +218,8 @@ export function SubcategoriesPage() {
           categoryId: payload.categoryId,
           parentSubcategoryId: payload.parentSubcategoryId || "",
           relatedProductIds: payload.relatedProductIds || [],
+          relatedCategoryId: payload.relatedCategoryId || "",
+          relatedSubcategoryId: payload.relatedSubcategoryId || "",
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -479,12 +488,11 @@ export function SubcategoriesPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Рекомендовані товари (для цієї підгрупи)"
-            name="relatedProductIds"
-            tooltip="Товари за замовчуванням для блоку «До цього товару рекомендуємо» на товарах цієї підгрупи. Спрацьовує, якщо у товару немає власних рекомендацій. Має пріоритет над рекомендаціями категорії.">
-            <ProductPicker />
-          </Form.Item>
+          <RecommendationFields
+            categories={categories}
+            subcategories={items}
+            scopeHint="За замовчуванням для товарів цієї підгрупи (якщо у товару немає власних рекомендацій). Має пріоритет над рекомендаціями категорії."
+          />
 
           <Tabs
             items={[

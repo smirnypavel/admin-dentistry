@@ -10,6 +10,8 @@ type SubcategoryRaw = {
   categoryId: string;
   parentSubcategoryId?: string | null;
   relatedProductIds?: string[] | null;
+  relatedCategoryId?: string | null;
+  relatedSubcategoryId?: string | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -27,6 +29,8 @@ export type Subcategory = {
   categoryId: string;
   parentSubcategoryId?: string | null;
   relatedProductIds?: string[] | null;
+  relatedCategoryId?: string | null;
+  relatedSubcategoryId?: string | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -43,6 +47,8 @@ export type CreateSubcategoryDto = {
   categoryId: string;
   parentSubcategoryId?: string;
   relatedProductIds?: string[];
+  relatedCategoryId?: string;
+  relatedSubcategoryId?: string;
   sort?: number;
   isActive?: boolean;
 };
@@ -63,6 +69,8 @@ function mapRawToUi(c: SubcategoryRaw): Subcategory {
     categoryId: c.categoryId,
     parentSubcategoryId: c.parentSubcategoryId ?? null,
     relatedProductIds: c.relatedProductIds ?? [],
+    relatedCategoryId: c.relatedCategoryId ?? null,
+    relatedSubcategoryId: c.relatedSubcategoryId ?? null,
     sort: c.sort ?? null,
     isActive: c.isActive,
     createdAt: c.createdAt ?? null,

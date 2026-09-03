@@ -22,8 +22,9 @@ import {
 } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
-import { ProductPicker } from "../components/ProductPicker";
+import { RecommendationFields } from "../components/RecommendationFields";
 import type { Category } from "../api/categories";
+import { listSubcategories, type Subcategory } from "../api/subcategories";
 import {
   createCategory,
   deleteCategory,
@@ -43,6 +44,8 @@ type FormValues = {
   imageUrl?: string | null;
   cardSize?: string;
   relatedProductIds?: string[];
+  relatedCategoryId?: string;
+  relatedSubcategoryId?: string;
   sort?: number;
   isActive?: boolean;
 };
@@ -60,6 +63,7 @@ export function CategoriesPage() {
   const { message, modal } = AntApp.useApp();
   const { token } = antdTheme.useToken();
   const [items, setItems] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useQueryParam("q", "");
   const [pageStr, setPageStr] = useQueryParam("page", "1");
@@ -76,8 +80,12 @@ export function CategoriesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await listCategories();
+      const [data, subs] = await Promise.all([
+        listCategories(),
+        listSubcategories(),
+      ]);
       setItems(data);
+      setSubcategories(subs);
     } catch {
       message.error(t("categories.loadError"));
     } finally {
@@ -122,6 +130,8 @@ export function CategoriesPage() {
       imageUrl: record.imageUrl || undefined,
       cardSize: record.cardSize || undefined,
       relatedProductIds: record.relatedProductIds || undefined,
+      relatedCategoryId: record.relatedCategoryId || undefined,
+      relatedSubcategoryId: record.relatedSubcategoryId || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -168,6 +178,9 @@ export function CategoriesPage() {
         await updateCategory(editing._id, {
           ...payload,
           imageUrl: payload.imageUrl ?? undefined,
+          relatedProductIds: payload.relatedProductIds ?? [],
+          relatedCategoryId: payload.relatedCategoryId ?? "",
+          relatedSubcategoryId: payload.relatedSubcategoryId ?? "",
         });
         message.success(t("categories.msg.save.updated"));
       } else {
@@ -180,6 +193,8 @@ export function CategoriesPage() {
           imageUrl: payload.imageUrl || undefined,
           cardSize: payload.cardSize || undefined,
           relatedProductIds: payload.relatedProductIds || [],
+          relatedCategoryId: payload.relatedCategoryId || "",
+          relatedSubcategoryId: payload.relatedSubcategoryId || "",
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -460,12 +475,11 @@ export function CategoriesPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Рекомендовані товари (для всієї категорії)"
-            name="relatedProductIds"
-            tooltip="Товари за замовчуванням для блоку «До цього товару рекомендуємо» на всіх товарах цієї категорії. Спрацьовує, якщо у товару (і його підкатегорії) власні рекомендації не задані.">
-            <ProductPicker />
-          </Form.Item>
+          <RecommendationFields
+            categories={items}
+            subcategories={subcategories}
+            scopeHint="За замовчуванням для всіх товарів цієї категорії (якщо у товару та його підкатегорії власні рекомендації не задані)."
+          />
 
           <Space size="large">
             <Form.Item

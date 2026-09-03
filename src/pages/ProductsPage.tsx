@@ -43,7 +43,7 @@ import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
 import { ProductReorderDrawer } from "../components/ProductReorderDrawer";
-import { ProductPicker } from "../components/ProductPicker";
+import { RecommendationFields } from "../components/RecommendationFields";
 import { slugify } from "../utils/slugify";
 import { listCategories, type Category } from "../api/categories";
 import { listSubcategories, type Subcategory } from "../api/subcategories";
@@ -156,6 +156,8 @@ export function ProductsPage() {
     categoryIds: string[];
     subcategoryIds?: string[];
     relatedProductIds?: string[];
+    relatedCategoryId?: string | null;
+    relatedSubcategoryId?: string | null;
     tags?: string[];
     images?: string[];
     videos?: string[];
@@ -340,6 +342,8 @@ export function ProductsPage() {
         categoryIds: r.categoryIds || [],
         subcategoryIds: r.subcategoryIds || [],
         relatedProductIds: r.relatedProductIds || [],
+        relatedCategoryId: r.relatedCategoryId || undefined,
+        relatedSubcategoryId: r.relatedSubcategoryId || undefined,
         tags: r.tags || [],
         images: r.images || [],
         videos: r.videos || [],
@@ -544,6 +548,8 @@ export function ProductsPage() {
       categoryIds: [],
       subcategoryIds: [],
       relatedProductIds: [],
+      relatedCategoryId: undefined,
+      relatedSubcategoryId: undefined,
       tags: [],
       images: [],
       videos: [],
@@ -572,6 +578,8 @@ export function ProductsPage() {
     // Include values from unmounted basics form while on step 1
     const basics = form.getFieldsValue(true) as {
       relatedProductIds?: string[];
+      relatedCategoryId?: string | null;
+      relatedSubcategoryId?: string | null;
       titleUk?: string;
       titleEn?: string;
       slug?: string;
@@ -650,6 +658,8 @@ export function ProductsPage() {
           categoryIds: basics.categoryIds || [],
           subcategoryIds: basics.subcategoryIds || [],
           relatedProductIds: basics.relatedProductIds || [],
+          relatedCategoryId: basics.relatedCategoryId || "",
+          relatedSubcategoryId: basics.relatedSubcategoryId || "",
           tags: basics.tags || [],
           images: basics.images || [],
           videos: basics.videos || [],
@@ -671,6 +681,8 @@ export function ProductsPage() {
           categoryIds: basics.categoryIds || [],
           subcategoryIds: basics.subcategoryIds || [],
           relatedProductIds: basics.relatedProductIds || [],
+          relatedCategoryId: basics.relatedCategoryId || "",
+          relatedSubcategoryId: basics.relatedSubcategoryId || "",
           tags: basics.tags || [],
           images: basics.images || [],
           videos: basics.videos || [],
@@ -1283,12 +1295,12 @@ export function ProductsPage() {
                   placeholder={t("products.form.tags.placeholder")}
                 />
               </Form.Item>
-              <Form.Item
-                label="Рекомендовані товари (до цього товару)"
-                name="relatedProductIds"
-                tooltip="Ці товари покажуться в блоці «До цього товару рекомендуємо» на сторінці цього товару. Якщо не задано — беруться рекомендації підкатегорії/категорії, інакше автоматично.">
-                <ProductPicker excludeId={editor.record?._id} />
-              </Form.Item>
+              <RecommendationFields
+                categories={categories}
+                subcategories={subcategories}
+                excludeProductId={editor.record?._id}
+                scopeHint="Показується в блоці «До цього товару рекомендуємо». Якщо не задано — беруться рекомендації підкатегорії/категорії, інакше автоматично."
+              />
                       </>
                     ),
                   },
