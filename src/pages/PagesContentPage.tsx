@@ -863,7 +863,7 @@ function SlidesSelector({
 
 // ─── Promotions Tab ────────────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function PromotionsTab({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+export function PromotionsTab({ data, onChange, settingsOnly }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void; settingsOnly?: boolean }) {
   const { message, modal } = AntApp.useApp();
   const [slides, setSlides] = useState<PromoSlide[]>([]);
   const [loadingSlides, setLoadingSlides] = useState(false);
@@ -977,6 +977,17 @@ export function PromotionsTab({ data, onChange }: { data: Record<string, unknown
         <Input value={(data.collapseBtnText as string) ?? ""} onChange={(e) => set("collapseBtnText", e.target.value)} placeholder="Згорнути" />
       </Form.Item>
 
+      {settingsOnly && (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginTop: 8 }}
+          message="Самі акційні товари керуються на сторінках «Акції Слайдер» (великий блок) та «Акції Сітка» (нижні картки)."
+        />
+      )}
+
+      {!settingsOnly && (
+      <>
       {/* ── Товари (CRUD) ── */}
       <Divider orientation="left" orientationMargin={0} style={{ fontSize: 12, color: "#78716c" }}>
         <Space>
@@ -1085,6 +1096,8 @@ export function PromotionsTab({ data, onChange }: { data: Record<string, unknown
           </Form.Item>
         </Form>
       </Modal>
+      </>
+      )}
     </div>
   );
 }
@@ -1268,7 +1281,7 @@ export default function PagesContentPage() {
                     {key === "delivery" && <DeliveryTab data={currentData} onChange={setCurrentData} />}
                     {key === "contacts-page" && <ContactsTab data={currentData} onChange={setCurrentData} />}
                     {key === "homepage-doctors" && <DoctorsTab data={currentData} onChange={setCurrentData} />}
-                    {key === "promotions-section" && <PromotionsTab data={currentData} onChange={setCurrentData} />}
+                    {key === "promotions-section" && <PromotionsTab data={currentData} onChange={setCurrentData} settingsOnly />}
                   </Form>
                 </Card>
               </div>
