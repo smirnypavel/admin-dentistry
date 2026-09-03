@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { App as AntApp, Button, Card, Form, Spin, Tabs } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
-import { PromotionsTab } from "./PagesContentPage";
+import { PromotionsTab, PromotionsPreview } from "./PagesContentPage";
 import { getAdminPageContent, updatePageContent } from "../api/pages";
 import { PromoSlidesPage } from "./PromoSlidesPage";
 import { PromoGridPage } from "./PromoGridPage";
@@ -43,19 +43,38 @@ function PromotionsSettings() {
   }
 
   return (
-    <Card
-      style={{ maxWidth: 640 }}
-      title="Тексти та таймер акційної секції"
-      extra={
-        <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={save}>
-          Зберегти
-        </Button>
-      }
-    >
-      <Form layout="vertical">
-        <PromotionsTab data={data} onChange={setData} settingsOnly />
-      </Form>
-    </Card>
+    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+      {/* Left: form */}
+      <div style={{ flex: "0 0 560px", minWidth: 0 }}>
+        <Card
+          title="Тексти та таймер акційної секції"
+          extra={
+            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={save}>
+              Зберегти
+            </Button>
+          }
+        >
+          <Form layout="vertical">
+            <PromotionsTab data={data} onChange={setData} settingsOnly />
+          </Form>
+        </Card>
+      </div>
+
+      {/* Right: live preview */}
+      <div style={{ flex: 1, minWidth: 320, position: "sticky", top: 24 }}>
+        <Card
+          size="small"
+          title={
+            <span style={{ fontWeight: 500 }}>👁 Прев'ю секції (оновлюється наживо)</span>
+          }
+          styles={{
+            body: { padding: 0, maxHeight: "calc(100vh - 220px)", overflowY: "auto" },
+          }}
+        >
+          <PromotionsPreview data={data} />
+        </Card>
+      </div>
+    </div>
   );
 }
 
