@@ -8,6 +8,7 @@ type CategoryRaw = {
   descriptionI18n?: { uk?: string; en?: string } | null;
   imageUrl?: string | null;
   cardSize?: string | null;
+  relatedProductIds?: string[] | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -23,6 +24,7 @@ export type Category = {
   descriptionI18n?: { uk?: string; en?: string } | null;
   imageUrl?: string | null;
   cardSize?: string | null;
+  relatedProductIds?: string[] | null;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -37,6 +39,7 @@ export type CreateCategoryDto = {
   descEn?: string;
   imageUrl?: string;
   cardSize?: string;
+  relatedProductIds?: string[];
   sort?: number;
   isActive?: boolean;
 };
@@ -56,6 +59,7 @@ export async function listCategories(): Promise<Category[]> {
     descriptionI18n: c.descriptionI18n ?? null,
     imageUrl: c.imageUrl ?? null,
     cardSize: c.cardSize ?? null,
+    relatedProductIds: c.relatedProductIds ?? [],
     sort: c.sort ?? null,
     isActive: c.isActive,
     createdAt: c.createdAt ?? null,
@@ -82,6 +86,7 @@ export async function createCategory(
       : {}),
     imageUrl: payload.imageUrl,
     cardSize: payload.cardSize,
+    relatedProductIds: payload.relatedProductIds,
     sort: payload.sort,
     isActive: payload.isActive,
   } as const;
@@ -96,6 +101,7 @@ export async function createCategory(
     descriptionI18n: data.descriptionI18n ?? null,
     imageUrl: data.imageUrl ?? null,
     cardSize: data.cardSize ?? null,
+    relatedProductIds: data.relatedProductIds ?? [],
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
@@ -141,6 +147,7 @@ export async function updateCategory(
     descriptionI18n: data.descriptionI18n ?? null,
     imageUrl: data.imageUrl ?? null,
     cardSize: data.cardSize ?? null,
+    relatedProductIds: data.relatedProductIds ?? [],
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
@@ -162,6 +169,7 @@ export async function deleteCategory(id: string): Promise<Category | null> {
     descriptionI18n: data.descriptionI18n ?? null,
     imageUrl: data.imageUrl ?? null,
     cardSize: data.cardSize ?? null,
+    relatedProductIds: data.relatedProductIds ?? [],
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,

@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
 import { ProductReorderDrawer } from "../components/ProductReorderDrawer";
+import { ProductPicker } from "../components/ProductPicker";
 import { slugify } from "../utils/slugify";
 import { listCategories, type Category } from "../api/categories";
 import { listSubcategories, type Subcategory } from "../api/subcategories";
@@ -154,6 +155,7 @@ export function ProductsPage() {
     descEn?: string;
     categoryIds: string[];
     subcategoryIds?: string[];
+    relatedProductIds?: string[];
     tags?: string[];
     images?: string[];
     videos?: string[];
@@ -337,6 +339,7 @@ export function ProductsPage() {
         descEn: r.descriptionI18n?.en || "",
         categoryIds: r.categoryIds || [],
         subcategoryIds: r.subcategoryIds || [],
+        relatedProductIds: r.relatedProductIds || [],
         tags: r.tags || [],
         images: r.images || [],
         videos: r.videos || [],
@@ -540,6 +543,7 @@ export function ProductsPage() {
       descEn: "",
       categoryIds: [],
       subcategoryIds: [],
+      relatedProductIds: [],
       tags: [],
       images: [],
       videos: [],
@@ -567,6 +571,7 @@ export function ProductsPage() {
     }
     // Include values from unmounted basics form while on step 1
     const basics = form.getFieldsValue(true) as {
+      relatedProductIds?: string[];
       titleUk?: string;
       titleEn?: string;
       slug?: string;
@@ -644,6 +649,7 @@ export function ProductsPage() {
           descEn: basics.descEn || undefined,
           categoryIds: basics.categoryIds || [],
           subcategoryIds: basics.subcategoryIds || [],
+          relatedProductIds: basics.relatedProductIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
           videos: basics.videos || [],
@@ -664,6 +670,7 @@ export function ProductsPage() {
           descEn: basics.descEn || undefined,
           categoryIds: basics.categoryIds || [],
           subcategoryIds: basics.subcategoryIds || [],
+          relatedProductIds: basics.relatedProductIds || [],
           tags: basics.tags || [],
           images: basics.images || [],
           videos: basics.videos || [],
@@ -1275,6 +1282,12 @@ export function ProductsPage() {
                   mode="tags"
                   placeholder={t("products.form.tags.placeholder")}
                 />
+              </Form.Item>
+              <Form.Item
+                label="Рекомендовані товари (до цього товару)"
+                name="relatedProductIds"
+                tooltip="Ці товари покажуться в блоці «До цього товару рекомендуємо» на сторінці цього товару. Якщо не задано — беруться рекомендації підкатегорії/категорії, інакше автоматично.">
+                <ProductPicker excludeId={editor.record?._id} />
               </Form.Item>
                       </>
                     ),

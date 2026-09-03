@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
+import { ProductPicker } from "../components/ProductPicker";
 import type { Subcategory } from "../api/subcategories";
 import {
   createSubcategory,
@@ -44,6 +45,7 @@ type FormValues = {
   imageUrl?: string | null;
   categoryId: string;
   parentSubcategoryId?: string;
+  relatedProductIds?: string[];
   sort?: number;
   isActive?: boolean;
 };
@@ -148,6 +150,7 @@ export function SubcategoriesPage() {
       imageUrl: record.imageUrl || undefined,
       categoryId: record.categoryId,
       parentSubcategoryId: record.parentSubcategoryId || undefined,
+      relatedProductIds: record.relatedProductIds || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -207,6 +210,7 @@ export function SubcategoriesPage() {
           imageUrl: payload.imageUrl || undefined,
           categoryId: payload.categoryId,
           parentSubcategoryId: payload.parentSubcategoryId || "",
+          relatedProductIds: payload.relatedProductIds || [],
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -473,6 +477,13 @@ export function SubcategoriesPage() {
               options={parentOptions}
               notFoundContent="Спочатку оберіть категорію та створіть групи 1-го рівня"
             />
+          </Form.Item>
+
+          <Form.Item
+            label="Рекомендовані товари (для цієї підгрупи)"
+            name="relatedProductIds"
+            tooltip="Товари за замовчуванням для блоку «До цього товару рекомендуємо» на товарах цієї підгрупи. Спрацьовує, якщо у товару немає власних рекомендацій. Має пріоритет над рекомендаціями категорії.">
+            <ProductPicker />
           </Form.Item>
 
           <Tabs

@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
+import { ProductPicker } from "../components/ProductPicker";
 import type { Category } from "../api/categories";
 import {
   createCategory,
@@ -41,6 +42,7 @@ type FormValues = {
   descEn?: string;
   imageUrl?: string | null;
   cardSize?: string;
+  relatedProductIds?: string[];
   sort?: number;
   isActive?: boolean;
 };
@@ -119,6 +121,7 @@ export function CategoriesPage() {
       descEn: record.descriptionI18n?.en,
       imageUrl: record.imageUrl || undefined,
       cardSize: record.cardSize || undefined,
+      relatedProductIds: record.relatedProductIds || undefined,
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -176,6 +179,7 @@ export function CategoriesPage() {
           descEn: payload.descEn || undefined,
           imageUrl: payload.imageUrl || undefined,
           cardSize: payload.cardSize || undefined,
+          relatedProductIds: payload.relatedProductIds || [],
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -454,6 +458,13 @@ export function CategoriesPage() {
               placeholder="За замовчуванням (звичайна 1×1)"
               options={CARD_SIZE_OPTIONS}
             />
+          </Form.Item>
+
+          <Form.Item
+            label="Рекомендовані товари (для всієї категорії)"
+            name="relatedProductIds"
+            tooltip="Товари за замовчуванням для блоку «До цього товару рекомендуємо» на всіх товарах цієї категорії. Спрацьовує, якщо у товару (і його підкатегорії) власні рекомендації не задані.">
+            <ProductPicker />
           </Form.Item>
 
           <Space size="large">

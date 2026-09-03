@@ -23,6 +23,7 @@ type ProductRaw = {
   descriptionI18n?: { uk?: string; en?: string } | null;
   categoryIds: string[];
   subcategoryIds?: string[];
+  relatedProductIds?: string[];
   tags?: string[];
   images?: string[];
   videos?: string[];
@@ -56,6 +57,7 @@ export type Product = {
   descriptionI18n?: { uk?: string; en?: string } | null;
   categoryIds: string[];
   subcategoryIds?: string[];
+  relatedProductIds?: string[];
   tags?: string[];
   images?: string[];
   videos?: string[];
@@ -81,6 +83,8 @@ export type Product = {
 
 export type ListProductsParams = {
   q?: string;
+  qLike?: string;
+  ids?: string[];
   category?: string;
   subcategory?: string;
   manufacturerId?: string | string[];
@@ -128,6 +132,7 @@ export async function listProducts(
       descriptionI18n: p.descriptionI18n ?? null,
       categoryIds: p.categoryIds || [],
       subcategoryIds: p.subcategoryIds || [],
+    relatedProductIds: p.relatedProductIds || [],
       tags: p.tags || [],
       images: p.images || [],
       videos: p.videos || [],
@@ -176,6 +181,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -202,6 +208,7 @@ export type CreateProductDto = {
   descEn?: string;
   categoryIds?: string[];
   subcategoryIds?: string[];
+  relatedProductIds?: string[];
   tags?: string[];
   images?: string[];
   videos?: string[];
@@ -237,6 +244,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
       : {}),
     categoryIds: dto.categoryIds,
     subcategoryIds: dto.subcategoryIds,
+    relatedProductIds: dto.relatedProductIds,
     tags: dto.tags,
     images: dto.images,
     videos: dto.videos,
@@ -257,6 +265,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -322,6 +331,7 @@ export async function updateProduct(
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -356,6 +366,7 @@ export async function cloneProduct(
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -387,6 +398,7 @@ export async function deleteProduct(id: string): Promise<Product | null> {
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -421,6 +433,7 @@ export async function addVariant(
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -456,6 +469,7 @@ export async function updateVariant(
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
@@ -489,6 +503,7 @@ export async function deleteVariant(
     descriptionI18n: data.descriptionI18n ?? null,
     categoryIds: data.categoryIds || [],
     subcategoryIds: data.subcategoryIds || [],
+    relatedProductIds: data.relatedProductIds || [],
     tags: data.tags || [],
     images: data.images || [],
     videos: data.videos || [],
