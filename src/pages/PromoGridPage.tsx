@@ -54,7 +54,7 @@ type FormValues = {
 
 let featureKeyCounter = 0;
 
-export function PromoGridPage() {
+export function PromoGridPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { message } = AntApp.useApp();
   useI18n();
   const [form] = Form.useForm<FormValues>();
@@ -289,8 +289,8 @@ export function PromoGridPage() {
     },
   ];
 
-  return (
-    <AdminLayout>
+  const content = (
+    <>
       <Space direction="vertical" style={{ width: "100%" }} size="large">
         <Space style={{ justifyContent: "space-between", width: "100%" }} wrap>
           <Space>
@@ -427,8 +427,9 @@ export function PromoGridPage() {
           </Form>
         </Modal>
       </Space>
-    </AdminLayout>
+    </>
   );
+  return embedded ? content : <AdminLayout>{content}</AdminLayout>;
 }
 
 export default PromoGridPage;

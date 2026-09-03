@@ -1190,7 +1190,6 @@ const PAGE_KEYS = [
   { key: "delivery", label: "Доставка" },
   { key: "contacts-page", label: "Контакти" },
   { key: "homepage-doctors", label: "Лікарі / клініки" },
-  { key: "promotions-section", label: "Акції (головна)" },
 ];
 
 export default function PagesContentPage() {
@@ -1281,7 +1280,6 @@ export default function PagesContentPage() {
                     {key === "delivery" && <DeliveryTab data={currentData} onChange={setCurrentData} />}
                     {key === "contacts-page" && <ContactsTab data={currentData} onChange={setCurrentData} />}
                     {key === "homepage-doctors" && <DoctorsTab data={currentData} onChange={setCurrentData} />}
-                    {key === "promotions-section" && <PromotionsTab data={currentData} onChange={setCurrentData} settingsOnly />}
                   </Form>
                 </Card>
               </div>
@@ -1320,7 +1318,6 @@ export default function PagesContentPage() {
                     {key === "delivery" && <DeliveryPreview data={currentData} />}
                     {key === "contacts-page" && <ContactsPreview data={currentData} />}
                     {key === "homepage-doctors" && <DoctorsPreview data={currentData} />}
-                    {key === "promotions-section" && <PromotionsPreview data={currentData} />}
                   </div>
                 </Card>
               </div>

@@ -301,18 +301,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               label: <Link to="/gallery">{t("layout.menu.gallery")}</Link>,
             },
             {
-              key: "/promo-slides",
+              key: "/promotions",
               icon: <FireOutlined />,
-              label: (
-                <Link to="/promo-slides">🎞 Акції Слайдер</Link>
-              ),
-            },
-            {
-              key: "/promo-grid",
-              icon: <FireOutlined />,
-              label: (
-                <Link to="/promo-grid">🗂 Акції Сітка</Link>
-              ),
+              label: <Link to="/promotions">🔥 Акції</Link>,
             },
             {
               key: "/media",
