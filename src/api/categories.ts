@@ -11,6 +11,7 @@ type CategoryRaw = {
   relatedProductIds?: string[] | null;
   relatedCategoryId?: string | null;
   relatedSubcategoryId?: string | null;
+  colors?: Array<{ name: string; hex?: string }>;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -29,6 +30,7 @@ export type Category = {
   relatedProductIds?: string[] | null;
   relatedCategoryId?: string | null;
   relatedSubcategoryId?: string | null;
+  colors?: Array<{ name: string; hex?: string }>;
   sort?: number | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -46,6 +48,7 @@ export type CreateCategoryDto = {
   relatedProductIds?: string[];
   relatedCategoryId?: string;
   relatedSubcategoryId?: string;
+  colors?: Array<{ name: string; hex?: string }>;
   sort?: number;
   isActive?: boolean;
 };
@@ -68,6 +71,7 @@ export async function listCategories(): Promise<Category[]> {
     relatedProductIds: c.relatedProductIds ?? [],
     relatedCategoryId: c.relatedCategoryId ?? null,
     relatedSubcategoryId: c.relatedSubcategoryId ?? null,
+    colors: c.colors ?? [],
     sort: c.sort ?? null,
     isActive: c.isActive,
     createdAt: c.createdAt ?? null,
@@ -97,6 +101,7 @@ export async function createCategory(
     relatedProductIds: payload.relatedProductIds,
     relatedCategoryId: payload.relatedCategoryId,
     relatedSubcategoryId: payload.relatedSubcategoryId,
+    colors: payload.colors,
     sort: payload.sort,
     isActive: payload.isActive,
   } as const;
@@ -114,6 +119,7 @@ export async function createCategory(
     relatedProductIds: data.relatedProductIds ?? [],
     relatedCategoryId: data.relatedCategoryId ?? null,
     relatedSubcategoryId: data.relatedSubcategoryId ?? null,
+    colors: data.colors ?? [],
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
@@ -162,6 +168,7 @@ export async function updateCategory(
     relatedProductIds: data.relatedProductIds ?? [],
     relatedCategoryId: data.relatedCategoryId ?? null,
     relatedSubcategoryId: data.relatedSubcategoryId ?? null,
+    colors: data.colors ?? [],
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,
@@ -186,6 +193,7 @@ export async function deleteCategory(id: string): Promise<Category | null> {
     relatedProductIds: data.relatedProductIds ?? [],
     relatedCategoryId: data.relatedCategoryId ?? null,
     relatedSubcategoryId: data.relatedSubcategoryId ?? null,
+    colors: data.colors ?? [],
     sort: data.sort ?? null,
     isActive: data.isActive,
     createdAt: data.createdAt ?? null,

@@ -24,6 +24,7 @@ import {
 import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
 import { RecommendationFields } from "../components/RecommendationFields";
+import { ColorsField } from "../components/ColorsField";
 import type { Subcategory } from "../api/subcategories";
 import {
   createSubcategory,
@@ -48,6 +49,7 @@ type FormValues = {
   relatedProductIds?: string[];
   relatedCategoryId?: string;
   relatedSubcategoryId?: string;
+  colors?: Array<{ name: string; hex?: string }>;
   sort?: number;
   isActive?: boolean;
 };
@@ -155,6 +157,7 @@ export function SubcategoriesPage() {
       relatedProductIds: record.relatedProductIds || undefined,
       relatedCategoryId: record.relatedCategoryId || undefined,
       relatedSubcategoryId: record.relatedSubcategoryId || undefined,
+      colors: (record.colors || []).map((c) => ({ name: c.name, hex: c.hex || "" })),
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -205,6 +208,7 @@ export function SubcategoriesPage() {
           relatedProductIds: payload.relatedProductIds ?? [],
           relatedCategoryId: payload.relatedCategoryId ?? "",
           relatedSubcategoryId: payload.relatedSubcategoryId ?? "",
+          colors: payload.colors ?? [],
         });
         message.success(t("subcategories.msg.save.updated"));
       } else {
@@ -220,6 +224,7 @@ export function SubcategoriesPage() {
           relatedProductIds: payload.relatedProductIds || [],
           relatedCategoryId: payload.relatedCategoryId || "",
           relatedSubcategoryId: payload.relatedSubcategoryId || "",
+          colors: payload.colors || [],
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -492,6 +497,11 @@ export function SubcategoriesPage() {
             categories={categories}
             subcategories={items}
             scopeHint="За замовчуванням для товарів цієї підгрупи (якщо у товару немає власних рекомендацій). Має пріоритет над рекомендаціями категорії."
+          />
+
+          <ColorsField
+            label="Кольори (за замовчуванням для товарів підкатегорії)"
+            tooltip="Показуються на товарах цієї підкатегорії, якщо у самого товару кольори не задані. Мають пріоритет над кольорами категорії."
           />
 
           <Tabs

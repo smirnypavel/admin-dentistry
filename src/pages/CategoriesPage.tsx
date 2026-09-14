@@ -23,6 +23,7 @@ import {
 import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
 import { RecommendationFields } from "../components/RecommendationFields";
+import { ColorsField } from "../components/ColorsField";
 import type { Category } from "../api/categories";
 import { listSubcategories, type Subcategory } from "../api/subcategories";
 import {
@@ -46,6 +47,7 @@ type FormValues = {
   relatedProductIds?: string[];
   relatedCategoryId?: string;
   relatedSubcategoryId?: string;
+  colors?: Array<{ name: string; hex?: string }>;
   sort?: number;
   isActive?: boolean;
 };
@@ -132,6 +134,7 @@ export function CategoriesPage() {
       relatedProductIds: record.relatedProductIds || undefined,
       relatedCategoryId: record.relatedCategoryId || undefined,
       relatedSubcategoryId: record.relatedSubcategoryId || undefined,
+      colors: (record.colors || []).map((c) => ({ name: c.name, hex: c.hex || "" })),
       sort: record.sort ?? undefined,
       isActive: record.isActive,
     });
@@ -181,6 +184,7 @@ export function CategoriesPage() {
           relatedProductIds: payload.relatedProductIds ?? [],
           relatedCategoryId: payload.relatedCategoryId ?? "",
           relatedSubcategoryId: payload.relatedSubcategoryId ?? "",
+          colors: payload.colors ?? [],
         });
         message.success(t("categories.msg.save.updated"));
       } else {
@@ -195,6 +199,7 @@ export function CategoriesPage() {
           relatedProductIds: payload.relatedProductIds || [],
           relatedCategoryId: payload.relatedCategoryId || "",
           relatedSubcategoryId: payload.relatedSubcategoryId || "",
+          colors: payload.colors || [],
           sort: payload.sort,
           isActive: payload.isActive,
         });
@@ -479,6 +484,11 @@ export function CategoriesPage() {
             categories={items}
             subcategories={subcategories}
             scopeHint="За замовчуванням для всіх товарів цієї категорії (якщо у товару та його підкатегорії власні рекомендації не задані)."
+          />
+
+          <ColorsField
+            label="Кольори (за замовчуванням для товарів категорії)"
+            tooltip="Показуються на товарах цієї категорії, якщо у самого товару та його підкатегорії кольори не задані."
           />
 
           <Space size="large">
