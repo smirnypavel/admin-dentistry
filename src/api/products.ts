@@ -30,6 +30,7 @@ type ProductRaw = {
   images?: string[];
   videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
+  colors?: Array<{ name: string; hex?: string }>;
   variants: ProductVariant[];
   manufacturerIds?: string[];
   countryIds?: string[];
@@ -66,6 +67,7 @@ export type Product = {
   images?: string[];
   videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
+  colors?: Array<{ name: string; hex?: string }>;
   variants: ProductVariant[];
   manufacturerIds?: string[];
   countryIds?: string[];
@@ -143,6 +145,7 @@ export async function listProducts(
       images: p.images || [],
       videos: p.videos || [],
       attributes: p.attributes || [],
+    colors: p.colors || [],
       variants: p.variants || [],
       manufacturerIds: p.manufacturerIds || [],
       countryIds: p.countryIds || [],
@@ -194,6 +197,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -223,6 +227,7 @@ export type CreateProductDto = {
   images?: string[];
   videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
+  colors?: Array<{ name: string; hex?: string }>;
   variants: ProductVariant[];
   isActive?: boolean;
   isNew?: boolean;
@@ -261,6 +266,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     images: dto.images,
     videos: dto.videos,
     attributes: dto.attributes,
+    colors: dto.colors,
     variants: dto.variants,
     isActive: dto.isActive,
     isNew: dto.isNew,
@@ -284,6 +290,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -352,6 +359,7 @@ export async function updateProduct(
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -389,6 +397,7 @@ export async function cloneProduct(
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -423,6 +432,7 @@ export async function deleteProduct(id: string): Promise<Product | null> {
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -460,6 +470,7 @@ export async function addVariant(
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -498,6 +509,7 @@ export async function updateVariant(
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -534,6 +546,7 @@ export async function deleteVariant(
     images: data.images || [],
     videos: data.videos || [],
     attributes: data.attributes || [],
+    colors: data.colors || [],
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],

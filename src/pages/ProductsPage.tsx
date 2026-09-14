@@ -162,6 +162,7 @@ export function ProductsPage() {
     images?: string[];
     videos?: string[];
     attributes?: Array<{ key: string; value: string }>;
+    colors?: Array<{ name: string; hex?: string }>;
     isActive: boolean;
     isNew?: boolean;
     cashbackPercent?: number;
@@ -350,6 +351,10 @@ export function ProductsPage() {
         attributes: (r.attributes || []).map((a) => ({
           key: a.key,
           value: String(a.value ?? ""),
+        })),
+        colors: (r.colors || []).map((c) => ({
+          name: c.name,
+          hex: c.hex || "",
         })),
         isActive: r.isActive,
         isNew: r.isNew ?? false,
@@ -591,6 +596,7 @@ export function ProductsPage() {
       images?: string[];
       videos?: string[];
       attributes?: Array<{ key: string; value: string }>;
+      colors?: Array<{ name: string; hex?: string }>;
       isActive?: boolean;
       isNew?: boolean;
       cashbackPercent?: number;
@@ -624,6 +630,12 @@ export function ProductsPage() {
         else if (!isNaN(Number(raw)) && raw !== "") parsed = Number(raw);
         return { key: key.trim(), value: parsed };
       });
+    const colors = (basics.colors || [])
+      .filter((c) => (c.name || "").trim())
+      .map((c) => ({
+        name: c.name.trim(),
+        ...((c.hex || "").trim() ? { hex: (c.hex || "").trim() } : {}),
+      }));
     // Manufacturer is required per variant; it is set at product level and
     // applied to every combination.
     if (variants.length > 0 && !variantManufacturerId) {
@@ -664,6 +676,7 @@ export function ProductsPage() {
           images: basics.images || [],
           videos: basics.videos || [],
           attributes,
+          colors,
           variants: preparedVariants,
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
@@ -687,6 +700,7 @@ export function ProductsPage() {
           images: basics.images || [],
           videos: basics.videos || [],
           attributes,
+          colors,
           variants: preparedVariants,
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
@@ -1144,7 +1158,7 @@ export function ProductsPage() {
             <Form
               layout="vertical"
               form={form}
-              initialValues={{ isActive: true, images: [], attributes: [] }}
+              initialValues={{ isActive: true, images: [], attributes: [], colors: [] }}
               onValuesChange={(changed) => {
                 if ("titleUk" in changed || "titleEn" in changed) {
                   const currentSlug = (form.getFieldValue("slug") || "").trim();
@@ -1373,6 +1387,58 @@ export function ProductsPage() {
                     </Space>
                   )}
                 </Form.List>
+                        </Form.Item>
+
+                        <Form.Item
+                          label="Кольори (покупець обирає на сторінці товару)"
+                          tooltip="Напр. для еластичних лігатур/ланцюжків. Додайте назву кольору та, за бажанням, HEX для кольорового кружечка. Якщо кольорів нема — вибір не показується.">
+                          <Form.List name="colors">
+                            {(fields, { add, remove }) => (
+                              <Space direction="vertical" style={{ width: "100%" }}>
+                                {fields.map(({ key, name, ...restField }) => (
+                                  <Space key={key} align="baseline" wrap>
+                                    <Form.Item
+                                      {...restField}
+                                      name={[name, "name"]}
+                                      rules={[{ required: true, message: "Вкажіть назву кольору" }]}
+                                      style={{ width: 240, marginBottom: 0 }}>
+                                      <Input placeholder="Напр. Червоний / Neon Pink" />
+                                    </Form.Item>
+                                    <Form.Item
+                                      {...restField}
+                                      name={[name, "hex"]}
+                                      style={{ width: 160, marginBottom: 0 }}>
+                                      <Input placeholder="#22c55e (необов'язково)" allowClear />
+                                    </Form.Item>
+                                    <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
+                                      {() => {
+                                        const hex = form.getFieldValue(["colors", name, "hex"]);
+                                        return (
+                                          <span
+                                            style={{
+                                              display: "inline-block",
+                                              width: 22,
+                                              height: 22,
+                                              borderRadius: "50%",
+                                              border: "1px solid #d6d3d1",
+                                              background: hex || "#f5f5f4",
+                                              verticalAlign: "middle",
+                                            }}
+                                          />
+                                        );
+                                      }}
+                                    </Form.Item>
+                                    <Button danger onClick={() => remove(name)}>
+                                      {t("common.delete")}
+                                    </Button>
+                                  </Space>
+                                ))}
+                                <Button onClick={() => add({ name: "", hex: "" })}>
+                                  Додати колір
+                                </Button>
+                              </Space>
+                            )}
+                          </Form.List>
                         </Form.Item>
                       </>
                     ),
