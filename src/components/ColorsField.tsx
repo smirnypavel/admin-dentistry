@@ -36,18 +36,45 @@ export function ColorsField({
                 <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
                   {() => {
                     const hex = form.getFieldValue([name, fname, "hex"]);
+                    const valid = /^#[0-9a-fA-F]{6}$/.test(hex || "");
                     return (
-                      <span
+                      <label
+                        title="Натисніть, щоб обрати колір"
                         style={{
+                          position: "relative",
                           display: "inline-block",
-                          width: 22,
-                          height: 22,
-                          borderRadius: "50%",
-                          border: "1px solid #d6d3d1",
-                          background: hex || "#f5f5f4",
+                          width: 26,
+                          height: 26,
                           verticalAlign: "middle",
+                          cursor: "pointer",
                         }}
-                      />
+                      >
+                        <span
+                          style={{
+                            display: "block",
+                            width: 26,
+                            height: 26,
+                            borderRadius: "50%",
+                            border: "1px solid #d6d3d1",
+                            background: valid ? hex : "#f5f5f4",
+                          }}
+                        />
+                        <input
+                          type="color"
+                          value={valid ? hex : "#22c55e"}
+                          onChange={(e) =>
+                            form.setFieldValue([name, fname, "hex"], e.target.value)
+                          }
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            opacity: 0,
+                            cursor: "pointer",
+                          }}
+                        />
+                      </label>
                     );
                   }}
                 </Form.Item>
