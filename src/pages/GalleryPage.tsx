@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  Alert,
   App as AntApp,
   Button,
   Card,
@@ -34,6 +35,7 @@ export function GalleryPage() {
   const { t } = useI18n();
   const { message } = AntApp.useApp();
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [dims, setDims] = useState<Record<string, { w: number; h: number }>>({});
   const [loading, setLoading] = useState(false);
   const [addingUrl, setAddingUrl] = useState<string | null>(null);
 
@@ -129,6 +131,12 @@ export function GalleryPage() {
           style={{ marginBottom: 24 }}
           title={t("gallery.addNew")}>
           <Space direction="vertical" style={{ width: "100%" }}>
+            <Alert
+              type="info"
+              showIcon
+              message="Рекомендований розмір фото"
+              description="Вертикальне фото, співвідношення 3:4 — наприклад 900×1200 px (мінімум 600×800 px). Фото обрізається під формат 3:4 по центру, тож тримайте головне в центрі кадру."
+            />
             <ImageUploader
               value={addingUrl}
               onChange={(url) => setAddingUrl(url)}
@@ -175,6 +183,16 @@ export function GalleryPage() {
                   <Image
                     src={img.imageUrl}
                     alt={img.altI18n?.uk || "gallery"}
+                    onLoad={(e) => {
+                      const el = e.currentTarget as HTMLImageElement;
+                      if (el.naturalWidth) {
+                        setDims((d) =>
+                          d[img._id]
+                            ? d
+                            : { ...d, [img._id]: { w: el.naturalWidth, h: el.naturalHeight } },
+                        );
+                      }
+                    }}
                     style={{
                       maxHeight: 200,
                       objectFit: "cover",
@@ -219,6 +237,9 @@ export function GalleryPage() {
                 }}>
                 <Text type="secondary">
                   #{index + 1}
+                  {dims[img._id]
+                    ? ` · ${dims[img._id].w}×${dims[img._id].h} px`
+                    : ""}
                 </Text>
                 <Switch
                   size="small"
