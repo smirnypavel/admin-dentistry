@@ -191,6 +191,7 @@ export function ProductsPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [tableSources, setTableSources] = useState<Product[]>([]);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -327,6 +328,31 @@ export function ProductsPage() {
       void loadRefs();
     }
   }, [editor.open, loadRefs]);
+
+  // Products (elastic materials) that already have a table — as copy sources.
+  useEffect(() => {
+    if (!editor.open) return;
+    let alive = true;
+    (async () => {
+      try {
+        const cat = categories.find((c) => c.slug === "elastychni");
+        const res = await listProducts({ limit: 50, category: cat?._id });
+        if (!alive) return;
+        setTableSources(
+          res.items.filter(
+            (p) =>
+              (p.elasticsTable?.entries?.length ?? 0) > 0 &&
+              p._id !== editor.record?._id,
+          ),
+        );
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [editor.open, editor.record, categories]);
 
   // Load reference lists for filters on initial mount
   useEffect(() => {
@@ -1514,6 +1540,32 @@ export function ProductsPage() {
                           >
                             Заповнити прикладом ZOO
                           </Button>
+                          <Select
+                            style={{ minWidth: 260 }}
+                            allowClear
+                            showSearch
+                            optionFilterProp="label"
+                            value={undefined}
+                            placeholder="Скопіювати таблицю з товару…"
+                            notFoundContent="Немає товарів з таблицею"
+                            options={tableSources.map((p) => ({
+                              value: p._id,
+                              label: `${p.title} (${p.elasticsTable?.entries?.length ?? 0} поз.)`,
+                            }))}
+                            onChange={(id) => {
+                              const src = tableSources.find((p) => p._id === id);
+                              const entries = src?.elasticsTable?.entries ?? [];
+                              if (entries.length) {
+                                form.setFieldValue(
+                                  "elasticsEntries",
+                                  entries.map((e) => ({ ...e })),
+                                );
+                                message.success(
+                                  `Скопійовано ${entries.length} позицій із «${src?.title}». Відредагуйте та збережіть.`,
+                                );
+                              }
+                            }}
+                          />
                           <Button danger onClick={() => form.setFieldValue("elasticsEntries", [])}>
                             Очистити
                           </Button>
