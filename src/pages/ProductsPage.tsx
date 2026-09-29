@@ -41,6 +41,7 @@ import {
   updateProduct,
 } from "../api/products";
 import { ZOO_ELASTIC_ENTRIES } from "../data/zooElastics";
+import { ElasticsPreview } from "../components/ElasticsPreview";
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
@@ -1528,8 +1529,8 @@ export function ProductsPage() {
                           type="info"
                           showIcon
                           style={{ marginBottom: 16 }}
-                          message="Інтерактивна таблиця еластиків (як ZOO)"
-                          description="Кожен рядок = клітинка: розмір + сила + тварина + артикул. На сайті вони автоматично збираються у таблицю розмір×сила з кнопками «Додати». Натисніть «Заповнити прикладом ZOO» для стандартної таблиці Ormco та відредагуйте за потреби. Якщо порожньо — таблиця на сайті не показується."
+                          message="Як заповнювати таблицю еластиків"
+                          description="Кожен рядок нижче — це одна клітинка майбутньої таблиці: «Розмір + мм» стає рядком, «Сила (oz/г/рівень)» — стовпцем, а «Тварина + артикул» — вмістом клітинки. На сайті все автоматично збереться у таблицю розмір×сила з кнопками «Додати в кошик» (див. живий приклад унизу). Найпростіше: натисніть «Заповнити прикладом ZOO» — підставиться стандартна таблиця Ormco, яку можна підправити. Якщо рядків немає — таблиця на сайті не показується."
                         />
                         <Space style={{ marginBottom: 12 }} wrap>
                           <Button
@@ -1620,6 +1621,7 @@ export function ProductsPage() {
                             )}
                           </Form.List>
                         </div>
+                        <ElasticsPreview />
                       </>
                     ),
                   },
