@@ -15,6 +15,20 @@ export type ProductVariant = {
   variantKey?: string | null;
 };
 
+export type ElasticEntry = {
+  group: "intra" | "extra";
+  size: string;
+  mm: number;
+  forceName: string;
+  oz: string;
+  g: string;
+  level: number;
+  animal: string;
+  art: string;
+  colorArt?: string;
+};
+export type ElasticsTable = { title?: string; entries: ElasticEntry[] };
+
 // Backend raw shape with i18n fields
 type ProductRaw = {
   _id: string;
@@ -31,6 +45,7 @@ type ProductRaw = {
   videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   colors?: Array<{ name: string; hex?: string }>;
+  elasticsTable?: ElasticsTable | null;
   variants: ProductVariant[];
   manufacturerIds?: string[];
   countryIds?: string[];
@@ -68,6 +83,7 @@ export type Product = {
   videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   colors?: Array<{ name: string; hex?: string }>;
+  elasticsTable?: ElasticsTable | null;
   variants: ProductVariant[];
   manufacturerIds?: string[];
   countryIds?: string[];
@@ -146,6 +162,7 @@ export async function listProducts(
       videos: p.videos || [],
       attributes: p.attributes || [],
     colors: p.colors || [],
+    elasticsTable: p.elasticsTable ?? null,
       variants: p.variants || [],
       manufacturerIds: p.manufacturerIds || [],
       countryIds: p.countryIds || [],
@@ -198,6 +215,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -228,6 +246,7 @@ export type CreateProductDto = {
   videos?: string[];
   attributes?: Array<{ key: string; value: string | number | boolean }>;
   colors?: Array<{ name: string; hex?: string }>;
+  elasticsTable?: ElasticsTable | null;
   variants: ProductVariant[];
   isActive?: boolean;
   isNew?: boolean;
@@ -267,6 +286,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     videos: dto.videos,
     attributes: dto.attributes,
     colors: dto.colors,
+    elasticsTable: dto.elasticsTable,
     variants: dto.variants,
     isActive: dto.isActive,
     isNew: dto.isNew,
@@ -291,6 +311,7 @@ export async function createProduct(dto: CreateProductDto): Promise<Product> {
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -360,6 +381,7 @@ export async function updateProduct(
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -398,6 +420,7 @@ export async function cloneProduct(
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -433,6 +456,7 @@ export async function deleteProduct(id: string): Promise<Product | null> {
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -471,6 +495,7 @@ export async function addVariant(
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -510,6 +535,7 @@ export async function updateVariant(
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],
@@ -547,6 +573,7 @@ export async function deleteVariant(
     videos: data.videos || [],
     attributes: data.attributes || [],
     colors: data.colors || [],
+    elasticsTable: data.elasticsTable ?? null,
     variants: data.variants || [],
     manufacturerIds: data.manufacturerIds || [],
     countryIds: data.countryIds || [],

@@ -37,8 +37,10 @@ import {
   type ListProductsResponse,
   type Product,
   type ProductVariant,
+  type ElasticEntry,
   updateProduct,
 } from "../api/products";
+import { ZOO_ELASTIC_ENTRIES } from "../data/zooElastics";
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
@@ -163,6 +165,7 @@ export function ProductsPage() {
     videos?: string[];
     attributes?: Array<{ key: string; value: string }>;
     colors?: Array<{ name: string; hex?: string }>;
+    elasticsEntries?: ElasticEntry[];
     isActive: boolean;
     isNew?: boolean;
     cashbackPercent?: number;
@@ -356,6 +359,7 @@ export function ProductsPage() {
           name: c.name,
           hex: c.hex || "",
         })),
+        elasticsEntries: r.elasticsTable?.entries ?? [],
         isActive: r.isActive,
         isNew: r.isNew ?? false,
         cashbackPercent: r.cashbackPercent ?? 0,
@@ -597,6 +601,7 @@ export function ProductsPage() {
       videos?: string[];
       attributes?: Array<{ key: string; value: string }>;
       colors?: Array<{ name: string; hex?: string }>;
+      elasticsEntries?: ElasticEntry[];
       isActive?: boolean;
       isNew?: boolean;
       cashbackPercent?: number;
@@ -636,6 +641,21 @@ export function ProductsPage() {
         name: c.name.trim(),
         ...((c.hex || "").trim() ? { hex: (c.hex || "").trim() } : {}),
       }));
+    const elasticEntries = (basics.elasticsEntries || [])
+      .filter((e) => (e.animal || "").trim() && (e.size || "").trim())
+      .map((e): ElasticEntry => ({
+        group: e.group === "extra" ? "extra" : "intra",
+        size: (e.size || "").trim(),
+        mm: Number(e.mm) || 0,
+        forceName: (e.forceName || "").trim(),
+        oz: (e.oz || "").trim(),
+        g: (e.g || "").trim(),
+        level: Math.min(5, Math.max(1, Number(e.level) || 1)),
+        animal: (e.animal || "").trim(),
+        art: (e.art || "").trim(),
+        ...((e.colorArt || "").trim() ? { colorArt: (e.colorArt || "").trim() } : {}),
+      }));
+    const elasticsTable = elasticEntries.length ? { entries: elasticEntries } : null;
     // Manufacturer is required per variant; it is set at product level and
     // applied to every combination.
     if (variants.length > 0 && !variantManufacturerId) {
@@ -677,6 +697,7 @@ export function ProductsPage() {
           videos: basics.videos || [],
           attributes,
           colors,
+          elasticsTable,
           variants: preparedVariants,
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
@@ -701,6 +722,7 @@ export function ProductsPage() {
           videos: basics.videos || [],
           attributes,
           colors,
+          elasticsTable,
           variants: preparedVariants,
           isActive: basics.isActive,
           isNew: basics.isNew ?? false,
@@ -1158,7 +1180,7 @@ export function ProductsPage() {
             <Form
               layout="vertical"
               form={form}
-              initialValues={{ isActive: true, images: [], attributes: [], colors: [] }}
+              initialValues={{ isActive: true, images: [], attributes: [], colors: [], elasticsEntries: [] }}
               onValuesChange={(changed) => {
                 if ("titleUk" in changed || "titleEn" in changed) {
                   const currentSlug = (form.getFieldValue("slug") || "").trim();
@@ -1467,6 +1489,85 @@ export function ProductsPage() {
                             )}
                           </Form.List>
                         </Form.Item>
+                      </>
+                    ),
+                  },
+                  {
+                    key: "elastics",
+                    label: "Таблиця еластиків",
+                    forceRender: true,
+                    children: (
+                      <>
+                        <Alert
+                          type="info"
+                          showIcon
+                          style={{ marginBottom: 16 }}
+                          message="Інтерактивна таблиця еластиків (як ZOO)"
+                          description="Кожен рядок = клітинка: розмір + сила + тварина + артикул. На сайті вони автоматично збираються у таблицю розмір×сила з кнопками «Додати». Натисніть «Заповнити прикладом ZOO» для стандартної таблиці Ormco та відредагуйте за потреби. Якщо порожньо — таблиця на сайті не показується."
+                        />
+                        <Space style={{ marginBottom: 12 }} wrap>
+                          <Button
+                            icon={<PlusOutlined />}
+                            onClick={() =>
+                              form.setFieldValue("elasticsEntries", ZOO_ELASTIC_ENTRIES.map((e) => ({ ...e })))
+                            }
+                          >
+                            Заповнити прикладом ZOO
+                          </Button>
+                          <Button danger onClick={() => form.setFieldValue("elasticsEntries", [])}>
+                            Очистити
+                          </Button>
+                        </Space>
+                        <div style={{ overflowX: "auto" }}>
+                          <Form.List name="elasticsEntries">
+                            {(fields, { add, remove }) => (
+                              <Space direction="vertical" style={{ width: "100%", minWidth: 980 }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "120px 90px 70px 150px 70px 70px 70px minmax(140px,1fr) 120px 120px 40px", gap: 8, fontSize: 11, color: "#78716c", fontWeight: 600, paddingInline: 4 }}>
+                                  <span>Група</span>
+                                  <span>Розмір</span>
+                                  <span>мм</span>
+                                  <span>Сила</span>
+                                  <span>oz</span>
+                                  <span>г</span>
+                                  <span>Рівень</span>
+                                  <span>Тварина</span>
+                                  <span>Артикул</span>
+                                  <span>Кольор. арт</span>
+                                  <span />
+                                </div>
+                                {fields.map(({ key, name, ...rest }) => (
+                                  <div key={key} style={{ display: "grid", gridTemplateColumns: "120px 90px 70px 150px 70px 70px 70px minmax(140px,1fr) 120px 120px 40px", gap: 8, alignItems: "center" }}>
+                                    <Form.Item {...rest} name={[name, "group"]} noStyle>
+                                      <Select
+                                        options={[
+                                          { value: "intra", label: "Внутр." },
+                                          { value: "extra", label: "Позарот." },
+                                        ]}
+                                        placeholder="Група"
+                                      />
+                                    </Form.Item>
+                                    <Form.Item {...rest} name={[name, "size"]} noStyle><Input placeholder={'1/8"'} /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "mm"]} noStyle><InputNumber style={{ width: "100%" }} step={0.01} placeholder="мм" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "forceName"]} noStyle><Input placeholder="Слабкі" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "oz"]} noStyle><Input placeholder="2 oz" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "g"]} noStyle><Input placeholder="60 г" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "level"]} noStyle><InputNumber style={{ width: "100%" }} min={1} max={5} placeholder="1-5" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "animal"]} noStyle><Input placeholder="Колібрі" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "art"]} noStyle><Input placeholder="630-0010" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "colorArt"]} noStyle><Input placeholder="—" /></Form.Item>
+                                    <Button danger type="text" icon={<DeleteOutlined />} onClick={() => remove(name)} />
+                                  </div>
+                                ))}
+                                <Button
+                                  icon={<PlusOutlined />}
+                                  onClick={() => add({ group: "intra", size: "", mm: 0, forceName: "", oz: "", g: "", level: 1, animal: "", art: "" })}
+                                >
+                                  Додати рядок
+                                </Button>
+                              </Space>
+                            )}
+                          </Form.List>
+                        </div>
                       </>
                     ),
                   },
