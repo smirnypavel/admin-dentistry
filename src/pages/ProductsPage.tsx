@@ -42,6 +42,29 @@ import {
 } from "../api/products";
 import { ZOO_ELASTIC_ENTRIES } from "../data/zooElastics";
 import { ElasticsPreview } from "../components/ElasticsPreview";
+
+// Presets so managers pick Size/Force from lists instead of typing oz/г/level.
+const ELASTIC_SIZE_OPTS: { v: string; mm: number }[] = [
+  { v: '1/8"', mm: 3.18 },
+  { v: '3/16"', mm: 4.76 },
+  { v: '1/4"', mm: 6.35 },
+  { v: '5/16"', mm: 7.94 },
+  { v: '3/8"', mm: 9.35 },
+  { v: '1/2"', mm: 12.7 },
+  { v: '5/8"', mm: 15.9 },
+  { v: '3/4"', mm: 19.1 },
+];
+const ELASTIC_FORCE_PRESETS: {
+  key: string; group: "intra" | "extra"; forceName: string; oz: string; g: string; level: number; label: string;
+}[] = [
+  { key: "i1", group: "intra", forceName: "Слабкі", oz: "2 oz", g: "60 г", level: 1, label: "Внутр · Слабкі (2 oz / 60 г)" },
+  { key: "i2", group: "intra", forceName: "Середні", oz: "3 oz", g: "85 г", level: 2, label: "Внутр · Середні (3 oz / 85 г)" },
+  { key: "i3", group: "intra", forceName: "Середньо-сильні", oz: "3.5 oz", g: "100 г", level: 3, label: "Внутр · Середньо-сильні (3.5 oz / 100 г)" },
+  { key: "i4", group: "intra", forceName: "Сильні", oz: "4.5 oz", g: "130 г", level: 4, label: "Внутр · Сильні (4.5 oz / 130 г)" },
+  { key: "i5", group: "intra", forceName: "Дуже сильні", oz: "6 oz", g: "170 г", level: 5, label: "Внутр · Дуже сильні (6 oz / 170 г)" },
+  { key: "e1", group: "extra", forceName: "Слабкі", oz: "8 oz", g: "230 г", level: 4, label: "Позарот · Слабкі (8 oz / 230 г)" },
+  { key: "e2", group: "extra", forceName: "Сильні", oz: "14 oz", g: "400 г", level: 5, label: "Позарот · Сильні (14 oz / 400 г)" },
+];
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
@@ -1530,7 +1553,7 @@ export function ProductsPage() {
                           showIcon
                           style={{ marginBottom: 16 }}
                           message="Як заповнювати таблицю еластиків"
-                          description="Кожен рядок нижче — це одна клітинка майбутньої таблиці: «Розмір + мм» стає рядком, «Сила (oz/г/рівень)» — стовпцем, а «Тварина + артикул» — вмістом клітинки. На сайті все автоматично збереться у таблицю розмір×сила з кнопками «Додати в кошик» (див. живий приклад унизу). Найпростіше: натисніть «Заповнити прикладом ZOO» — підставиться стандартна таблиця Ormco, яку можна підправити. Якщо рядків немає — таблиця на сайті не показується."
+                          description="У кожному рядку оберіть зі списків Розмір і Силу (мм, oz, г та рівень підставляться самі) і впишіть назву тварини та артикул. Один рядок = одна клітинка; на сайті все збереться у таблицю розмір×сила з кнопками «Додати в кошик» — див. живий приклад унизу. Найшвидше: натисніть «Заповнити прикладом ZOO» і підправте. Якщо рядків немає — таблиця на сайті не показується."
                         />
                         <Space style={{ marginBottom: 12 }} wrap>
                           <Button
@@ -1574,47 +1597,67 @@ export function ProductsPage() {
                         <div style={{ overflowX: "auto" }}>
                           <Form.List name="elasticsEntries">
                             {(fields, { add, remove }) => (
-                              <Space direction="vertical" style={{ width: "100%", minWidth: 980 }}>
-                                <div style={{ display: "grid", gridTemplateColumns: "120px 90px 70px 150px 70px 70px 70px minmax(140px,1fr) 120px 120px 40px", gap: 8, fontSize: 11, color: "#78716c", fontWeight: 600, paddingInline: 4 }}>
-                                  <span>Група</span>
+                              <Space direction="vertical" style={{ width: "100%", minWidth: 800 }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "170px 240px minmax(140px,1fr) 130px 150px 40px", gap: 8, fontSize: 11, color: "#78716c", fontWeight: 600, paddingInline: 4 }}>
                                   <span>Розмір</span>
-                                  <span>мм</span>
                                   <span>Сила</span>
-                                  <span>oz</span>
-                                  <span>г</span>
-                                  <span>Рівень</span>
                                   <span>Тварина</span>
                                   <span>Артикул</span>
-                                  <span>Кольор. арт</span>
+                                  <span>Кольор. артикул</span>
                                   <span />
                                 </div>
                                 {fields.map(({ key, name, ...rest }) => (
-                                  <div key={key} style={{ display: "grid", gridTemplateColumns: "120px 90px 70px 150px 70px 70px 70px minmax(140px,1fr) 120px 120px 40px", gap: 8, alignItems: "center" }}>
-                                    <Form.Item {...rest} name={[name, "group"]} noStyle>
-                                      <Select
-                                        options={[
-                                          { value: "intra", label: "Внутр." },
-                                          { value: "extra", label: "Позарот." },
-                                        ]}
-                                        placeholder="Група"
-                                      />
+                                  <div key={key} style={{ display: "grid", gridTemplateColumns: "170px 240px minmax(140px,1fr) 130px 150px 40px", gap: 8, alignItems: "center" }}>
+                                    <Form.Item noStyle shouldUpdate>
+                                      {() => {
+                                        const row = form.getFieldValue(["elasticsEntries", name]) || {};
+                                        return (
+                                          <Select
+                                            value={row.size || undefined}
+                                            placeholder="Розмір"
+                                            options={ELASTIC_SIZE_OPTS.map((s) => ({ value: s.v, label: `${s.v} (${s.mm} мм)` }))}
+                                            onChange={(v) => {
+                                              const s = ELASTIC_SIZE_OPTS.find((x) => x.v === v);
+                                              form.setFieldValue(["elasticsEntries", name, "size"], v);
+                                              form.setFieldValue(["elasticsEntries", name, "mm"], s ? s.mm : 0);
+                                            }}
+                                            style={{ width: "100%" }}
+                                          />
+                                        );
+                                      }}
                                     </Form.Item>
-                                    <Form.Item {...rest} name={[name, "size"]} noStyle><Input placeholder={'1/8"'} /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "mm"]} noStyle><InputNumber style={{ width: "100%" }} step={0.01} placeholder="мм" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "forceName"]} noStyle><Input placeholder="Слабкі" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "oz"]} noStyle><Input placeholder="2 oz" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "g"]} noStyle><Input placeholder="60 г" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "level"]} noStyle><InputNumber style={{ width: "100%" }} min={1} max={5} placeholder="1-5" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "animal"]} noStyle><Input placeholder="Колібрі" /></Form.Item>
+                                    <Form.Item noStyle shouldUpdate>
+                                      {() => {
+                                        const row = form.getFieldValue(["elasticsEntries", name]) || {};
+                                        const cur = ELASTIC_FORCE_PRESETS.find((p) => p.group === row.group && p.forceName === row.forceName);
+                                        return (
+                                          <Select
+                                            value={cur ? cur.key : undefined}
+                                            placeholder="Оберіть силу"
+                                            optionFilterProp="label"
+                                            showSearch
+                                            options={ELASTIC_FORCE_PRESETS.map((p) => ({ value: p.key, label: p.label }))}
+                                            onChange={(k) => {
+                                              const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === k);
+                                              if (!p) return;
+                                              form.setFieldValue(["elasticsEntries", name, "group"], p.group);
+                                              form.setFieldValue(["elasticsEntries", name, "forceName"], p.forceName);
+                                              form.setFieldValue(["elasticsEntries", name, "oz"], p.oz);
+                                              form.setFieldValue(["elasticsEntries", name, "g"], p.g);
+                                              form.setFieldValue(["elasticsEntries", name, "level"], p.level);
+                                            }}
+                                            style={{ width: "100%" }}
+                                          />
+                                        );
+                                      }}
+                                    </Form.Item>
+                                    <Form.Item {...rest} name={[name, "animal"]} noStyle><Input placeholder="Напр. Колібрі" /></Form.Item>
                                     <Form.Item {...rest} name={[name, "art"]} noStyle><Input placeholder="630-0010" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "colorArt"]} noStyle><Input placeholder="—" /></Form.Item>
+                                    <Form.Item {...rest} name={[name, "colorArt"]} noStyle><Input placeholder="необовʼязково" /></Form.Item>
                                     <Button danger type="text" icon={<DeleteOutlined />} onClick={() => remove(name)} />
                                   </div>
                                 ))}
-                                <Button
-                                  icon={<PlusOutlined />}
-                                  onClick={() => add({ group: "intra", size: "", mm: 0, forceName: "", oz: "", g: "", level: 1, animal: "", art: "" })}
-                                >
+                                <Button icon={<PlusOutlined />} onClick={() => add({})}>
                                   Додати рядок
                                 </Button>
                               </Space>
