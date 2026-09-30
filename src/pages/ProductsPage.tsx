@@ -65,6 +65,9 @@ const ELASTIC_FORCE_PRESETS: {
   { key: "e1", group: "extra", forceName: "Слабкі", oz: "8 oz", g: "230 г", level: 4, label: "Позарот · Слабкі (8 oz / 230 г)" },
   { key: "e2", group: "extra", forceName: "Сильні", oz: "14 oz", g: "400 г", level: 5, label: "Позарот · Сильні (14 oz / 400 г)" },
 ];
+// Кольори за рівнем сили (1..5): від м'якого зеленого до насиченого червоного
+const ELASTIC_LEVEL_COLORS = ["#a3a3a3", "#22c55e", "#84cc16", "#f59e0b", "#f97316", "#ef4444"];
+const elasticLevelColor = (lvl?: number) => ELASTIC_LEVEL_COLORS[Math.max(0, Math.min(5, Number(lvl) || 0))];
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
@@ -1596,72 +1599,108 @@ export function ProductsPage() {
                         </Space>
                         <div style={{ overflowX: "auto" }}>
                           <Form.List name="elasticsEntries">
-                            {(fields, { add, remove }) => (
-                              <Space direction="vertical" style={{ width: "100%", minWidth: 800 }}>
-                                <div style={{ display: "grid", gridTemplateColumns: "170px 240px minmax(140px,1fr) 130px 150px 40px", gap: 8, fontSize: 11, color: "#78716c", fontWeight: 600, paddingInline: 4 }}>
-                                  <span>Розмір</span>
-                                  <span>Сила</span>
-                                  <span>Тварина</span>
-                                  <span>Артикул</span>
-                                  <span>Кольор. артикул</span>
-                                  <span />
-                                </div>
-                                {fields.map(({ key, name, ...rest }) => (
-                                  <div key={key} style={{ display: "grid", gridTemplateColumns: "170px 240px minmax(140px,1fr) 130px 150px 40px", gap: 8, alignItems: "center" }}>
-                                    <Form.Item noStyle shouldUpdate>
-                                      {() => {
-                                        const row = form.getFieldValue(["elasticsEntries", name]) || {};
-                                        return (
-                                          <Select
-                                            value={row.size || undefined}
-                                            placeholder="Розмір"
-                                            options={ELASTIC_SIZE_OPTS.map((s) => ({ value: s.v, label: `${s.v} (${s.mm} мм)` }))}
-                                            onChange={(v) => {
-                                              const s = ELASTIC_SIZE_OPTS.find((x) => x.v === v);
-                                              form.setFieldValue(["elasticsEntries", name, "size"], v);
-                                              form.setFieldValue(["elasticsEntries", name, "mm"], s ? s.mm : 0);
-                                            }}
-                                            style={{ width: "100%" }}
-                                          />
-                                        );
-                                      }}
-                                    </Form.Item>
-                                    <Form.Item noStyle shouldUpdate>
-                                      {() => {
-                                        const row = form.getFieldValue(["elasticsEntries", name]) || {};
-                                        const cur = ELASTIC_FORCE_PRESETS.find((p) => p.group === row.group && p.forceName === row.forceName);
-                                        return (
-                                          <Select
-                                            value={cur ? cur.key : undefined}
-                                            placeholder="Оберіть силу"
-                                            optionFilterProp="label"
-                                            showSearch
-                                            options={ELASTIC_FORCE_PRESETS.map((p) => ({ value: p.key, label: p.label }))}
-                                            onChange={(k) => {
-                                              const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === k);
-                                              if (!p) return;
-                                              form.setFieldValue(["elasticsEntries", name, "group"], p.group);
-                                              form.setFieldValue(["elasticsEntries", name, "forceName"], p.forceName);
-                                              form.setFieldValue(["elasticsEntries", name, "oz"], p.oz);
-                                              form.setFieldValue(["elasticsEntries", name, "g"], p.g);
-                                              form.setFieldValue(["elasticsEntries", name, "level"], p.level);
-                                            }}
-                                            style={{ width: "100%" }}
-                                          />
-                                        );
-                                      }}
-                                    </Form.Item>
-                                    <Form.Item {...rest} name={[name, "animal"]} noStyle><Input placeholder="Напр. Колібрі" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "art"]} noStyle><Input placeholder="630-0010" /></Form.Item>
-                                    <Form.Item {...rest} name={[name, "colorArt"]} noStyle><Input placeholder="необовʼязково" /></Form.Item>
-                                    <Button danger type="text" icon={<DeleteOutlined />} onClick={() => remove(name)} />
+                            {(fields, { add, remove }) => {
+                              const GRID = "220px 260px minmax(140px,1fr) 130px 150px 40px";
+                              let prevSize = " ";
+                              return (
+                                <div style={{ width: "100%", minWidth: 820 }}>
+                                  <div style={{ display: "grid", gridTemplateColumns: GRID, gap: 10, fontSize: 11, color: "#78716c", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4, padding: "0 12px 8px", borderBottom: "1px solid #ececeb", marginBottom: 6 }}>
+                                    <span>🎯 Розмір</span>
+                                    <span>💪 Сила тяги</span>
+                                    <span>🐾 Тварина</span>
+                                    <span>Артикул</span>
+                                    <span>Кольор. артикул</span>
+                                    <span />
                                   </div>
-                                ))}
-                                <Button icon={<PlusOutlined />} onClick={() => add({})}>
-                                  Додати рядок
-                                </Button>
-                              </Space>
-                            )}
+                                  {fields.map(({ key, name, ...rest }, idx) => {
+                                    const size = (form.getFieldValue(["elasticsEntries", name, "size"]) as string) || "";
+                                    const mm = form.getFieldValue(["elasticsEntries", name, "mm"]) as number | undefined;
+                                    const showHeader = size !== prevSize;
+                                    prevSize = size;
+                                    const dia = Math.max(10, Math.min(26, Math.round((Number(mm) || 3) * 1.15)));
+                                    return (
+                                      <div key={key}>
+                                        {showHeader && (
+                                          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: idx === 0 ? "2px 4px 6px" : "16px 4px 6px" }}>
+                                            <span style={{ width: dia, height: dia, borderRadius: "50%", border: "2.5px solid #0ea5e9", background: "#e0f2fe", flex: "0 0 auto" }} />
+                                            <span style={{ fontWeight: 700, fontSize: 15, color: "#1c1917" }}>{size || "Оберіть розмір нижче"}</span>
+                                            {mm ? <span style={{ color: "#78716c", fontSize: 12 }}>· ⌀ {mm} мм</span> : null}
+                                            <span style={{ flex: 1, height: 1, background: "#f0efee" }} />
+                                          </div>
+                                        )}
+                                        <div style={{ display: "grid", gridTemplateColumns: GRID, gap: 10, alignItems: "center", background: idx % 2 ? "#fafaf9" : "#fff", border: "1px solid #eeedec", borderRadius: 10, padding: "8px 12px", marginBottom: 6 }}>
+                                          <Form.Item noStyle shouldUpdate>
+                                            {() => {
+                                              const row = form.getFieldValue(["elasticsEntries", name]) || {};
+                                              return (
+                                                <Select
+                                                  value={row.size || undefined}
+                                                  placeholder="Розмір"
+                                                  options={ELASTIC_SIZE_OPTS.map((s) => ({ value: s.v, label: `${s.v} · ${s.mm} мм` }))}
+                                                  onChange={(v) => {
+                                                    const s = ELASTIC_SIZE_OPTS.find((x) => x.v === v);
+                                                    form.setFieldValue(["elasticsEntries", name, "size"], v);
+                                                    form.setFieldValue(["elasticsEntries", name, "mm"], s ? s.mm : 0);
+                                                  }}
+                                                  style={{ width: "100%" }}
+                                                />
+                                              );
+                                            }}
+                                          </Form.Item>
+                                          <Form.Item noStyle shouldUpdate>
+                                            {() => {
+                                              const row = form.getFieldValue(["elasticsEntries", name]) || {};
+                                              const cur = ELASTIC_FORCE_PRESETS.find((p) => p.group === row.group && p.forceName === row.forceName);
+                                              return (
+                                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                  <span title="Рівень сили" style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: elasticLevelColor(cur?.level), boxShadow: cur ? `0 0 0 3px ${elasticLevelColor(cur.level)}22` : "none" }} />
+                                                  <Select
+                                                    value={cur ? cur.key : undefined}
+                                                    placeholder="Оберіть силу"
+                                                    optionFilterProp="label"
+                                                    showSearch
+                                                    options={ELASTIC_FORCE_PRESETS.map((p) => ({
+                                                      value: p.key,
+                                                      label: (
+                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                                                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(p.level) }} />
+                                                          {p.label}
+                                                        </span>
+                                                      ),
+                                                    }))}
+                                                    filterOption={(input, opt) => {
+                                                      const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === opt?.value);
+                                                      return !!p && p.label.toLowerCase().includes(input.toLowerCase());
+                                                    }}
+                                                    onChange={(k) => {
+                                                      const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === k);
+                                                      if (!p) return;
+                                                      form.setFieldValue(["elasticsEntries", name, "group"], p.group);
+                                                      form.setFieldValue(["elasticsEntries", name, "forceName"], p.forceName);
+                                                      form.setFieldValue(["elasticsEntries", name, "oz"], p.oz);
+                                                      form.setFieldValue(["elasticsEntries", name, "g"], p.g);
+                                                      form.setFieldValue(["elasticsEntries", name, "level"], p.level);
+                                                    }}
+                                                    style={{ flex: 1 }}
+                                                  />
+                                                </div>
+                                              );
+                                            }}
+                                          </Form.Item>
+                                          <Form.Item {...rest} name={[name, "animal"]} noStyle><Input placeholder="Напр. Колібрі" /></Form.Item>
+                                          <Form.Item {...rest} name={[name, "art"]} noStyle><Input placeholder="630-0010" /></Form.Item>
+                                          <Form.Item {...rest} name={[name, "colorArt"]} noStyle><Input placeholder="необовʼязково" /></Form.Item>
+                                          <Button danger type="text" icon={<DeleteOutlined />} onClick={() => remove(name)} />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                  <Button icon={<PlusOutlined />} onClick={() => add({})} block style={{ marginTop: 4, borderStyle: "dashed" }}>
+                                    Додати рядок
+                                  </Button>
+                                </div>
+                              );
+                            }}
                           </Form.List>
                         </div>
                         <ElasticsPreview />
