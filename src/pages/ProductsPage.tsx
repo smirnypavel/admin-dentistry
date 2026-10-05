@@ -289,7 +289,11 @@ export function ProductsPage() {
     setLoading(true);
     try {
       const baseParams = {
-        q: q || undefined,
+        // Substring/partial search (regex) across title/slug/sku/description.
+        // NB: `q` on the backend is a MongoDB $text search — whole-word only,
+        // so partial queries like "еласт" returned nothing. qLike matches
+        // substrings and is what managers expect from the search box.
+        qLike: q || undefined,
         sort: sort || undefined,
         page,
         limit,
