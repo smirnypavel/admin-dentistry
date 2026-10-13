@@ -1674,23 +1674,35 @@ export function ProductsPage() {
                                           <Form.Item noStyle shouldUpdate>
                                             {() => {
                                               const row = form.getFieldValue(["elasticsEntries", name]) || {};
-                                              // Full match (name + oz + г + level), not just name — so a custom force
-    // that happens to reuse a preset name (e.g. "Слабкі" with 2.5 oz) is kept
-    // as custom and its real values persist on reopen, instead of snapping
-    // back to the preset's values.
-    const cur = ELASTIC_FORCE_PRESETS.find(
-      (p) =>
-        p.group === row.group &&
-        p.forceName === row.forceName &&
-        p.oz === row.oz &&
-        p.g === row.g &&
-        p.level === row.level,
-    );
-                                              const inferredCustom = !cur && !!(row.forceName || row.oz || row.g || row.level != null);
-                                              const isCustom = row.__customForce === true || (row.__customForce !== false && inferredCustom);
                                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const setF = (field: string, val: unknown) => form.setFieldValue(["elasticsEntries", name, field] as any, val);
-                                              if (isCustom) {
+                                              const matchesPreset = (e: any) =>
+                                                ELASTIC_FORCE_PRESETS.find(
+                                                  (p) => p.group === e.group && p.forceName === e.forceName && p.oz === e.oz && p.g === e.g && p.level === e.level,
+                                                );
+                                              const cur = matchesPreset(row);
+                                              // Reusable custom forces gathered from this table (non-preset, named), deduped — selectable on any row.
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              const allEntries = (form.getFieldValue("elasticsEntries") as any[]) || [];
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              const cfKey = (e: any) => "cf:" + (e.group === "extra" ? "extra" : "intra") + "|" + (e.forceName || "") + "|" + (e.oz || "") + "|" + (e.g || "") + "|" + (e.level ?? "");
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              const customForces: any[] = [];
+                                              const seenCF = new Set<string>();
+                                              for (const e of allEntries) {
+                                                if (!e || matchesPreset(e) || !e.forceName) continue;
+                                                const k = cfKey(e);
+                                                if (seenCF.has(k)) continue;
+                                                seenCF.add(k);
+                                                customForces.push({ key: k, group: e.group === "extra" ? "extra" : "intra", forceName: e.forceName || "", oz: e.oz || "", g: e.g || "", level: e.level });
+                                              }
+                                              const curCustom = !cur ? customForces.find((c) => c.key === cfKey(row)) : undefined;
+                                              const hasForceData = !!(row.forceName || row.oz || row.g || row.level != null);
+                                              const isCustomEdit = row.__customForce === true || (row.__customForce !== false && !cur && !curCustom && hasForceData);
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              const setF = (field: string, val: unknown) => form.setFieldValue(["elasticsEntries", name, field] as any, val);
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              const applyForce = (fc: any) => { setF("group", fc.group); setF("forceName", fc.forceName); setF("oz", fc.oz); setF("g", fc.g); setF("level", fc.level); setF("__customForce", false); };
+                                              if (isCustomEdit) {
                                                 return (
                                                   <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
                                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1714,45 +1726,54 @@ export function ProductsPage() {
                                                   </div>
                                                 );
                                               }
+                                              const selectedValue = cur ? cur.key : (curCustom ? curCustom.key : undefined);
+                                              const dotColor = cur ? elasticLevelColor(cur.level) : (curCustom ? elasticLevelColor(Number(curCustom.level) || 0) : "#e7e5e4");
+                                              const presetOptions = ELASTIC_FORCE_PRESETS.map((p) => ({
+                                                value: p.key,
+                                                label: (
+                                                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(p.level) }} />
+                                                    {p.label}
+                                                  </span>
+                                                ),
+                                              }));
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              const customOptions = customForces.map((c: any) => ({
+                                                value: c.key,
+                                                label: (
+                                                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(Number(c.level) || 0) }} />
+                                                    {(c.group === "extra" ? "Позарот" : "Внутр") + " · " + c.forceName + " (" + c.oz + " / " + c.g + ")"}
+                                                    <span style={{ color: "#0ea5e9", fontSize: 11 }}>своя</span>
+                                                  </span>
+                                                ),
+                                              }));
+                                              const forceOptions = [
+                                                ...presetOptions,
+                                                ...(customOptions.length ? [{ label: "Власні сили", options: customOptions }] : []),
+                                                { value: "__custom__", label: (<span style={{ color: "#0ea5e9", fontWeight: 600 }}>✏️ Своя сила…</span>) },
+                                              ];
                                               return (
                                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                                  <span title="Рівень сили" style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: elasticLevelColor(cur?.level), boxShadow: cur ? `0 0 0 3px ${elasticLevelColor(cur.level)}22` : "none" }} />
+                                                  <span title="Рівень сили" style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: dotColor, boxShadow: (cur || curCustom) ? ("0 0 0 3px " + dotColor + "22") : "none" }} />
                                                   <Select
-                                                    value={cur ? cur.key : undefined}
+                                                    value={selectedValue}
                                                     placeholder="Оберіть силу"
                                                     optionFilterProp="label"
                                                     showSearch
-                                                    options={[
-                                                      ...ELASTIC_FORCE_PRESETS.map((p) => ({
-                                                        value: p.key,
-                                                        label: (
-                                                          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                                                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(p.level) }} />
-                                                            {p.label}
-                                                          </span>
-                                                        ),
-                                                      })),
-                                                      { value: "__custom__", label: (<span style={{ color: "#0ea5e9", fontWeight: 600 }}>✏️ Своя сила…</span>) },
-                                                    ]}
+                                                    options={forceOptions}
                                                     filterOption={(input, opt) => {
-                                                      if (opt?.value === "__custom__") return true;
-                                                      const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === opt?.value);
+                                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                      const v = String((opt as any)?.value ?? "");
+                                                      if (!v || v === "__custom__") return true;
+                                                      if (v.startsWith("cf:")) return v.toLowerCase().includes(input.toLowerCase());
+                                                      const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === v);
                                                       return !!p && p.label.toLowerCase().includes(input.toLowerCase());
                                                     }}
                                                     onChange={(k) => {
-                                                      if (k === "__custom__") {
-                                                        setF("__customForce", true);
-                                                        if (!row.group) setF("group", "intra");
-                                                        return;
-                                                      }
-                                                      const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === k);
-                                                      if (!p) return;
-                                                      setF("group", p.group);
-                                                      setF("forceName", p.forceName);
-                                                      setF("oz", p.oz);
-                                                      setF("g", p.g);
-                                                      setF("level", p.level);
-                                                      setF("__customForce", false);
+                                                      if (k === "__custom__") { setF("__customForce", true); if (!row.group) setF("group", "intra"); return; }
+                                                      if (typeof k === "string" && k.startsWith("cf:")) { const fc = customForces.find((c) => c.key === k); if (fc) applyForce(fc); return; }
+                                                      const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === k); if (!p) return; applyForce(p);
                                                     }}
                                                     style={{ flex: 1 }}
                                                   />
