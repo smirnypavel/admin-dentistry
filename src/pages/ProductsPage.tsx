@@ -1561,7 +1561,7 @@ export function ProductsPage() {
                           showIcon
                           style={{ marginBottom: 16 }}
                           message="Як заповнювати таблицю еластиків"
-                          description="У кожному рядку оберіть Розмір зі списку або впишіть свій (тоді вкажіть мм вручну — воно потрібне для сортування на сайті), оберіть Силу (oz, г та рівень підставляться самі) і впишіть назву тварини та артикул. Один рядок = одна клітинка; на сайті все збереться у таблицю розмір×сила з кнопками «Додати в кошик» — див. живий приклад унизу. Найшвидше: натисніть «Заповнити прикладом ZOO» і підправте. Якщо рядків немає — таблиця на сайті не показується."
+                          description="У кожному рядку оберіть Розмір зі списку або впишіть свій (тоді вкажіть мм вручну — воно потрібне для сортування на сайті), оберіть Силу зі списку (oz, г та рівень підставляться самі) або «✏️ Своя сила…», щоб вписати власну і впишіть назву тварини та артикул. Один рядок = одна клітинка; на сайті все збереться у таблицю розмір×сила з кнопками «Додати в кошик» — див. живий приклад унизу. Найшвидше: натисніть «Заповнити прикладом ZOO» і підправте. Якщо рядків немає — таблиця на сайті не показується."
                         />
                         <Space style={{ marginBottom: 12 }} wrap>
                           <Button
@@ -1675,6 +1675,34 @@ export function ProductsPage() {
                                             {() => {
                                               const row = form.getFieldValue(["elasticsEntries", name]) || {};
                                               const cur = ELASTIC_FORCE_PRESETS.find((p) => p.group === row.group && p.forceName === row.forceName);
+                                              const inferredCustom = !cur && !!(row.forceName || row.oz || row.g || row.level != null);
+                                              const isCustom = row.__customForce === true || (row.__customForce !== false && inferredCustom);
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const setF = (field: string, val: unknown) => form.setFieldValue(["elasticsEntries", name, field] as any, val);
+                                              if (isCustom) {
+                                                return (
+                                                  <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                                      <span style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: elasticLevelColor(Number(row.level) || 0) }} />
+                                                      <Select
+                                                        value={row.group === "extra" ? "extra" : "intra"}
+                                                        options={[{ value: "intra", label: "Внутр." }, { value: "extra", label: "Позарот." }]}
+                                                        onChange={(v) => setF("group", v)}
+                                                        style={{ width: 118 }}
+                                                      />
+                                                      <Button size="small" type="link" style={{ padding: 0, height: "auto" }} onClick={() => { setF("__customForce", false); setF("forceName", ""); setF("oz", ""); setF("g", ""); setF("level", undefined); }}>
+                                                        ← пресети
+                                                      </Button>
+                                                    </div>
+                                                    <Input placeholder="Назва сили (напр. Екстра)" value={row.forceName || ""} onChange={(e) => setF("forceName", e.target.value)} />
+                                                    <div style={{ display: "flex", gap: 6 }}>
+                                                      <Input placeholder="oz" value={row.oz || ""} onChange={(e) => setF("oz", e.target.value)} style={{ width: 66 }} />
+                                                      <Input placeholder="г" value={row.g || ""} onChange={(e) => setF("g", e.target.value)} style={{ width: 66 }} />
+                                                      <InputNumber placeholder="рів. 1-5" value={row.level} min={1} max={5} onChange={(v) => setF("level", v ?? undefined)} style={{ width: 92 }} />
+                                                    </div>
+                                                  </div>
+                                                );
+                                              }
                                               return (
                                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                                   <span title="Рівень сили" style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: elasticLevelColor(cur?.level), boxShadow: cur ? `0 0 0 3px ${elasticLevelColor(cur.level)}22` : "none" }} />
@@ -1683,27 +1711,37 @@ export function ProductsPage() {
                                                     placeholder="Оберіть силу"
                                                     optionFilterProp="label"
                                                     showSearch
-                                                    options={ELASTIC_FORCE_PRESETS.map((p) => ({
-                                                      value: p.key,
-                                                      label: (
-                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                                                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(p.level) }} />
-                                                          {p.label}
-                                                        </span>
-                                                      ),
-                                                    }))}
+                                                    options={[
+                                                      ...ELASTIC_FORCE_PRESETS.map((p) => ({
+                                                        value: p.key,
+                                                        label: (
+                                                          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                                                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(p.level) }} />
+                                                            {p.label}
+                                                          </span>
+                                                        ),
+                                                      })),
+                                                      { value: "__custom__", label: (<span style={{ color: "#0ea5e9", fontWeight: 600 }}>✏️ Своя сила…</span>) },
+                                                    ]}
                                                     filterOption={(input, opt) => {
+                                                      if (opt?.value === "__custom__") return true;
                                                       const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === opt?.value);
                                                       return !!p && p.label.toLowerCase().includes(input.toLowerCase());
                                                     }}
                                                     onChange={(k) => {
+                                                      if (k === "__custom__") {
+                                                        setF("__customForce", true);
+                                                        if (!row.group) setF("group", "intra");
+                                                        return;
+                                                      }
                                                       const p = ELASTIC_FORCE_PRESETS.find((x) => x.key === k);
                                                       if (!p) return;
-                                                      form.setFieldValue(["elasticsEntries", name, "group"], p.group);
-                                                      form.setFieldValue(["elasticsEntries", name, "forceName"], p.forceName);
-                                                      form.setFieldValue(["elasticsEntries", name, "oz"], p.oz);
-                                                      form.setFieldValue(["elasticsEntries", name, "g"], p.g);
-                                                      form.setFieldValue(["elasticsEntries", name, "level"], p.level);
+                                                      setF("group", p.group);
+                                                      setF("forceName", p.forceName);
+                                                      setF("oz", p.oz);
+                                                      setF("g", p.g);
+                                                      setF("level", p.level);
+                                                      setF("__customForce", false);
                                                     }}
                                                     style={{ flex: 1 }}
                                                   />
