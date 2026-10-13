@@ -1674,7 +1674,18 @@ export function ProductsPage() {
                                           <Form.Item noStyle shouldUpdate>
                                             {() => {
                                               const row = form.getFieldValue(["elasticsEntries", name]) || {};
-                                              const cur = ELASTIC_FORCE_PRESETS.find((p) => p.group === row.group && p.forceName === row.forceName);
+                                              // Full match (name + oz + г + level), not just name — so a custom force
+    // that happens to reuse a preset name (e.g. "Слабкі" with 2.5 oz) is kept
+    // as custom and its real values persist on reopen, instead of snapping
+    // back to the preset's values.
+    const cur = ELASTIC_FORCE_PRESETS.find(
+      (p) =>
+        p.group === row.group &&
+        p.forceName === row.forceName &&
+        p.oz === row.oz &&
+        p.g === row.g &&
+        p.level === row.level,
+    );
                                               const inferredCustom = !cur && !!(row.forceName || row.oz || row.g || row.level != null);
                                               const isCustom = row.__customForce === true || (row.__customForce !== false && inferredCustom);
                                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
