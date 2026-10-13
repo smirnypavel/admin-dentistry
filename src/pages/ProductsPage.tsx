@@ -3,6 +3,7 @@ import { AdminLayout } from "../components/AdminLayout";
 import {
   App as AntApp,
   Alert,
+  AutoComplete,
   Button,
   Drawer,
   Form,
@@ -1560,7 +1561,7 @@ export function ProductsPage() {
                           showIcon
                           style={{ marginBottom: 16 }}
                           message="Як заповнювати таблицю еластиків"
-                          description="У кожному рядку оберіть зі списків Розмір і Силу (мм, oz, г та рівень підставляться самі) і впишіть назву тварини та артикул. Один рядок = одна клітинка; на сайті все збереться у таблицю розмір×сила з кнопками «Додати в кошик» — див. живий приклад унизу. Найшвидше: натисніть «Заповнити прикладом ZOO» і підправте. Якщо рядків немає — таблиця на сайті не показується."
+                          description="У кожному рядку оберіть Розмір зі списку або впишіть свій (тоді вкажіть мм вручну — воно потрібне для сортування на сайті), оберіть Силу (oz, г та рівень підставляться самі) і впишіть назву тварини та артикул. Один рядок = одна клітинка; на сайті все збереться у таблицю розмір×сила з кнопками «Додати в кошик» — див. живий приклад унизу. Найшвидше: натисніть «Заповнити прикладом ZOO» і підправте. Якщо рядків немає — таблиця на сайті не показується."
                         />
                         <Space style={{ marginBottom: 12 }} wrap>
                           <Button
@@ -1604,12 +1605,13 @@ export function ProductsPage() {
                         <div style={{ overflowX: "auto" }}>
                           <Form.List name="elasticsEntries">
                             {(fields, { add, remove }) => {
-                              const GRID = "220px 260px minmax(140px,1fr) 130px 150px 40px";
+                              const GRID = "180px 90px 240px minmax(130px,1fr) 120px 140px 40px";
                               let prevSize = " ";
                               return (
-                                <div style={{ width: "100%", minWidth: 820 }}>
+                                <div style={{ width: "100%", minWidth: 900 }}>
                                   <div style={{ display: "grid", gridTemplateColumns: GRID, gap: 10, fontSize: 11, color: "#78716c", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4, padding: "0 12px 8px", borderBottom: "1px solid #ececeb", marginBottom: 6 }}>
                                     <span>🎯 Розмір</span>
+                                    <span>⌀ мм</span>
                                     <span>💪 Сила тяги</span>
                                     <span>🐾 Тварина</span>
                                     <span>Артикул</span>
@@ -1637,19 +1639,37 @@ export function ProductsPage() {
                                             {() => {
                                               const row = form.getFieldValue(["elasticsEntries", name]) || {};
                                               return (
-                                                <Select
+                                                <AutoComplete
                                                   value={row.size || undefined}
-                                                  placeholder="Розмір"
+                                                  placeholder={'напр. 1/4" або свій'}
                                                   options={ELASTIC_SIZE_OPTS.map((s) => ({ value: s.v, label: `${s.v} · ${s.mm} мм` }))}
+                                                  filterOption={(input, opt) =>
+                                                    String(opt?.value ?? "").toLowerCase().includes(input.toLowerCase())
+                                                  }
                                                   onChange={(v) => {
+                                                    form.setFieldValue(["elasticsEntries", name, "size"], v ?? "");
+                                                  }}
+                                                  onSelect={(v) => {
                                                     const s = ELASTIC_SIZE_OPTS.find((x) => x.v === v);
                                                     form.setFieldValue(["elasticsEntries", name, "size"], v);
-                                                    form.setFieldValue(["elasticsEntries", name, "mm"], s ? s.mm : 0);
+                                                    if (s) form.setFieldValue(["elasticsEntries", name, "mm"], s.mm);
                                                   }}
                                                   style={{ width: "100%" }}
                                                 />
                                               );
                                             }}
+                                          </Form.Item>
+                                          <Form.Item noStyle shouldUpdate>
+                                            {() => (
+                                              <InputNumber
+                                                value={form.getFieldValue(["elasticsEntries", name, "mm"]) as number | undefined}
+                                                placeholder="мм"
+                                                min={0}
+                                                step={0.1}
+                                                onChange={(v) => form.setFieldValue(["elasticsEntries", name, "mm"], v ?? 0)}
+                                                style={{ width: "100%" }}
+                                              />
+                                            )}
                                           </Form.Item>
                                           <Form.Item noStyle shouldUpdate>
                                             {() => {
