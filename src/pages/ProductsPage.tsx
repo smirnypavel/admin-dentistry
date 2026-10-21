@@ -1806,11 +1806,19 @@ export function ProductsPage() {
                                                       <Button size="small" type="link" style={{ padding: 0, height: "auto" }} onClick={() => { setF("__customForce", false); setF("forceName", ""); setF("oz", ""); setF("g", ""); setF("level", undefined); }}>
                                                         ← пресети
                                                       </Button>
+                                                    </div>
+                                                    <Input placeholder="Назва сили (напр. Екстра)" value={row.forceName || ""} onChange={(e) => setF("forceName", e.target.value)} />
+                                                    <div style={{ display: "flex", gap: 6 }}>
+                                                      <Input placeholder="oz" value={row.oz || ""} onChange={(e) => setF("oz", e.target.value)} style={{ width: 66 }} />
+                                                      <Input placeholder="г" value={row.g || ""} onChange={(e) => setF("g", e.target.value)} style={{ width: 66 }} />
+                                                      <InputNumber placeholder="рів. 1-5" value={row.level} min={1} max={5} onChange={(v) => setF("level", v ?? undefined)} style={{ width: 92 }} />
+                                                    </div>
+                                                    <Tooltip title="Зберегти цю силу в список «Власні сили» — щоб потім обирати її на будь-якому товарі, не вписуючи знову">
                                                       <Button
                                                         size="small"
-                                                        type="link"
+                                                        block
                                                         loading={savingForces}
-                                                        style={{ padding: 0, height: "auto" }}
+                                                        style={{ marginTop: 4 }}
                                                         onClick={async () => {
                                                           const norm = (v: unknown) => String(v ?? "").trim().replace(/,/g, ".");
                                                           const fn = norm(row.forceName);
@@ -1819,20 +1827,14 @@ export function ProductsPage() {
                                                           const keyOf = (x: GlobalForce) => `${x.group}|${x.forceName}|${x.oz}|${x.g}`;
                                                           if (globalForces.some((x) => keyOf(x) === keyOf(f))) { message.info("Цю силу вже збережено"); return; }
                                                           const merged = [...globalForces, f];
-                                                          try { setSavingForces(true); await saveGlobalElasticForces(merged); setGlobalForces(merged); message.success(`Силу «${fn}» збережено — доступна на всіх товарах`); }
+                                                          try { setSavingForces(true); await saveGlobalElasticForces(merged); setGlobalForces(merged); message.success(`Силу «${fn}» збережено — тепер доступна на всіх товарах`); }
                                                           catch { message.error("Не вдалося зберегти силу"); }
                                                           finally { setSavingForces(false); }
                                                         }}
                                                       >
-                                                        💾 Зберегти
+                                                        💾 Зберегти цю силу
                                                       </Button>
-                                                    </div>
-                                                    <Input placeholder="Назва сили (напр. Екстра)" value={row.forceName || ""} onChange={(e) => setF("forceName", e.target.value)} />
-                                                    <div style={{ display: "flex", gap: 6 }}>
-                                                      <Input placeholder="oz" value={row.oz || ""} onChange={(e) => setF("oz", e.target.value)} style={{ width: 66 }} />
-                                                      <Input placeholder="г" value={row.g || ""} onChange={(e) => setF("g", e.target.value)} style={{ width: 66 }} />
-                                                      <InputNumber placeholder="рів. 1-5" value={row.level} min={1} max={5} onChange={(v) => setF("level", v ?? undefined)} style={{ width: 92 }} />
-                                                    </div>
+                                                    </Tooltip>
                                                   </div>
                                                 );
                                               }
