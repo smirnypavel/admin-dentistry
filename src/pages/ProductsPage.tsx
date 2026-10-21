@@ -69,6 +69,22 @@ const ELASTIC_FORCE_PRESETS: {
 // Кольори за рівнем сили (1..5): від м'якого зеленого до насиченого червоного
 const ELASTIC_LEVEL_COLORS = ["#a3a3a3", "#22c55e", "#84cc16", "#f59e0b", "#f97316", "#ef4444"];
 const elasticLevelColor = (lvl?: number) => ELASTIC_LEVEL_COLORS[Math.max(0, Math.min(5, Number(lvl) || 0))];
+// Числові грами з поля "г" ("170 г" → 170).
+const parseGrams = (g?: unknown) => {
+  const n = parseFloat(String(g ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+};
+// Сила 1..5 з реальних грамів — щоб колір був правильний навіть для власних сил,
+// де збережений level може бути хибним.
+const gramsToLevel = (g?: unknown, fallback = 1) => {
+  const n = parseGrams(g);
+  if (!n) return Math.min(5, Math.max(1, Number(fallback) || 1));
+  if (n <= 70) return 1;
+  if (n <= 90) return 2;
+  if (n <= 115) return 3;
+  if (n <= 150) return 4;
+  return 5;
+};
 import dayjs from "dayjs";
 import { ImageUploader } from "../components/ImageUploader";
 import { MediaPicker } from "../components/MediaPicker";
@@ -706,9 +722,11 @@ export function ProductsPage() {
         size: (e.size || "").trim(),
         mm: Number(e.mm) || 0,
         forceName: (e.forceName || "").trim(),
-        oz: (e.oz || "").trim(),
-        g: (e.g || "").trim(),
-        level: Math.min(5, Math.max(1, Number(e.level) || 1)),
+        oz: (e.oz || "").trim().replace(/,/g, "."),
+        g: (e.g || "").trim().replace(/,/g, "."),
+        // Normalise strength from the real force (grams) so colour/order are
+        // always correct regardless of a stale manually-entered level.
+        level: gramsToLevel(e.g, e.level),
         animal: (e.animal || "").trim(),
         art: (e.art || "").trim(),
         ...((e.colorArt || "").trim() ? { colorArt: (e.colorArt || "").trim() } : {}),
@@ -1706,7 +1724,7 @@ export function ProductsPage() {
                                                 return (
                                                   <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
                                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                      <span style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: elasticLevelColor(Number(row.level) || 0) }} />
+                                                      <span style={{ width: 10, height: 10, borderRadius: "50%", flex: "0 0 auto", background: elasticLevelColor(gramsToLevel(row.g, row.level)) }} />
                                                       <Select
                                                         value={row.group === "extra" ? "extra" : "intra"}
                                                         options={[{ value: "intra", label: "Внутр." }, { value: "extra", label: "Позарот." }]}
@@ -1727,7 +1745,7 @@ export function ProductsPage() {
                                                 );
                                               }
                                               const selectedValue = cur ? cur.key : (curCustom ? curCustom.key : undefined);
-                                              const dotColor = cur ? elasticLevelColor(cur.level) : (curCustom ? elasticLevelColor(Number(curCustom.level) || 0) : "#e7e5e4");
+                                              const dotColor = (cur || curCustom) ? elasticLevelColor(gramsToLevel(row.g, cur?.level ?? curCustom?.level)) : "#e7e5e4";
                                               const presetOptions = ELASTIC_FORCE_PRESETS.map((p) => ({
                                                 value: p.key,
                                                 label: (
@@ -1742,7 +1760,7 @@ export function ProductsPage() {
                                                 value: c.key,
                                                 label: (
                                                   <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(Number(c.level) || 0) }} />
+                                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: elasticLevelColor(gramsToLevel(c.g, c.level)) }} />
                                                     {(c.group === "extra" ? "Позарот" : "Внутр") + " · " + c.forceName + " (" + c.oz + " / " + c.g + ")"}
                                                     <span style={{ color: "#0ea5e9", fontSize: 11 }}>своя</span>
                                                   </span>

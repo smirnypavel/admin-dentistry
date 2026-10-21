@@ -13,6 +13,12 @@ type Entry = {
   colorArt?: string;
 };
 
+/** Numeric grams from a force's "г" value ("170 г" → 170). */
+function parseGrams(g: unknown): number {
+  const n = parseFloat(String(g ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
 /** Live pivoted preview of the elastics matrix (rows = size, cols = force),
  *  exactly how the storefront groups the flat rows. Read-only. */
 export function ElasticsPreview() {
@@ -69,10 +75,11 @@ export function ElasticsPreview() {
                 oz: e.oz || "",
                 g: e.g || "",
                 level: Number(e.level) || 1,
+                grams: parseGrams(e.g),
               },
             ]),
           ).values(),
-        ].sort((a, b) => a.level - b.level);
+        ].sort((a, b) => a.grams - b.grams || a.level - b.level);
         const cell: Record<string, Record<string, Entry>> = {};
         ge.forEach((e) => {
           (cell[e.size!] ||= {})[e.forceName || ""] = e;
