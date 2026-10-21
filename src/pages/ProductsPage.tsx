@@ -43,6 +43,11 @@ import {
 } from "../api/products";
 import { ZOO_ELASTIC_ENTRIES } from "../data/zooElastics";
 import { ElasticsPreview } from "../components/ElasticsPreview";
+import {
+  getGlobalElasticForces,
+  saveGlobalElasticForces,
+  type GlobalForce,
+} from "../api/elasticForces";
 
 // Presets so managers pick Size/Force from lists instead of typing oz/г/level.
 const ELASTIC_SIZE_OPTS: { v: string; mm: number }[] = [
@@ -236,6 +241,10 @@ export function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [tableSources, setTableSources] = useState<Product[]>([]);
+  // Globally saved "own" forces, reusable across all products (loaded in the
+  // background, saved with a single async request — no page reload).
+  const [globalForces, setGlobalForces] = useState<GlobalForce[]>([]);
+  const [savingForces, setSavingForces] = useState(false);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -406,6 +415,15 @@ export function ProductsPage() {
   useEffect(() => {
     void loadRefs();
   }, [loadRefs]);
+
+  // Globally saved "own" forces — loaded once in the background.
+  useEffect(() => {
+    let alive = true;
+    getGlobalElasticForces()
+      .then((fs) => { if (alive) setGlobalForces(fs); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   const onEdit = useCallback(
     (r: Product) => {
@@ -1619,6 +1637,59 @@ export function ProductsPage() {
                           <Button danger onClick={() => form.setFieldValue("elasticsEntries", [])}>
                             Очистити
                           </Button>
+                          <Tooltip title="Зберегти всі власні сили з цієї таблиці глобально — вони зʼявляться у випадайці «Сила» на всіх товарах">
+                            <Button
+                              loading={savingForces}
+                              onClick={async () => {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                const entries = ((form.getFieldValue("elasticsEntries") as any[]) || []);
+                                const norm = (v?: unknown) => String(v ?? "").trim().replace(/,/g, ".");
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                const isPreset = (e: any) =>
+                                  ELASTIC_FORCE_PRESETS.some(
+                                    (p) =>
+                                      p.group === (e.group === "extra" ? "extra" : "intra") &&
+                                      p.forceName === norm(e.forceName) &&
+                                      p.oz === norm(e.oz) &&
+                                      p.g === norm(e.g),
+                                  );
+                                const keyOf = (f: GlobalForce) => `${f.group}|${f.forceName}|${f.oz}|${f.g}`;
+                                const merged: GlobalForce[] = [...globalForces];
+                                const seen = new Set(merged.map(keyOf));
+                                let added = 0;
+                                for (const e of entries) {
+                                  if (!e || !norm(e.forceName) || isPreset(e)) continue;
+                                  const f: GlobalForce = {
+                                    group: e.group === "extra" ? "extra" : "intra",
+                                    forceName: norm(e.forceName),
+                                    oz: norm(e.oz),
+                                    g: norm(e.g),
+                                    level: gramsToLevel(e.g, e.level),
+                                  };
+                                  if (seen.has(keyOf(f))) continue;
+                                  seen.add(keyOf(f));
+                                  merged.push(f);
+                                  added++;
+                                }
+                                if (!added) {
+                                  message.info("Нових власних сил для збереження немає");
+                                  return;
+                                }
+                                try {
+                                  setSavingForces(true);
+                                  await saveGlobalElasticForces(merged);
+                                  setGlobalForces(merged);
+                                  message.success(`Збережено власні сили (+${added}) — доступні на всіх товарах`);
+                                } catch {
+                                  message.error("Не вдалося зберегти власні сили");
+                                } finally {
+                                  setSavingForces(false);
+                                }
+                              }}
+                            >
+                              💾 Зберегти власні сили
+                            </Button>
+                          </Tooltip>
                         </Space>
                         <div style={{ overflowX: "auto" }}>
                           <Form.List name="elasticsEntries">
@@ -1702,11 +1773,12 @@ export function ProductsPage() {
                                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                               const allEntries = (form.getFieldValue("elasticsEntries") as any[]) || [];
                                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                              const cfKey = (e: any) => "cf:" + (e.group === "extra" ? "extra" : "intra") + "|" + (e.forceName || "") + "|" + (e.oz || "") + "|" + (e.g || "") + "|" + (e.level ?? "");
+                                              const cfKey = (e: any) => "cf:" + (e.group === "extra" ? "extra" : "intra") + "|" + (e.forceName || "") + "|" + (e.oz || "") + "|" + (e.g || "");
                                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                               const customForces: any[] = [];
                                               const seenCF = new Set<string>();
-                                              for (const e of allEntries) {
+                                              // Globally-saved own forces first, then ones used in this table.
+                                              for (const e of [...globalForces, ...allEntries]) {
                                                 if (!e || matchesPreset(e) || !e.forceName) continue;
                                                 const k = cfKey(e);
                                                 if (seenCF.has(k)) continue;
