@@ -1806,6 +1806,26 @@ export function ProductsPage() {
                                                       <Button size="small" type="link" style={{ padding: 0, height: "auto" }} onClick={() => { setF("__customForce", false); setF("forceName", ""); setF("oz", ""); setF("g", ""); setF("level", undefined); }}>
                                                         ← пресети
                                                       </Button>
+                                                      <Button
+                                                        size="small"
+                                                        type="link"
+                                                        loading={savingForces}
+                                                        style={{ padding: 0, height: "auto" }}
+                                                        onClick={async () => {
+                                                          const norm = (v: unknown) => String(v ?? "").trim().replace(/,/g, ".");
+                                                          const fn = norm(row.forceName);
+                                                          if (!fn) { message.info("Спершу впишіть назву сили"); return; }
+                                                          const f: GlobalForce = { group: row.group === "extra" ? "extra" : "intra", forceName: fn, oz: norm(row.oz), g: norm(row.g), level: gramsToLevel(row.g, row.level) };
+                                                          const keyOf = (x: GlobalForce) => `${x.group}|${x.forceName}|${x.oz}|${x.g}`;
+                                                          if (globalForces.some((x) => keyOf(x) === keyOf(f))) { message.info("Цю силу вже збережено"); return; }
+                                                          const merged = [...globalForces, f];
+                                                          try { setSavingForces(true); await saveGlobalElasticForces(merged); setGlobalForces(merged); message.success(`Силу «${fn}» збережено — доступна на всіх товарах`); }
+                                                          catch { message.error("Не вдалося зберегти силу"); }
+                                                          finally { setSavingForces(false); }
+                                                        }}
+                                                      >
+                                                        💾 Зберегти
+                                                      </Button>
                                                     </div>
                                                     <Input placeholder="Назва сили (напр. Екстра)" value={row.forceName || ""} onChange={(e) => setF("forceName", e.target.value)} />
                                                     <div style={{ display: "flex", gap: 6 }}>

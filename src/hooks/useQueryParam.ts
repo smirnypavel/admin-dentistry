@@ -25,17 +25,18 @@ export function useQueryParam(key: string, initial = "", debounceMs = 300) {
       pendingRef.current = true;
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
-        // Functional updater so concurrent writes (e.g. page + pageSize)
-        // merge against the latest params instead of clobbering each other.
-        setParams(
-          (prev) => {
-            const newParams = new URLSearchParams(prev);
-            if (next && next.trim()) newParams.set(key, next.trim());
-            else newParams.delete(key);
-            return newParams;
-          },
-          { replace: true },
-        );
+        // Base the write on the LIVE URL (window.location.search), not on
+        // react-router's `prev`. When several filters change in one handler
+        // (e.g. category also resets subcategory + page), their timers fire
+        // sequentially and history.replaceState updates window.location
+        // synchronously between them — so reading it here lets the writes
+        // merge instead of clobbering each other. react-router's functional
+        // updater does NOT chain across these batched calls, which caused the
+        // "category applies only on the second try" bug (the last setter won).
+        const newParams = new URLSearchParams(window.location.search);
+        if (next && next.trim()) newParams.set(key, next.trim());
+        else newParams.delete(key);
+        setParams(newParams, { replace: true });
         pendingRef.current = false;
       }, debounceMs);
     };
