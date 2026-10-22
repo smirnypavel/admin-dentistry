@@ -1520,54 +1520,49 @@ export function ProductsPage() {
                                       style={{ width: 240, marginBottom: 0 }}>
                                       <Input placeholder="Напр. Червоний / Neon Pink" />
                                     </Form.Item>
-                                    <Form.Item
-                                      {...restField}
-                                      name={[name, "hex"]}
-                                      style={{ width: 160, marginBottom: 0 }}>
-                                      <Input placeholder="#22c55e (необов'язково)" allowClear />
-                                    </Form.Item>
                                     <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
                                       {() => {
-                                        const hex = form.getFieldValue(["colors", name, "hex"]);
-                                        const valid = /^#[0-9a-fA-F]{6}$/.test(hex || "");
+                                        const raw = String(form.getFieldValue(["colors", name, "hex"]) ?? "");
+                                        const [a = "", b = ""] = raw.split("/").map((s) => s.trim());
+                                        const isHexV = (v: string) => /^#[0-9a-fA-F]{6}$/.test(v);
+                                        const aValid = isHexV(a);
+                                        const bValid = isHexV(b);
+                                        const setC = (na: string, nb: string) =>
+                                          form.setFieldValue(["colors", name, "hex"], nb ? `${na || "#000000"}/${nb}` : na);
+                                        const sw = { display: "block", width: 26, height: 26, borderRadius: "50%", border: "1px solid #d6d3d1" } as const;
+                                        const swLbl = { position: "relative", display: "inline-block", width: 26, height: 26, verticalAlign: "middle", cursor: "pointer" } as const;
+                                        const swInp = { position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" } as const;
                                         return (
-                                          <label
-                                            title="Натисніть, щоб обрати колір"
-                                            style={{
-                                              position: "relative",
-                                              display: "inline-block",
-                                              width: 26,
-                                              height: 26,
-                                              verticalAlign: "middle",
-                                              cursor: "pointer",
-                                            }}
-                                          >
-                                            <span
-                                              style={{
-                                                display: "block",
-                                                width: 26,
-                                                height: 26,
-                                                borderRadius: "50%",
-                                                border: "1px solid #d6d3d1",
-                                                background: valid ? hex : "#f5f5f4",
-                                              }}
-                                            />
-                                            <input
-                                              type="color"
-                                              value={valid ? hex : "#22c55e"}
-                                              onChange={(e) =>
-                                                form.setFieldValue(["colors", name, "hex"], e.target.value)
-                                              }
-                                              style={{
-                                                position: "absolute",
-                                                inset: 0,
-                                                width: "100%",
-                                                height: "100%",
-                                                opacity: 0,
-                                                cursor: "pointer",
-                                              }}
-                                            />
-                                          </label>
+                                          <Space align="center" size={8} wrap>
+                                            <Input value={a} placeholder="#22c55e" allowClear onChange={(e) => setC(e.target.value, b)} style={{ width: 130 }} />
+                                            <Tooltip title="Основний колір">
+                                              <label style={swLbl}>
+                                                <span style={{ ...sw, background: aValid ? a : "#f5f5f4" }} />
+                                                <input type="color" value={aValid ? a : "#22c55e"} onChange={(e) => setC(e.target.value, b)} style={swInp} />
+                                              </label>
+                                            </Tooltip>
+                                            {bValid ? (
+                                              <Space size={2} align="center">
+                                                <Tooltip title="Другий колір (двоколірний)">
+                                                  <label style={swLbl}>
+                                                    <span style={{ ...sw, background: b }} />
+                                                    <input type="color" value={b} onChange={(e) => setC(a, e.target.value)} style={swInp} />
+                                                  </label>
+                                                </Tooltip>
+                                                <Tooltip title="Прибрати другий колір">
+                                                  <Button size="small" type="text" danger onClick={() => setC(a, "")}>×</Button>
+                                                </Tooltip>
+                                                <span title="Як виглядатиме на сайті" style={{ ...sw, background: `linear-gradient(135deg, ${a || "#000000"} 0 50%, ${b} 50% 100%)` }} />
+                                              </Space>
+                                            ) : (
+                                              <Tooltip title="Додати другий колір (для двоколірних)">
+                                                <label style={swLbl}>
+                                                  <span style={{ ...sw, background: "#fff", border: "1px dashed #a8a29e", color: "#a8a29e", textAlign: "center", fontSize: 16, lineHeight: "24px" }}>+</span>
+                                                  <input type="color" value="#3b82f6" onChange={(e) => setC(a || "#22c55e", e.target.value)} style={swInp} />
+                                                </label>
+                                              </Tooltip>
+                                            )}
+                                          </Space>
                                         );
                                       }}
                                     </Form.Item>
