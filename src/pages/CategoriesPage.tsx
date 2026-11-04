@@ -24,6 +24,10 @@ import { AdminLayout } from "../components/AdminLayout";
 import { ImageUploader } from "../components/ImageUploader";
 import { RecommendationFields } from "../components/RecommendationFields";
 import { ColorsField } from "../components/ColorsField";
+import {
+  getCategoryContent,
+  saveCategoryContent,
+} from "../api/categoryContent";
 import type { Category } from "../api/categories";
 import { listSubcategories, type Subcategory } from "../api/subcategories";
 import {
@@ -50,6 +54,9 @@ type FormValues = {
   colors?: Array<{ name: string; hex?: string }>;
   sort?: number;
   isActive?: boolean;
+  // Landing content for the category page (stored separately, keyed by slug).
+  pageHero?: string | null;
+  pageBlocks?: Array<{ img?: string; text?: string }>;
 };
 
 // Bento sizes for the catalog landing page (must match storefront mapping)
@@ -137,8 +144,22 @@ export function CategoriesPage() {
       colors: (record.colors || []).map((c) => ({ name: c.name, hex: c.hex || "" })),
       sort: record.sort ?? undefined,
       isActive: record.isActive,
+      pageHero: undefined,
+      pageBlocks: [],
     });
     setOpen(true);
+    // Landing content is stored separately (page-content store) — load it async.
+    getCategoryContent(record.slug)
+      .then((content) => {
+        form.setFieldsValue({
+          pageHero: content.hero || undefined,
+          pageBlocks: (content.blocks || []).map((b) => ({
+            img: b.img || "",
+            text: b.text || "",
+          })),
+        });
+      })
+      .catch(() => {});
   };
 
   const onDelete = (record: Category) => {
@@ -205,6 +226,13 @@ export function CategoriesPage() {
         });
         message.success(t("categories.msg.save.created"));
       }
+      // Save the category landing content (hero + blocks) keyed by slug.
+      await saveCategoryContent(payload.slug, {
+        hero: payload.pageHero || undefined,
+        blocks: (payload.pageBlocks || [])
+          .map((b) => ({ img: (b.img || "").trim(), text: (b.text || "").trim() }))
+          .filter((b) => b.img || b.text),
+      });
       setOpen(false);
       await load();
     } catch {
@@ -467,6 +495,48 @@ export function CategoriesPage() {
             name="imageUrl"
             valuePropName="value">
             <ImageUploader folder="categories" />
+          </Form.Item>
+
+          <Form.Item
+            label="Банер сторінки категорії (велике фото зверху)"
+            name="pageHero"
+            valuePropName="value"
+            tooltip="Показується на всю ширину зверху сторінки цієї категорії (над блоками й товарами).">
+            <ImageUploader folder="categories" />
+          </Form.Item>
+
+          <Form.Item
+            label="Блоки «фото + опис» (під банером)"
+            tooltip="Кожен блок: фото зліва + текст опису справа. Можна додати скільки завгодно. Показуються під банером, над картками товарів.">
+            <Form.List name="pageBlocks">
+              {(fields, { add, remove }) => (
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  {fields.map(({ key, name, ...rest }) => (
+                    <div
+                      key={key}
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        alignItems: "flex-start",
+                        border: "1px solid #f0efee",
+                        borderRadius: 10,
+                        padding: 12,
+                      }}>
+                      <Form.Item {...rest} name={[name, "img"]} valuePropName="value" style={{ marginBottom: 0 }}>
+                        <ImageUploader folder="categories" />
+                      </Form.Item>
+                      <Form.Item {...rest} name={[name, "text"]} style={{ flex: 1, marginBottom: 0 }}>
+                        <Input.TextArea rows={6} placeholder="Опис блоку…" />
+                      </Form.Item>
+                      <Button danger type="text" onClick={() => remove(name)}>
+                        Видалити
+                      </Button>
+                    </div>
+                  ))}
+                  <Button onClick={() => add({ img: "", text: "" })}>+ Додати блок</Button>
+                </Space>
+              )}
+            </Form.List>
           </Form.Item>
 
           <Form.Item
