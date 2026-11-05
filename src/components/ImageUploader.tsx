@@ -26,7 +26,7 @@ export function ImageUploader({
   folder = "categories",
   disabled,
   accept = ["image/jpeg", "image/png", "image/webp"],
-  maxSizeMB = 2,
+  maxSizeMB = 25,
   showMediaPicker = true,
 }: Props) {
   const { t } = useI18n();

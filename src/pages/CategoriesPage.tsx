@@ -199,8 +199,13 @@ export function CategoriesPage() {
     };
     try {
       if (editing) {
+        // pageHero/pageBlocks belong to the landing-content store, NOT the
+        // category DTO — strip them or the backend rejects them (400).
+        const { pageHero: _ph, pageBlocks: _pb, ...catFields } = payload;
+        void _ph;
+        void _pb;
         await updateCategory(editing._id, {
-          ...payload,
+          ...catFields,
           imageUrl: payload.imageUrl ?? undefined,
           relatedProductIds: payload.relatedProductIds ?? [],
           relatedCategoryId: payload.relatedCategoryId ?? "",
