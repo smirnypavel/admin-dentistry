@@ -538,16 +538,16 @@ export function CategoriesPage() {
                           alignItems: "flex-start",
                           flexWrap: "wrap",
                         }}>
-                        <div style={{ width: 220, flexShrink: 0 }}>
+                        <div style={{ width: 240, flexShrink: 0 }}>
                           <div style={{ marginBottom: 6, fontSize: 12, color: "#8c8c8c" }}>Фото</div>
                           <Form.Item {...rest} name={[name, "img"]} valuePropName="value" style={{ marginBottom: 0 }}>
                             <ImageUploader folder="categories" />
                           </Form.Item>
                         </div>
-                        <div style={{ flex: 1, minWidth: 260 }}>
+                        <div style={{ flex: 1, minWidth: 280 }}>
                           <div style={{ marginBottom: 6, fontSize: 12, color: "#8c8c8c" }}>Опис</div>
                           <Form.Item {...rest} name={[name, "text"]} style={{ marginBottom: 0 }}>
-                            <Input.TextArea rows={8} placeholder="Опис блоку…" />
+                            <Input.TextArea autoSize={{ minRows: 6, maxRows: 16 }} placeholder="Опис блоку…" />
                           </Form.Item>
                         </div>
                       </div>
