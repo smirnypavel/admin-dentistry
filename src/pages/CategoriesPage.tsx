@@ -510,27 +510,47 @@ export function CategoriesPage() {
             tooltip="Кожен блок: фото зліва + текст опису справа. Можна додати скільки завгодно. Показуються під банером, над картками товарів.">
             <Form.List name="pageBlocks">
               {(fields, { add, remove }) => (
-                <Space direction="vertical" style={{ width: "100%" }}>
-                  {fields.map(({ key, name, ...rest }) => (
+                <Space direction="vertical" style={{ width: "100%" }} size={16}>
+                  {fields.map(({ key, name, ...rest }, idx) => (
                     <div
                       key={key}
                       style={{
-                        display: "flex",
-                        gap: 12,
-                        alignItems: "flex-start",
                         border: "1px solid #f0efee",
                         borderRadius: 10,
-                        padding: 12,
+                        padding: 16,
                       }}>
-                      <Form.Item {...rest} name={[name, "img"]} valuePropName="value" style={{ marginBottom: 0 }}>
-                        <ImageUploader folder="categories" />
-                      </Form.Item>
-                      <Form.Item {...rest} name={[name, "text"]} style={{ flex: 1, marginBottom: 0 }}>
-                        <Input.TextArea rows={6} placeholder="Опис блоку…" />
-                      </Form.Item>
-                      <Button danger type="text" onClick={() => remove(name)}>
-                        Видалити
-                      </Button>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: 12,
+                        }}>
+                        <span style={{ fontWeight: 600, color: "#595959" }}>Блок {idx + 1}</span>
+                        <Button danger type="text" size="small" onClick={() => remove(name)}>
+                          Видалити
+                        </Button>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 16,
+                          alignItems: "flex-start",
+                          flexWrap: "wrap",
+                        }}>
+                        <div style={{ width: 220, flexShrink: 0 }}>
+                          <div style={{ marginBottom: 6, fontSize: 12, color: "#8c8c8c" }}>Фото</div>
+                          <Form.Item {...rest} name={[name, "img"]} valuePropName="value" style={{ marginBottom: 0 }}>
+                            <ImageUploader folder="categories" />
+                          </Form.Item>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 260 }}>
+                          <div style={{ marginBottom: 6, fontSize: 12, color: "#8c8c8c" }}>Опис</div>
+                          <Form.Item {...rest} name={[name, "text"]} style={{ marginBottom: 0 }}>
+                            <Input.TextArea rows={8} placeholder="Опис блоку…" />
+                          </Form.Item>
+                        </div>
+                      </div>
                     </div>
                   ))}
                   <Button onClick={() => add({ img: "", text: "" })}>+ Додати блок</Button>
